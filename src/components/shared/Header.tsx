@@ -1,3 +1,4 @@
+// src\components\shared\Header.tsx
 "use client";
 
 import { useState } from "react";
@@ -18,7 +19,7 @@ export default function Header() {
 
   return (
     <header
-      className={`${styles.navStyle} rounded-full border m-8 sticky top-0 z-50 shadow-md mx-auto lg:max-w-[70%] md:max-w-[90%] sm:max-w-[95%]`}
+      className={`${styles.navStyle} rounded-full border mx-8 mt-8 sticky top-0 z-50 shadow-md mx-auto lg:max-w-[70%] md:max-w-[90%] sm:max-w-[95%]`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
