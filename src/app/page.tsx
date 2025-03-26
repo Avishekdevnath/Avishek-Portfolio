@@ -10,14 +10,19 @@ import Projects from "@/components/pages/home/Projects";
 
 export default function Home() {
   return (
-    // <ErrorBoundary>
-      <div className="flex flex-col">
+    <>
+    
+       {/* <div className="flex flex-col "> */}
+        
+        {/* ok */}
         <Hero />
         <About />
         <Experience />
         <Projects />
+
         <Contact />
-      </div>
-    // </ErrorBoundary>
+      {/* </div> */}
+    
+    </>
   );
 }
