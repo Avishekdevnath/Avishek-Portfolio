@@ -1,3 +1,4 @@
+// src\data\blogData.ts
 export const blogPosts = [
     {
         id: "getting-started-with-react",

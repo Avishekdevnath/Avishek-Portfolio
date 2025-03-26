@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { projectsData } from "../../../data/projectsData";
 import { FaArrowLeft, FaGithub, FaExternalLinkAlt } from "react-icons/fa";
 
-export default function ProjectDetails({ params }: { params: { id: string } }) {
-    const project = projectsData.find((p) => p.id === params.id);
+export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+
+    const project = projectsData.find((p) => p.id === id);
     if (!project) {
         notFound();
     }
