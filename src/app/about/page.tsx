@@ -6,8 +6,7 @@ import {
     FaLinkedin,
     FaCode,
     FaPaintBrush,
-    FaVideo,
-    FaFileAlt,
+
     FaGlobe,
     FaGraduationCap,
 } from "react-icons/fa";
