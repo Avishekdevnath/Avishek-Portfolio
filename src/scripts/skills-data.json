@@ -1,0 +1,232 @@
+[
+  {
+    "name": "React",
+    "category": "Frontend Development",
+    "proficiency": 4.5,
+    "icon": "react-icon",
+    "iconSet": "si",
+    "description": "Building modern web applications with React and its ecosystem",
+    "featured": true,
+    "order": 1
+  },
+  {
+    "name": "Next.js",
+    "category": "Frontend Development",
+    "proficiency": 4,
+    "icon": "nextjs-icon",
+    "iconSet": "si",
+    "description": "Creating full-stack React applications with Next.js framework",
+    "featured": true,
+    "order": 2
+  },
+  {
+    "name": "TypeScript",
+    "category": "Frontend Development",
+    "proficiency": 4,
+    "icon": "typescript-icon",
+    "iconSet": "si",
+    "description": "Developing type-safe applications with TypeScript",
+    "featured": true,
+    "order": 3
+  },
+  {
+    "name": "Tailwind CSS",
+    "category": "Frontend Development",
+    "proficiency": 4.5,
+    "icon": "tailwind-icon",
+    "iconSet": "si",
+    "description": "Crafting responsive designs with Tailwind CSS",
+    "featured": true,
+    "order": 4
+  },
+  {
+    "name": "HTML5/CSS3",
+    "category": "Frontend Development",
+    "proficiency": 5,
+    "icon": "html5-icon",
+    "iconSet": "si",
+    "description": "Creating semantic and accessible web layouts",
+    "featured": true,
+    "order": 5
+  },
+  {
+    "name": "Node.js",
+    "category": "Backend Development",
+    "proficiency": 4,
+    "icon": "nodejs-icon",
+    "iconSet": "si",
+    "description": "Building scalable server-side applications",
+    "featured": true,
+    "order": 1
+  },
+  {
+    "name": "Express.js",
+    "category": "Backend Development",
+    "proficiency": 4,
+    "icon": "express-icon",
+    "iconSet": "si",
+    "description": "Creating robust REST APIs with Express.js",
+    "featured": true,
+    "order": 2
+  },
+  {
+    "name": "MongoDB",
+    "category": "Backend Development",
+    "proficiency": 4,
+    "icon": "mongodb-icon",
+    "iconSet": "si",
+    "description": "Working with NoSQL databases and MongoDB Atlas",
+    "featured": true,
+    "order": 3
+  },
+  {
+    "name": "PostgreSQL",
+    "category": "Backend Development",
+    "proficiency": 3.5,
+    "icon": "postgresql-icon",
+    "iconSet": "si",
+    "description": "Managing relational databases with PostgreSQL",
+    "featured": false,
+    "order": 4
+  },
+  {
+    "name": "Python",
+    "category": "Backend Development",
+    "proficiency": 4,
+    "icon": "python-icon",
+    "iconSet": "si",
+    "description": "Developing backend services with Python",
+    "featured": true,
+    "order": 5
+  },
+  {
+    "name": "TensorFlow",
+    "category": "AI & Machine Learning",
+    "proficiency": 3.5,
+    "icon": "tensorflow-icon",
+    "iconSet": "si",
+    "description": "Building and training neural networks",
+    "featured": true,
+    "order": 1
+  },
+  {
+    "name": "PyTorch",
+    "category": "AI & Machine Learning",
+    "proficiency": 3,
+    "icon": "pytorch-icon",
+    "iconSet": "si",
+    "description": "Developing deep learning models",
+    "featured": false,
+    "order": 2
+  },
+  {
+    "name": "Scikit-learn",
+    "category": "AI & Machine Learning",
+    "proficiency": 4,
+    "icon": "sklearn-icon",
+    "iconSet": "si",
+    "description": "Implementing machine learning algorithms",
+    "featured": true,
+    "order": 3
+  },
+  {
+    "name": "OpenCV",
+    "category": "AI & Machine Learning",
+    "proficiency": 3.5,
+    "icon": "opencv-icon",
+    "iconSet": "si",
+    "description": "Computer vision and image processing",
+    "featured": true,
+    "order": 4
+  },
+  {
+    "name": "Pandas",
+    "category": "AI & Machine Learning",
+    "proficiency": 4,
+    "icon": "pandas-icon",
+    "iconSet": "si",
+    "description": "Data manipulation and analysis",
+    "featured": true,
+    "order": 5
+  },
+  {
+    "name": "Photoshop",
+    "category": "Graphics & Design",
+    "proficiency": 3.5,
+    "icon": "photoshop-icon",
+    "iconSet": "si",
+    "description": "Photo editing and manipulation",
+    "featured": true,
+    "order": 1
+  },
+  {
+    "name": "Figma",
+    "category": "Graphics & Design",
+    "proficiency": 4,
+    "icon": "figma-icon",
+    "iconSet": "si",
+    "description": "UI/UX design and prototyping",
+    "featured": true,
+    "order": 2
+  },
+  {
+    "name": "Illustrator",
+    "category": "Graphics & Design",
+    "proficiency": 3,
+    "icon": "illustrator-icon",
+    "iconSet": "si",
+    "description": "Vector graphics and illustrations",
+    "featured": false,
+    "order": 3
+  },
+  {
+    "name": "Canva",
+    "category": "Graphics & Design",
+    "proficiency": 4.5,
+    "icon": "canva-icon",
+    "iconSet": "si",
+    "description": "Quick graphic design and social media content",
+    "featured": true,
+    "order": 4
+  },
+  {
+    "name": "Microsoft Office",
+    "category": "Office & Productivity",
+    "proficiency": 4.5,
+    "icon": "office-icon",
+    "iconSet": "si",
+    "description": "Advanced use of Word, Excel, and PowerPoint",
+    "featured": true,
+    "order": 1
+  },
+  {
+    "name": "Google Workspace",
+    "category": "Office & Productivity",
+    "proficiency": 4.5,
+    "icon": "google-icon",
+    "iconSet": "si",
+    "description": "Collaborative work with Docs, Sheets, and Slides",
+    "featured": true,
+    "order": 2
+  },
+  {
+    "name": "Notion",
+    "category": "Office & Productivity",
+    "proficiency": 4,
+    "icon": "notion-icon",
+    "iconSet": "si",
+    "description": "Project management and documentation",
+    "featured": true,
+    "order": 3
+  },
+  {
+    "name": "Trello",
+    "category": "Office & Productivity",
+    "proficiency": 4,
+    "icon": "trello-icon",
+    "iconSet": "si",
+    "description": "Task management and team collaboration",
+    "featured": false,
+    "order": 4
+  }
+] 

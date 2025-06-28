@@ -1,0 +1,176 @@
+import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/mongodb';
+import Stats from '@/models/Stats';
+import Project from '@/models/Project';
+import Skill from '@/models/Skill';
+import { connectToDatabase } from '@/lib/mongodb';
+import BlogStats from '@/models/BlogStats';
+import Blog from '@/models/Blog';
+
+// GET /api/stats - Get all stats including computed values
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const range = searchParams.get('range') || '7d';
+
+    await connectToDatabase();
+
+    // Calculate date range
+    const endDate = new Date();
+    const startDate = new Date();
+    switch (range) {
+      case '30d':
+        startDate.setDate(endDate.getDate() - 30);
+        break;
+      case '90d':
+        startDate.setDate(endDate.getDate() - 90);
+        break;
+      default: // 7d
+        startDate.setDate(endDate.getDate() - 7);
+    }
+
+    // Aggregate blog stats
+    const blogStats = await BlogStats.aggregate([
+      {
+        $match: {
+          'views.timestamp': { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $lookup: {
+          from: 'blogs',
+          localField: 'blog',
+          foreignField: '_id',
+          as: 'blogDetails'
+        }
+      },
+      {
+        $unwind: '$blogDetails'
+      },
+      {
+        $group: {
+          _id: null,
+          totalViews: { $sum: { $size: '$views' } },
+          uniqueVisitors: { 
+            $addToSet: '$views.ip'
+          },
+          totalLikes: { $sum: { $size: '$likes' } },
+          totalShares: { $sum: { $size: '$shares' } },
+          avgTimeSpent: { 
+            $avg: '$readingProgress.timeSpent'
+          },
+          blogs: {
+            $push: {
+              title: '$blogDetails.title',
+              views: { $size: '$views' }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalViews: 1,
+          uniqueVisitors: { $size: '$uniqueVisitors' },
+          totalLikes: 1,
+          totalShares: 1,
+          avgTimeSpent: { $round: ['$avgTimeSpent', 1] },
+          blogs: 1
+        }
+      }
+    ]);
+
+    // Get daily stats
+    const dailyStats = await BlogStats.aggregate([
+      {
+        $match: {
+          'dailyStats.date': { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $unwind: '$dailyStats'
+      },
+      {
+        $group: {
+          _id: '$dailyStats.date',
+          views: { $sum: '$dailyStats.views' },
+          visitors: { $sum: '$dailyStats.uniqueVisitors' },
+          likes: { $sum: '$dailyStats.likes' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          date: { $dateToString: { format: '%Y-%m-%d', date: '$_id' } },
+          views: 1,
+          visitors: 1,
+          likes: 1
+        }
+      },
+      {
+        $sort: { date: 1 }
+      }
+    ]);
+
+    // Get geographic distribution (mock data for now)
+    const geoStats = [
+      { country: 'United States', views: 1200 },
+      { country: 'India', views: 800 },
+      { country: 'United Kingdom', views: 600 },
+      { country: 'Germany', views: 400 },
+      { country: 'Canada', views: 300 }
+    ];
+
+    const stats = blogStats[0] || {
+      totalViews: 0,
+      uniqueVisitors: 0,
+      totalLikes: 0,
+      totalShares: 0,
+      avgTimeSpent: 0,
+      blogs: []
+    };
+
+    return NextResponse.json({
+      ...stats,
+      topBlogs: stats.blogs.sort((a, b) => b.views - a.views).slice(0, 5),
+      viewsByCountry: geoStats,
+      dailyStats
+    });
+
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch analytics data' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT /api/stats - Update stats
+export async function PUT(request: NextRequest) {
+  try {
+    await connectDB();
+
+    const body = await request.json();
+    let stats = await Stats.findOne();
+
+    if (!stats) {
+      stats = await Stats.create(body);
+    } else {
+      // Update only editable fields
+      stats.studentsCount = body.studentsCount;
+      stats.workExperience = body.workExperience;
+      stats.customStats = body.customStats;
+      stats.tagline = body.tagline;
+      await stats.save();
+    }
+
+    return NextResponse.json({ success: true, data: stats });
+  } catch (error) {
+    console.error('Error in stats PUT:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to update stats' },
+      { status: 500 }
+    );
+  }
+} 

@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Portfolio Website",
+    "description": "A modern portfolio website built with Next.js, TypeScript, and Tailwind CSS. Features dynamic content management, responsive design, and seamless animations.",
+    "image": "/assets/projects/portfolio.jpg",
+    "github": "https://github.com/yourusername/portfolio",
+    "liveDemo": "https://your-portfolio.com",
+    "technologies": ["Next.js", "TypeScript", "Tailwind CSS", "MongoDB"],
+    "featured": true,
+    "order": 1
+  },
+  {
+    "title": "AI Image Generator",
+    "description": "An AI-powered image generation application that uses deep learning models to create unique artwork from text descriptions.",
+    "image": "/assets/projects/ai-image.jpg",
+    "github": "https://github.com/yourusername/ai-image-generator",
+    "liveDemo": "https://ai-image-gen.com",
+    "technologies": ["Python", "TensorFlow", "React", "Flask"],
+    "featured": true,
+    "order": 2
+  },
+  {
+    "title": "E-Commerce Platform",
+    "description": "A full-featured e-commerce platform with product management, shopping cart, and secure payment integration using Stripe.",
+    "image": "/assets/projects/ecommerce.jpg",
+    "github": "https://github.com/yourusername/ecommerce",
+    "liveDemo": "https://your-shop.com",
+    "technologies": ["React", "Node.js", "Express", "MongoDB", "Stripe"],
+    "featured": true,
+    "order": 3
+  }
+] 

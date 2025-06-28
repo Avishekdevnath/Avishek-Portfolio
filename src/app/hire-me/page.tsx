@@ -1,10 +1,14 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import Header from "@/components/shared/Header";
+import Footer from "@/components/shared/Footer";
+import ExperienceSection from "@/components/ExperienceSection";
 import {
     FaCode,
     FaUsers,
     FaLightbulb,
-    FaBriefcase,
     FaBuilding,
     FaEnvelope,
     FaTag,
@@ -33,25 +37,12 @@ export default function HireMe() {
         },
     ];
 
-    const workExperience = [
-        {
-            role: "Full-Stack Developer",
-            company: "Tech Solutions Inc.",
-            duration: "January 2022 – December 2024",
-            description:
-                "Developed and maintained multiple web applications using React, Node.js, and MongoDB. Collaborated with a team of 5 developers to deliver a high-traffic e-commerce platform.",
-        },
-        {
-            role: "Junior Web Developer",
-            company: "Innovate Designs",
-            duration: "June 2020 – December 2021",
-            description:
-                "Assisted in building responsive websites using HTML, CSS, and JavaScript. Worked closely with the design team to implement UI/UX improvements.",
-        },
-    ];
-
     return (
-        <div className="bg-gray-100 min-h-screen">
+        <div className="min-h-screen bg-gray-100">
+            <div className="pt-6">
+                <Header />
+            </div>
+            
             {/* Hire Me Section */}
             <section className="py-16 flex flex-col items-center">
                 <div className="text-center mb-12">
@@ -63,7 +54,7 @@ export default function HireMe() {
                     {/* Introduction */}
                     <div className="text-center mb-16">
                         <p className="text-lg text-gray-700 mb-6">
-                            I’m Avishek Devnath, a dedicated Full-Stack Developer with over 3 years of experience in building web applications. I’m passionate about creating impactful solutions and am eager to join a dynamic team where I can contribute to meaningful projects full-time. Let’s connect to discuss how I can add value to your organization!
+                            I'm Avishek Devnath, a dedicated Full-Stack Developer with over 3 years of experience in building web applications. I'm passionate about creating impactful solutions and am eager to join a dynamic team where I can contribute to meaningful projects full-time. Let's connect to discuss how I can add value to your organization!
                         </p>
                         <Link
                             href="/contact"
@@ -94,31 +85,17 @@ export default function HireMe() {
                         </div>
                     </div>
 
-                    {/* Work Experience */}
+                    {/* Dynamic Work Experience Section */}
                     <div className="mb-16">
-                        <h3 className="text-3xl font-semibold text-gray-800 text-center mb-8">
-                            Work Experience
-                        </h3>
-                        <div className="space-y-8">
-                            {workExperience.map((exp, index) => (
-                                <div
-                                    key={index}
-                                    className="bg-white p-6 rounded-xl shadow-md"
-                                >
-                                    <div className="flex items-center space-x-3 mb-4">
-                                        <FaBriefcase className="text-2xl text-gray-600" />
-                                        <div>
-                                            <h4 className="text-xl font-semibold text-gray-800">
-                                                {exp.role}
-                                            </h4>
-                                            <p className="text-gray-600">{exp.company}</p>
-                                            <p className="text-sm text-gray-500">{exp.duration}</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-gray-600">{exp.description}</p>
-                                </div>
-                            ))}
-                        </div>
+                        <ExperienceSection 
+                            type="work"
+                            variant="detailed"
+                            showFeaturedOnly={false}
+                            limit={5}
+                            title="Work Experience"
+                            subtitle="My professional journey and career highlights"
+                            className="bg-transparent py-0"
+                        />
                     </div>
 
                     {/* Employment Inquiry Form */}
@@ -210,6 +187,7 @@ export default function HireMe() {
                     </div>
                 </div>
             </section>
+            <Footer />
         </div>
     );
 }
