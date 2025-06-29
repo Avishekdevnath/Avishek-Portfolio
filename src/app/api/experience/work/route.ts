@@ -1,21 +1,24 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { WorkExperience } from '@/models/Experience';
-import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
+import { IWorkExperience, ExperienceListApiResponse } from '@/types/experience';
+import { FlattenMaps } from 'mongoose';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/experience/work - Get all work experiences
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<Response> {
   try {
     await connectToDatabase();
     
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') || 'published';
+    const searchParams = request.nextUrl.searchParams;
+    const status = searchParams.get('status') || 'all'; // Default to 'all' to show both draft and published
     const featured = searchParams.get('featured');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = parseInt(searchParams.get('limit') || '50'); // Increased default limit
     const page = parseInt(searchParams.get('page') || '1');
     
-    // Build query - if status is 'all', get both published and draft
-    const query: any = {};
+    // Build query
+    const query: any = { type: 'work' }; // Always filter by type
     if (status !== 'all') {
       query.status = status;
     }
@@ -36,35 +39,58 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Convert MongoDB documents to plain objects and ensure proper field mapping
-    const processedExperiences = workExperiences.map(exp => ({
-      ...exp,
+    const processedExperiences: IWorkExperience[] = workExperiences.map((exp: FlattenMaps<any>): IWorkExperience => ({
       _id: exp._id.toString(),
-      type: 'work',
-      // Ensure backward compatibility
-      jobTitle: exp.jobTitle || exp.position,
-      position: exp.position || exp.jobTitle,
-      // Ensure all required fields have fallbacks
+      type: 'work' as const,
+      // Ensure all required fields from IWorkExperience interface
       title: exp.title || exp.jobTitle || exp.position || 'Work Experience',
-      organization: exp.organization || exp.company,
-      company: exp.company || exp.organization,
+      organization: exp.organization || exp.company || '',
+      location: exp.location || '',
+      startDate: exp.startDate ? new Date(exp.startDate).toISOString() : new Date().toISOString(),
+      endDate: exp.endDate ? new Date(exp.endDate).toISOString() : null,
+      isCurrent: exp.isCurrent || false,
+      description: exp.description || '',
+      order: exp.order || 0,
+      featured: exp.featured || false,
+      status: exp.status || 'published',
+      // Work-specific fields
+      jobTitle: exp.jobTitle || exp.position || '',
+      level: exp.level || undefined,
+      position: exp.position || exp.jobTitle || '',
+      company: exp.company || exp.organization || '',
+      employmentType: exp.employmentType || 'full-time',
+      technologies: exp.technologies || [],
+      achievements: exp.achievements || [],
+      responsibilities: exp.responsibilities || [],
+      website: exp.website || undefined,
+      companySize: exp.companySize || undefined,
     }));
 
-    return sendSuccess({
-      workExperiences: processedExperiences,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit),
-      },
-    });
+    const response: ExperienceListApiResponse = {
+      success: true,
+      data: {
+        experiences: processedExperiences,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit),
+        }
+      }
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error fetching work experiences:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch work experiences'
+    });
   }
 }
 
 // POST /api/experience/work - Create a new work experience
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<Response> {
   try {
     await connectToDatabase();
     
@@ -90,7 +116,10 @@ export async function POST(request: NextRequest) {
     }
     
     if (missingFields.length > 0) {
-      return sendError(`Missing required fields: ${missingFields.join(', ')}`, 400);
+      return NextResponse.json({
+        success: false,
+        error: `Missing required fields: ${missingFields.join(', ')}`
+      }, { status: 400 });
     }
 
     // Convert string dates to Date objects
@@ -125,8 +154,16 @@ export async function POST(request: NextRequest) {
     // Create new work experience
     const workExperience = await WorkExperience.create(body);
     
-    return sendSuccess(workExperience, 'Work experience created successfully');
+    return NextResponse.json({
+      success: true,
+      data: workExperience,
+      message: 'Work experience created successfully'
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error creating work experience:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create work experience'
+    });
   }
 } 

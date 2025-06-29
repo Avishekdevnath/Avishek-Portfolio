@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Message from '@/models/Message';
+import { IReply } from '@/types/message';
 import { sendReply } from '@/lib/email';
 
 export async function POST(
@@ -23,7 +24,7 @@ export async function POST(
     }
 
     // Add the reply to the message
-    const reply = {
+    const reply: IReply = {
       message: replyMessage,
       sentBy: 'admin',
       sentAt: new Date(),

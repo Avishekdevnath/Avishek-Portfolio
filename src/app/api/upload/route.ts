@@ -151,10 +151,6 @@ export async function DELETE(request: Request) {
   }
 }
 
-// Increase the maximum request size for file uploads
-export const config = {
-  api: {
-    bodyParser: false,
-    responseLimit: '10mb'
-  }
-}; 
+// Add these new exports
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic'; 

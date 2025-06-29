@@ -13,8 +13,8 @@ const MONGODB_URI = process.env.MONGODB_URI;
  */
 declare global {
   var mongoose: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
+    conn: mongoose.Mongoose | null;
+    promise: Promise<mongoose.Mongoose> | null;
   };
 }
 
@@ -38,9 +38,7 @@ export async function connectDB() {
       family: 4
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI, opts);
   }
 
   try {

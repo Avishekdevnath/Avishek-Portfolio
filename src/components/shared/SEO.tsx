@@ -5,7 +5,7 @@ interface SEOProps {
   description: string;
   image?: string;
   url?: string;
-  type?: 'website' | 'article';
+  type?: 'website' | 'article' | 'book' | 'profile';
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
@@ -30,9 +30,8 @@ export function generateMetadata({
     openGraph: {
       title,
       description,
-      type,
-      url,
       siteName: 'Avishek Portfolio',
+      url,
     },
     twitter: {
       card: 'summary_large_image',
@@ -43,18 +42,44 @@ export function generateMetadata({
 
   // Add image if provided
   if (image) {
-    metadata.openGraph.images = [image];
+    if (!metadata.openGraph) {
+      metadata.openGraph = {};
+    }
+    if (!metadata.twitter) {
+      metadata.twitter = {};
+    }
+    metadata.openGraph.images = [
+      {
+        url: image,
+        width: 1200,
+        height: 630,
+        alt: title,
+      }
+    ];
     metadata.twitter.images = [image];
   }
 
   // Add article specific metadata
-  if (type === 'article') {
-    metadata.openGraph.type = 'article';
-    metadata.openGraph.article = {
-      publishedTime,
-      modifiedTime,
-      authors: author ? [author] : undefined,
-      tags,
+  if (type === 'article' && metadata.openGraph) {
+    metadata.openGraph = {
+      ...metadata.openGraph,
+      ...{
+        title,
+        description,
+        siteName: 'Avishek Portfolio',
+        url,
+        images: metadata.openGraph.images,
+        type: 'article',
+        publishedTime,
+        modifiedTime,
+        authors: author ? [author] : undefined,
+        tags,
+      }
+    };
+  } else if (metadata.openGraph) {
+    metadata.openGraph = {
+      ...metadata.openGraph,
+      type: 'website'
     };
   }
 
@@ -71,23 +96,20 @@ export function generateMetadata({
     },
   };
 
-  // Add JSON-LD structured data
+  // Create JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': type === 'article' ? 'BlogPosting' : 'WebPage',
+    headline: title,
+    description,
+    image: image ? [image] : undefined,
+    datePublished: publishedTime,
+    dateModified: modifiedTime,
+  };
+
+  // Add JSON-LD to metadata
   metadata.other = {
-    'script:ld+json': [
-      {
-        '@context': 'https://schema.org',
-        '@type': type === 'article' ? 'BlogPosting' : 'WebPage',
-        headline: title,
-        description,
-        image: image ? [image] : undefined,
-        datePublished: publishedTime,
-        dateModified: modifiedTime,
-        author: author ? {
-          '@type': 'Person',
-          name: author,
-        } : undefined,
-      },
-    ],
+    'script:ld+json': JSON.stringify(jsonLd),
   };
 
   return metadata;

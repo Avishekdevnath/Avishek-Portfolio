@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import EditProjectForm from './EditProjectForm';
+import EditProjectForm from './EditForm';
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
   // Redirect to 404 if ID is undefined or invalid

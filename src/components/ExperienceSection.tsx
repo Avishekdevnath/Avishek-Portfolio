@@ -1,41 +1,13 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import ExperienceCard from './ExperienceCard';
 import LoadingScreen from './shared/LoadingScreen';
 import { FaBriefcase, FaGraduationCap } from 'react-icons/fa';
-
-interface Experience {
-  _id: string;
-  type: 'work' | 'education';
-  title: string;
-  organization: string;
-  location: string;
-  startDate: string | Date;
-  endDate?: string | Date;
-  isCurrent: boolean;
-  description: string;
-  featured: boolean;
-  // Work-specific fields
-  jobTitle?: string;
-  level?: string;
-  company?: string;
-  employmentType?: string;
-  technologies?: string[];
-  achievements?: string[];
-  responsibilities?: string[];
-  website?: string;
-  // Education-specific fields
-  degree?: string;
-  institution?: string;
-  fieldOfStudy?: string;
-  gpa?: number;
-  maxGpa?: number;
-  activities?: string[];
-  honors?: string[];
-  coursework?: string[];
-}
+import { IWorkExperience, IEducation, ExperienceType, ExperienceListApiResponse } from '@/types/experience';
 
 interface ExperienceSectionProps {
-  type?: 'work' | 'education' | 'both';
+  type?: ExperienceType | 'both';
   variant?: 'default' | 'compact' | 'detailed';
   showFeaturedOnly?: boolean;
   limit?: number;
@@ -54,8 +26,8 @@ export default function ExperienceSection({
   className = ''
 }: ExperienceSectionProps) {
   const [experiences, setExperiences] = useState<{
-    work: Experience[];
-    education: Experience[];
+    work: IWorkExperience[];
+    education: IEducation[];
   }>({ work: [], education: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +36,7 @@ export default function ExperienceSection({
     const fetchExperiences = async () => {
       try {
         setLoading(true);
+        console.log('🔄 ExperienceSection: Fetching experiences...', { type, showFeaturedOnly, limit });
         
         const params = new URLSearchParams({
           status: 'published',
@@ -80,29 +53,87 @@ export default function ExperienceSection({
           url = `/api/experience?${params}`;
         }
 
+        console.log('🌐 ExperienceSection: Fetching from URL:', url);
+
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch experiences');
         }
         
-        const data = await response.json();
+        const data: ExperienceListApiResponse = await response.json();
+        console.log('📦 ExperienceSection: Received data:', {
+          type,
+          url,
+          success: data.success,
+          hasWork: 'work' in data.data,
+          hasEducation: 'education' in data.data,
+          hasExperiences: 'experiences' in data.data,
+          workCount: data.data?.work?.length || data.data?.experiences?.filter(e => e.type === 'work').length || 0,
+          educationCount: data.data?.education?.length || data.data?.experiences?.filter(e => e.type === 'education').length || 0
+        });
+
         if (!data.success) {
           throw new Error(data.error || 'Failed to fetch experiences');
         }
 
+        // Handle both response formats
         if (type === 'work') {
-          setExperiences({ work: data.data.workExperiences || [], education: [] });
-        } else if (type === 'education') {
-          setExperiences({ work: [], education: data.data.education || [] });
-        } else {
+          const workExperiences = data.data?.experiences || [];
+          console.log('💼 ExperienceSection: Setting work experiences:', workExperiences.length);
           setExperiences({
-            work: data.data.work || [],
-            education: data.data.education || []
+            work: workExperiences,
+            education: []
           });
+        } else if (type === 'education') {
+          // Check if we have the education array in the response
+          if (data.data?.education) {
+            console.log('🎓 ExperienceSection: Setting education experiences from education array:', data.data.education.length);
+            setExperiences({
+              work: [],
+              education: data.data.education
+            });
+          } else {
+            const educationExperiences = data.data?.experiences || [];
+            console.log('🎓 ExperienceSection: Setting education experiences from experiences array:', educationExperiences.length);
+            setExperiences({
+              work: [],
+              education: educationExperiences
+            });
+          }
+        } else {
+          // For 'both', check if we have the new format or old format
+          if ('work' in data.data) {
+            console.log('🔄 ExperienceSection: Using combined format');
+            setExperiences({
+              work: data.data.work || [],
+              education: data.data.education || []
+            });
+          } else {
+            console.log('🔄 ExperienceSection: Using experiences array format');
+            // Old format with experiences array
+            const workExp = (data.data?.experiences || []).filter(
+              (exp): exp is IWorkExperience => exp.type === 'work'
+            );
+            const eduExp = (data.data?.experiences || []).filter(
+              (exp): exp is IEducation => exp.type === 'education'
+            );
+            setExperiences({
+              work: workExp,
+              education: eduExp
+            });
+          }
         }
 
+        console.log('✅ ExperienceSection: State updated', { 
+          type,
+          workCount: experiences.work.length, 
+          educationCount: experiences.education.length,
+          hasWork: experiences.work.length > 0,
+          hasEducation: experiences.education.length > 0
+        });
+
       } catch (error) {
-        console.error('Error fetching experiences:', error);
+        console.error('❌ ExperienceSection Error:', error);
         setError(error instanceof Error ? error.message : 'Failed to fetch experiences');
       } finally {
         setLoading(false);
@@ -112,14 +143,44 @@ export default function ExperienceSection({
     fetchExperiences();
   }, [type, showFeaturedOnly, limit]);
 
-  if (loading) return <LoadingScreen />;
-  if (error) return null;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+      <p className="text-gray-600">Loading experiences...</p>
+    </div>
+  );
+
+  if (error) {
+    console.error('❌ ExperienceSection: Rendering error state:', error);
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600 mb-4">Unable to load experiences</p>
+        <p className="text-gray-600 text-sm">Please make sure MongoDB is properly configured</p>
+      </div>
+    );
+  }
 
   const hasWork = experiences.work.length > 0;
   const hasEducation = experiences.education.length > 0;
   const hasExperiences = hasWork || hasEducation;
 
-  if (!hasExperiences) return null;
+  console.log('🎯 ExperienceSection: Rendering with:', { 
+    hasWork, 
+    hasEducation, 
+    workCount: experiences.work.length,
+    educationCount: experiences.education.length,
+    type
+  });
+
+  if (!hasExperiences) {
+    console.log('⚠️ ExperienceSection: No experiences to show');
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">No experiences found</p>
+        <p className="text-gray-500 text-sm mt-2">Add some experiences in the dashboard</p>
+      </div>
+    );
+  }
 
   const getDefaultTitle = () => {
     if (type === 'work') return 'Work Experience';

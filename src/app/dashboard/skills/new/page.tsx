@@ -23,7 +23,7 @@ const skillCategories = [
   'Tools',
   'Graphic Design',
   'Video Editing',
-  'Office',
+  'Office & Productivity',
   'Language',
 ];
 

@@ -1,14 +1,15 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { WorkExperience, Education } from '@/models/Experience';
-import { handleApiError, sendSuccess } from '@/lib/api-utils';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/experience - Get all experiences (work + education)
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
     
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status') || 'published';
     const featured = searchParams.get('featured');
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -29,17 +30,24 @@ export async function GET(request: NextRequest) {
         .limit(limit),
     ]);
 
-    return sendSuccess({
-      work: workExperiences,
-      education: education,
-      summary: {
-        totalWork: workExperiences.length,
-        totalEducation: education.length,
-        featuredWork: workExperiences.filter(exp => exp.featured).length,
-        featuredEducation: education.filter(edu => edu.featured).length,
+    return NextResponse.json({
+      success: true,
+      data: {
+        work: workExperiences,
+        education: education,
+        summary: {
+          totalWork: workExperiences.length,
+          totalEducation: education.length,
+          featuredWork: workExperiences.filter(exp => exp.featured).length,
+          featuredEducation: education.filter(edu => edu.featured).length,
+        }
       }
     });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error fetching experiences:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch experiences'
+    });
   }
 } 

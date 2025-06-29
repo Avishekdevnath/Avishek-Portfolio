@@ -1,6 +1,7 @@
 'use server';
 
 import { v2 as cloudinary } from 'cloudinary';
+import { detectMimeType } from './mime';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -19,6 +20,19 @@ interface UploadResponse {
   format: string;
   width: number;
   height: number;
+}
+
+interface UploadOptions {
+  folder: string;
+  resource_type: string;
+  allowed_formats: string[];
+  transformation: Array<Record<string, string>>;
+  file?: string;
+}
+
+interface ImageFile {
+  size: number;
+  type: string;
 }
 
 // Helper function to get Cloudinary URL without requiring the full package
@@ -43,7 +57,7 @@ export const getImageUrl = (publicIdOrUrl: string, options: { width?: number; he
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   if (!cloudName) return publicIdOrUrl;
   
-  const transformations = [];
+  const transformations: string[] = [];
   
   // Add default transformations first
   transformations.push('f_auto', 'q_auto:good');
@@ -75,7 +89,7 @@ export async function uploadImage(file: string | Buffer, folder: string = 'portf
       throw new Error('No file provided');
     }
 
-    let uploadOptions: any = {
+    let uploadOptions: UploadOptions = {
       folder,
       resource_type: 'auto',
       allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff'],
@@ -131,7 +145,7 @@ export async function deleteImage(publicId: string) {
 }
 
 // Generate optimized image URL with transformations
-export async function generateImageUrl(publicId: string, options: any = {}) {
+export async function generateImageUrl(publicId: string, options: Record<string, string | number | boolean> = {}) {
   try {
     if (!publicId) {
       throw new Error('No public ID provided');
@@ -155,30 +169,30 @@ export async function generateImageUrl(publicId: string, options: any = {}) {
   }
 }
 
-// Helper function to detect MIME type from buffer
-async function detectMimeType(buffer: Buffer): Promise<string> {
-  // Check for image signatures
-  if (buffer.length < 4) return 'application/octet-stream';
-
-  const signatures: { [key: string]: number[] } = {
-    'image/jpeg': [0xFF, 0xD8, 0xFF],
-    'image/png': [0x89, 0x50, 0x4E, 0x47],
-    'image/gif': [0x47, 0x49, 0x46],
-    'image/webp': [0x52, 0x49, 0x46, 0x46],
-    'image/svg+xml': [0x3C, 0x3F, 0x78, 0x6D],
-    'image/bmp': [0x42, 0x4D],
-    'image/tiff': [0x49, 0x49, 0x2A, 0x00],
-    'image/x-icon': [0x00, 0x00, 0x01, 0x00]
-  };
-
-  for (const [mimeType, signature] of Object.entries(signatures)) {
-    if (signature.every((byte, i) => buffer[i] === byte)) {
-      return mimeType;
+// Validate image file
+export async function validateImage(file: ImageFile) {
+  try {
+    if (!file) {
+      throw new Error('No file provided');
     }
-  }
 
-  // Default to jpeg if no match found
-  return 'image/jpeg';
+    // Check file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new Error('File size exceeds 5MB limit');
+    }
+
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Invalid file type. Only JPG, PNG, GIF, and WebP are allowed');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error validating image:', error);
+    throw error;
+  }
 }
 
 // Get image information
@@ -232,32 +246,6 @@ export async function updateImageTransformations(publicId: string, options: any 
     return cloudinary.url(publicId, finalOptions);
   } catch (error) {
     console.error('Error updating image transformations:', error);
-    throw error;
-  }
-}
-
-// Validate image file
-export async function validateImage(file: any) {
-  try {
-    if (!file) {
-      throw new Error('No file provided');
-    }
-
-    // Check file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      throw new Error('File size exceeds 5MB limit');
-    }
-
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      throw new Error('Invalid file type. Only JPG, PNG, GIF, and WebP are allowed');
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error validating image:', error);
     throw error;
   }
 }

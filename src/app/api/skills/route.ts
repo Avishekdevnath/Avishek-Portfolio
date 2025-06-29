@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Skill from '@/models/Skill';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/skills - Get all skills
 export async function GET(request: NextRequest) {
@@ -17,33 +18,39 @@ export async function GET(request: NextRequest) {
     if (category) query.category = category;
 
     // Get skills
-    const skills = await Skill.find(query).sort({ order: 1, category: 1 });
+    const skills = await Skill.find(query)
+      .sort({ category: 1, order: 1 })
+      .lean();
 
     // Group skills by category
-    const groupedSkills = skills.reduce((acc: any, skill) => {
-      const key = skill.category.toLowerCase().replace(/\s+/g, '');
-      if (!acc[key]) {
-        acc[key] = [];
+    const skillsByCategory = skills.reduce((acc: Record<string, any[]>, skill) => {
+      const category = skill.category;
+      if (!acc[category]) {
+        acc[category] = [];
       }
-      acc[key].push({
+      acc[category].push({
+        _id: skill._id.toString(),
         name: skill.name,
-        _id: skill._id,
-        order: skill.order,
-        proficiency: convertLevelToProficiency(skill.level)
+        proficiency: skill.proficiency,
+        icon: skill.icon,
+        iconSet: skill.iconSet,
+        description: skill.description,
+        featured: skill.featured,
+        order: skill.order
       });
       return acc;
     }, {});
 
     return NextResponse.json({
       success: true,
-      data: groupedSkills,
+      data: skillsByCategory
     });
   } catch (error) {
-    console.error('Error fetching skills:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch skills' },
-      { status: 500 }
-    );
+    console.error('Error in GET /api/skills:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to fetch skills'
+    }, { status: 500 });
   }
 }
 
@@ -53,31 +60,50 @@ export async function POST(request: Request) {
     await connectDB();
 
     const body = await request.json();
+    const {
+      name,
+      category,
+      proficiency,
+      icon,
+      iconSet,
+      description,
+      featured,
+      order
+    } = body;
 
     // Validate required fields
-    const requiredFields = ['name', 'level', 'category', 'type'];
-    const missingFields = requiredFields.filter(field => !body[field]);
-
-    if (missingFields.length > 0) {
+    if (!name || !category || proficiency === undefined) {
       return NextResponse.json({
         success: false,
-        error: `Missing required fields: ${missingFields.join(', ')}`
+        error: 'Missing required fields'
       }, { status: 400 });
     }
 
-    // Create skill
-    const skill = await Skill.create(body);
+    // Create new skill
+    const skill = await Skill.create({
+      name,
+      category,
+      proficiency,
+      icon,
+      iconSet,
+      description,
+      featured: featured || false,
+      order: order || 0
+    });
+
+    revalidatePath('/');
+    revalidatePath('/dashboard/skills');
 
     return NextResponse.json({
       success: true,
-      data: skill,
+      data: skill
     });
   } catch (error) {
-    console.error('Error creating skill:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to create skill' },
-      { status: 500 }
-    );
+    console.error('Error in POST /api/skills:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create skill'
+    }, { status: 500 });
   }
 }
 
@@ -115,19 +141,4 @@ export async function PATCH(request: Request) {
       { status: 500 }
     );
   }
-}
-
-// Helper function to convert level to numeric proficiency
-function convertLevelToProficiency(level: string): number {
-  const levelMap: Record<string, number> = {
-    'Expert': 5,
-    'Advanced': 4,
-    'Intermediate': 3,
-    'Basic': 2,
-    'Beginner': 1,
-    'Proficient': 4.5,
-    'Native': 5,
-    'Explored': 2.5
-  };
-  return levelMap[level] || 3;
 } 

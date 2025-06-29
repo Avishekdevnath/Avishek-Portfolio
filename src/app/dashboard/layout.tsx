@@ -13,68 +13,93 @@ import {
   BookOpen,
   Award,
   User,
-  Bell
+  Bell,
+  BarChart3,
+  Wrench
 } from 'lucide-react';
-import Sidebar from '@/components/dashboard/Sidebar';
+import Sidebar, { NavItem, NavCategory } from '@/components/dashboard/Sidebar';
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-const sidebarItems = [
+const sidebarItems: NavItem[] = [
   { 
     icon: LayoutDashboard, 
     label: 'Overview', 
     href: '/dashboard',
-    description: 'Dashboard overview and analytics'
+    description: 'Dashboard overview and analytics',
+    category: 'Main'
+  },
+  { 
+    icon: Wrench, 
+    label: 'Tools', 
+    href: '/dashboard/tools',
+    description: 'Utility tools and features',
+    category: 'Main'
   },
   { 
     icon: Briefcase, 
     label: 'Projects', 
     href: '/dashboard/projects',
-    description: 'Manage portfolio projects'
+    description: 'Manage portfolio projects',
+    category: 'Content'
   },
   { 
     icon: Code2, 
     label: 'Skills', 
     href: '/dashboard/skills',
-    description: 'Update technical skills'
+    description: 'Update technical skills',
+    category: 'Content'
   },
   { 
     icon: GraduationCap, 
     label: 'Experience', 
     href: '/dashboard/experience',
-    description: 'Work and education history'
+    description: 'Work and education history',
+    category: 'Content'
   },
   { 
     icon: Award, 
     label: 'Achievements', 
     href: '/dashboard/achievements',
-    description: 'Awards and certifications'
+    description: 'Awards and certifications',
+    category: 'Content'
+  },
+  { 
+    icon: BarChart3, 
+    label: 'Statistics', 
+    href: '/dashboard/stats',
+    description: 'Portfolio stats and achievements',
+    category: 'Content'
   },
   { 
     icon: BookOpen, 
     label: 'Blog Posts', 
     href: '/dashboard/posts',
-    description: 'Manage blog content'
+    description: 'Manage blog content',
+    category: 'Content'
   },
   { 
     icon: Mail, 
     label: 'Messages', 
     href: '/dashboard/messages',
-    description: 'Contact form submissions'
+    description: 'Contact form submissions',
+    category: 'Engagement'
   },
   { 
     icon: Bell, 
     label: 'Notifications', 
     href: '/dashboard/notifications',
-    description: 'System notifications'
+    description: 'System notifications',
+    category: 'Engagement'
   },
   { 
     icon: Settings, 
     label: 'Settings', 
     href: '/dashboard/settings',
-    description: 'Profile and website settings'
+    description: 'Profile and website settings',
+    category: 'System'
   },
 ];
 

@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
+import Link from "next/link";
+import { FaGithub, FaGitlab, FaBitbucket, FaExternalLinkAlt } from "react-icons/fa";
 
 interface Repository {
     url: string;
     type: string;
     label: string;
+    name?: string;
 }
 
 interface Project {
@@ -60,9 +62,14 @@ export default function Projects() {
                 }
                 
                 // Only show published projects
-                const publishedProjects = data.data.projects.filter(project => 
-                    project.status === 'published'
-                );
+                const publishedProjects = data.data.projects
+                    .filter(project => project.status === 'published')
+                    // Show featured projects first
+                    .sort((a, b) => {
+                        if (a.featured && !b.featured) return -1;
+                        if (!a.featured && b.featured) return 1;
+                        return a.order - b.order;
+                    });
                 
                 setProjects(publishedProjects);
             } catch (err) {
@@ -76,10 +83,26 @@ export default function Projects() {
         fetchProjects();
     }, []);
 
+    const getRepositoryIcon = (type: string) => {
+        switch (type.toLowerCase()) {
+            case 'github':
+                return <FaGithub className="w-4 h-4" />;
+            case 'gitlab':
+                return <FaGitlab className="w-4 h-4" />;
+            case 'bitbucket':
+                return <FaBitbucket className="w-4 h-4" />;
+            default:
+                return <FaExternalLinkAlt className="w-3.5 h-3.5" />;
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-600 animate-pulse">Loading projects...</p>
+                </div>
             </div>
         );
     }
@@ -93,102 +116,149 @@ export default function Projects() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white">
+        <div className="py-20 px-4 bg-gray-50">
             {/* Header Section */}
             <div className="text-center mb-12">
-                <h4 className="text-md text-gray-600">Browse My Recent</h4>
-                <h4 className="text-5xl font-bold text-black">Projects</h4>
+                <h4 className="text-blue-600 font-medium mb-2">My Recent Work</h4>
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Featured Projects</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                    Explore a selection of my recent projects showcasing my technical skills and creative problem-solving abilities.
+                </p>
             </div>
 
             {/* Projects Section */}
-            <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-fr">
-                {projects.length > 0 ? (
-                    projects.map((project) => (
-                        <div
-                            key={project._id}
-                            className="border border-gray-200 rounded-xl shadow-md overflow-hidden flex flex-col items-center transform transition duration-300 hover:shadow-xl hover:-translate-y-1 h-full"
-                        >
-                            {/* Project Image */}
-                            <div className="w-full h-64 relative flex-shrink-0">
-                                <Image
-                                    src={project.image || '/placeholder-project.svg'}
-                                    alt={project.title}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-
-                            {/* Project Content */}
-                            <div className="p-6 flex flex-col items-center flex-grow">
-                                {/* Project Title */}
-                                <h5 className="text-xl font-semibold text-center mb-2 line-clamp-2">
-                                    {project.title}
-                                </h5>
-
-                                {/* Project Description */}
-                                <div className="flex-grow mb-4">
-                                    <p className="text-gray-600 text-center text-sm line-clamp-3">
-                                        {project.shortDescription || project.description}
-                                    </p>
-                                </div>
-
-                                {/* Category */}
-                                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm mb-4">
-                                    {project.category}
-                                </span>
-
-                                {/* Technologies */}
-                                {project.technologies && project.technologies.length > 0 && (
-                                    <div className="flex flex-wrap justify-center gap-2 mb-4 min-h-[2rem]">
-                                        {project.technologies.slice(0, 3).map((tech, index) => (
-                                            <span
-                                                key={index}
-                                                className="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-700"
-                                            >
-                                                {tech.name}
-                                            </span>
-                                        ))}
-                                        {project.technologies.length > 3 && (
-                                            <span className="px-3 py-1 bg-gray-200 rounded-full text-xs text-gray-600">
-                                                +{project.technologies.length - 3}
-                                            </span>
-                                        )}
+            <div className="max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr">
+                    {projects.length > 0 ? (
+                        projects.slice(0, 6).map((project) => (
+                            <div
+                                key={project._id}
+                                className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:shadow-2xl h-full flex flex-col border border-gray-100 animate-fadeIn"
+                            >
+                                {/* Featured Badge */}
+                                {project.featured && (
+                                    <div className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-sm">
+                                        Featured
                                     </div>
                                 )}
 
-                                {/* Buttons */}
-                                <div className="flex flex-wrap justify-center gap-4 mt-auto">
-                                    {project.repositories.map((repo, index) => (
-                                        <a
-                                            key={`repo-${index}`}
-                                            href={repo.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+                                {/* Project Image with Overlay */}
+                                <div className="relative h-52 w-full overflow-hidden flex-shrink-0">
+                                    <Image
+                                        src={project.image || '/placeholder-project.svg'}
+                                        alt={project.title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    />
+                                    
+                                    {/* Gradient Overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-70" />
+                                    
+                                    {/* Category Badge */}
+                                    <div className="absolute bottom-3 left-3 z-10">
+                                        <span className="rounded-full bg-black/30 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
+                                            {project.category}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Project Info */}
+                                <div className="p-5 flex flex-col flex-grow">
+                                    <Link href={`/projects/${project._id}`} className="group-hover:text-blue-600 transition-colors">
+                                        <h3 className="text-xl font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+                                            {project.title}
+                                        </h3>
+                                    </Link>
+
+                                    {/* Description */}
+                                    <div className="mb-5 flex-grow">
+                                        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                                            {project.shortDescription}
+                                        </p>
+                                    </div>
+
+                                    {/* Technologies */}
+                                    <div className="mb-5">
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {project.technologies.slice(0, 3).map((tech, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="rounded-full bg-gray-50 border border-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                                                >
+                                                    {tech.name}
+                                                </span>
+                                            ))}
+                                            {project.technologies.length > 3 && (
+                                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                                                    +{project.technologies.length - 3}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Links */}
+                                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+                                        {project.repositories.length > 0 && (
+                                            <a
+                                                href={project.repositories[0].url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                                            >
+                                                {getRepositoryIcon(project.repositories[0].type)}
+                                                <span className="text-sm font-medium">Code</span>
+                                            </a>
+                                        )}
+                                        
+                                        {project.demoUrls.length > 0 && (
+                                            <a
+                                                href={project.demoUrls[0].url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors group"
+                                            >
+                                                <span className="text-sm font-medium">Live Demo</span>
+                                                <FaExternalLinkAlt className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                            </a>
+                                        )}
+                                        
+                                        <Link
+                                            href={`/projects/${project._id}`}
+                                            className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                                         >
-                                            <FaGithub className="text-lg" />
-                                            {repo.label || 'Repository'}
-                                        </a>
-                                    ))}
-                                    {project.demoUrls.map((demo, index) => (
-                                        <a
-                                            key={`demo-${index}`}
-                                            href={demo.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
-                                        >
-                                            <FaExternalLinkAlt className="text-lg" />
-                                            {demo.label || 'Live Demo'}
-                                        </a>
-                                    ))}
+                                            View Details
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
+                        ))
+                    ) : (
+                        <div className="col-span-3 flex flex-col items-center justify-center text-center py-16">
+                            <div className="bg-gray-100 rounded-full p-6 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Projects Available</h3>
+                            <p className="text-gray-600 max-w-md">
+                                There are no published projects available at the moment. Please check back later.
+                            </p>
                         </div>
-                    ))
-                ) : (
-                    <div className="col-span-3 text-center text-gray-500 py-12">
-                        No published projects available at the moment.
+                    )}
+                </div>
+                
+                {projects.length > 6 && (
+                    <div className="mt-12 text-center">
+                        <Link 
+                            href="/projects" 
+                            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all transform hover:scale-105 hover:shadow-lg"
+                        >
+                            View All Projects
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </Link>
                     </div>
                 )}
             </div>

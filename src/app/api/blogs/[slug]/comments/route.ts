@@ -1,36 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 import Blog from '@/models/Blog';
 import Comment from '@/models/Comment';
 import { createBlogNotification } from '@/lib/notifications';
 
 // Get comments for a blog post
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: { slug: string } }) {
   try {
     await connectToDatabase();
 
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
-      return sendError('Blog not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Blog post not found'
+      });
     }
 
-    // Get all comments, they're approved by default
-    const comments = await Comment.find({ 
-      blogId: blog._id,
-      status: 'approved'
-    }).sort({ createdAt: -1 });
+    const comments = await Comment.find({ blogId: blog._id })
+      .sort({ createdAt: -1 });
 
-    return sendSuccess({
-      comments: comments.map(comment => ({
-        id: comment._id,
-        name: comment.name,
-        content: comment.content,
-        createdAt: comment.createdAt
-      }))
+    return NextResponse.json({
+      success: true,
+      data: comments
     });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error fetching comments:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch comments'
+    });
   }
 }
 

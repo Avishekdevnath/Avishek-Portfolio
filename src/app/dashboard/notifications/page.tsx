@@ -33,9 +33,9 @@ export default function NotificationsPage() {
   // Debounced search
   const debouncedSearch = useCallback((callback: () => void, delay: number) => {
     let timeoutId: NodeJS.Timeout;
-    return (...args: any[]) => {
+    return (...args: []) => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => callback.apply(null, args), delay);
+      timeoutId = setTimeout(() => callback(), delay);
     };
   }, []);
 

@@ -39,20 +39,21 @@ export interface ExperienceData {
 }
 
 // Project Types
-export interface ITechnology {
+export interface Technology {
   name: string;
   icon?: string;
 }
 
-export interface IRepository {
+export interface Repository {
   name: string;
   url: string;
   type: 'github' | 'gitlab' | 'bitbucket' | 'other';
 }
 
-export interface IDemoURL {
+export interface DemoURL {
   name: string;
   url: string;
+  type: 'live' | 'staging' | 'demo' | 'documentation';
 }
 
 export interface Project {
@@ -61,17 +62,37 @@ export interface Project {
   description: string;
   shortDescription: string;
   category: string;
-  technologies: ITechnology[];
-  repositories: IRepository[];
-  demoUrls: IDemoURL[];
+  technologies: Technology[];
+  repositories: Repository[];
+  demoUrls: DemoURL[];
   image: string;
   imagePublicId: string;
-  completionDate: string;
+  completionDate: string | Date;
   featured: boolean;
   status: 'draft' | 'published';
-  createdAt?: string;
-  updatedAt?: string;
-  order?: number;
+  order: number;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export interface ProjectApiResponse {
+  success: boolean;
+  data?: Project;
+  error?: string;
+}
+
+export interface ProjectListApiResponse {
+  success: boolean;
+  data?: {
+    projects: Project[];
+    pagination?: {
+      total: number;
+      page: number;
+      limit: number;
+      pages: number;
+    };
+  };
+  error?: string;
 }
 
 // Blog Types

@@ -2,20 +2,10 @@
 
 import type React from "react";
 import { useState, useRef } from "react";
-import Header from "@/components/shared/Header";
-import {
-  FaEnvelope,
-  FaLinkedin,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaCopy,
-  FaGithub,
-  FaTwitter,
-} from "react-icons/fa";
-import { Send, User, Mail, MessageSquare, Clock } from "lucide-react";
-import { MessageCategory } from '@/models/Message';
+import { Send, User, Mail, MessageSquare } from "lucide-react";
+import { MessageCategory } from '@/types/message';
+import ContactInfo from "@/components/shared/ContactInfo";
+import SocialLinks from "@/components/shared/SocialLinks";
 
 interface FormData {
   name: string;
@@ -44,60 +34,7 @@ export default function Contact() {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  const contactInfo = [
-    {
-      icon: <FaEnvelope />,
-      label: "Email",
-      value: "avishek@example.com",
-      link: "mailto:avishek@example.com",
-      copyable: true,
-    },
-    {
-      icon: <FaPhone />,
-      label: "Phone",
-      value: "+1 (555) 123-4567",
-      link: "tel:+15551234567",
-      copyable: true,
-    },
-    {
-      icon: <FaMapMarkerAlt />,
-      label: "Location",
-      value: "Dhaka, Bangladesh",
-      link: "#",
-      copyable: false,
-    },
-    {
-      icon: <Clock />,
-      label: "Response Time",
-      value: "Within 24 hours",
-      link: "#",
-      copyable: false,
-    },
-  ];
-
-  const socialLinks = [
-    {
-      icon: <FaLinkedin />,
-      label: "LinkedIn",
-      url: "https://www.linkedin.com/in/yourprofile",
-      color: "bg-orange-500 hover:bg-orange-600",
-    },
-    {
-      icon: <FaGithub />,
-      label: "GitHub",
-      url: "https://github.com/yourprofile",
-      color: "bg-gray-800 hover:bg-gray-900",
-    },
-    {
-      icon: <FaTwitter />,
-      label: "Twitter",
-      url: "https://twitter.com/yourprofile",
-      color: "bg-orange-400 hover:bg-orange-500",
-    },
-  ];
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -186,228 +123,181 @@ export default function Contact() {
     }
   };
 
-  const copyToClipboard = async (text: string, field: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedField(field);
-      setTimeout(() => setCopiedField(null), 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 bg-opacity-10">
-      <div className="container mx-auto px-4 py-16">
-        {/* Header Section */}
+    <section id="contact" className="py-16 bg-gradient-to-br from-orange-50 via-white to-amber-50">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <div className="inline-block bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-4 bg-opacity-70">
-            Let's Connect
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+          <div className="inline-block bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-4">
             Get in Touch
-          </h1>
+          </div>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Let's Work Together
+          </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Have a project in mind or just want to chat? I'd love to hear from
-            you. Let's create something amazing together!
+            Have a project in mind or just want to chat? I'd love to hear from you.
+            Let's create something amazing together!
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div className="space-y-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-              <div className="space-y-6">
-                {contactInfo.map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
-                      {item.icon}
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-sm text-gray-500">{item.label}</p>
-                      <div className="flex items-center space-x-2">
-                        <a
-                          href={item.link}
-                          className="text-gray-900 font-medium hover:text-orange-600"
-                        >
-                          {item.value}
-                        </a>
-                        {item.copyable && (
-                          <button
-                            onClick={() => copyToClipboard(item.value, item.label)}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            {copiedField === item.label ? (
-                              <FaCheckCircle className="text-green-500" />
-                            ) : (
-                              <FaCopy />
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Contact Information
+              </h3>
+              <p className="text-gray-600 mb-8">
+                Feel free to reach out through any of these channels. I'm always excited
+                to connect and discuss new opportunities.
+              </p>
+            </div>
 
-              {/* Social Links */}
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Connect with me</h3>
-                <div className="flex space-x-4">
-                  {socialLinks.map((social, index) => (
-                    <a
-                      key={index}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-white transition-all ${social.color}`}
-                    >
-                      {social.icon}
-                    </a>
-                  ))}
-                </div>
-              </div>
+            {/* Contact Info */}
+            <div className="bg-white rounded-xl shadow-sm p-8">
+              <ContactInfo />
+            </div>
+
+            {/* Social Links */}
+            <div className="bg-white rounded-xl shadow-sm p-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Connect With Me</h3>
+              <SocialLinks showLabels />
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Message</h2>
+          <div className="bg-white rounded-xl shadow-sm p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Send a Message</h3>
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Name
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Your Name
                 </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm ${
-                    errors.name
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-orange-500 focus:ring-orange-500'
-                  }`}
-                  placeholder="Your name"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={`block w-full pl-10 pr-3 py-2 border ${
+                      errors.name ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    placeholder="John Doe"
+                  />
+                </div>
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Email Address
                 </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm ${
-                    errors.email
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-orange-500 focus:ring-orange-500'
-                  }`}
-                  placeholder="your.email@example.com"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`block w-full pl-10 pr-3 py-2 border ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    placeholder="john@example.com"
+                  />
+                </div>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   Subject
                 </label>
-                <select
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                >
-                  {Object.values(MessageCategory).map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MessageSquare className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    className={`block w-full pl-10 pr-3 py-2 border ${
+                      errors.subject ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  >
+                    {Object.values(MessageCategory).map((category) => (
+                      <option key={category} value={category}>
+                        {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {errors.subject && (
+                  <p className="mt-1 text-sm text-red-500">{errors.subject}</p>
+                )}
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   Message
                 </label>
                 <textarea
-                  id="message"
                   name="message"
-                  rows={4}
                   value={formData.message}
                   onChange={handleInputChange}
-                  className={`mt-1 block w-full rounded-md shadow-sm ${
-                    errors.message
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-orange-500 focus:ring-orange-500'
-                  }`}
-                  placeholder="Your message here..."
+                  rows={6}
+                  className={`block w-full px-3 py-2 border ${
+                    errors.message ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  placeholder="Tell me about your project, ideas, or questions..."
                 />
                 {errors.message && (
-                  <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.message}</p>
                 )}
               </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Sending...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <Send size={20} />
-                      <span>Send Message</span>
-                    </div>
-                  )}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-medium
+                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-600"}
+                  transition-colors duration-200`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-5 w-5" />
+                    <span>Send Message</span>
+                  </>
+                )}
+              </button>
+
+              {submitStatus === "success" && (
+                <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-lg">
+                  Message sent successfully! I'll get back to you soon.
+                </div>
+              )}
+
+              {submitStatus === "error" && (
+                <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg">
+                  Failed to send message. Please try again.
+                </div>
+              )}
             </form>
           </div>
         </div>
-
-        {/* Status Messages */}
-        {submitStatus !== "idle" && (
-          <div
-            className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg ${
-              submitStatus === "success"
-                ? "bg-green-100 text-green-800 border border-green-200"
-                : "bg-red-100 text-red-800 border border-red-200"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              {submitStatus === "success" ? (
-                <>
-                  <FaCheckCircle className="text-green-500" />
-                  <span>Message sent successfully! I'll get back to you soon.</span>
-                </>
-              ) : (
-                <>
-                  <FaExclamationTriangle className="text-red-500" />
-                  <span>Failed to send message. Please try again later.</span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
       </div>
-    </div>
+    </section>
   );
 }

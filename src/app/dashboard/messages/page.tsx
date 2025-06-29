@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { Mail, Star, Archive } from 'lucide-react';
 import MessageRow from '@/components/dashboard/MessageRow';
-import { IMessage, MessageStatus } from '@/models/Message';
+import { IMessage } from '@/models/Message';
+import { MessageStatus } from '@/types/message';
+import mongoose from 'mongoose';
 
 interface MessageStats {
   total: number;
@@ -12,8 +14,12 @@ interface MessageStats {
   archived: number;
 }
 
+interface MessageWithId extends Omit<IMessage, '_id'> {
+  _id: string;
+}
+
 export default function MessagesPage() {
-  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [messages, setMessages] = useState<MessageWithId[]>([]);
   const [stats, setStats] = useState<MessageStats>({
     total: 0,
     unread: 0,
@@ -34,7 +40,11 @@ export default function MessagesPage() {
       
       if (data.success) {
         console.log('Setting messages:', data.data.messages);
-        setMessages(data.data.messages);
+        const messagesWithStringId = data.data.messages.map((message: any) => ({
+          ...message,
+          _id: message._id.toString()
+        }));
+        setMessages(messagesWithStringId);
         setStats(data.data.stats);
       } else {
         throw new Error(data.error || 'Failed to fetch messages');
@@ -163,7 +173,7 @@ export default function MessagesPage() {
               <tbody>
                 {messages.map((message) => (
                   <MessageRow
-                    key={message._id}
+                    key={message._id.toString()}
                     message={message}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDelete}

@@ -1,22 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import { FaSave, FaImage, FaTimes, FaEye, FaCode, FaPalette, FaPlus, FaUser } from 'react-icons/fa';
+import { FaSave, FaImage, FaTimes, FaEye, FaCode, FaPalette, FaPlus, FaUser, FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
-
-// Dynamic import of the rich text editor to avoid SSR issues
-const ReactQuill = dynamic(
-  () => import('react-quill'),
-  { 
-    ssr: false,
-    loading: () => <div className="h-64 w-full bg-gray-100 animate-pulse rounded-md" />
-  }
-);
-
-// Import Quill CSS
-import './quill.css';
+import { toast } from 'react-hot-toast';
+import DraftEditor from '../shared/DraftEditor';
 
 interface BlogFormProps {
   initialData?: {
@@ -27,6 +16,7 @@ interface BlogFormProps {
     excerpt: string;
     content: string;
     coverImage?: string;
+    coverImageId?: string;
     category: string;
     tags: string[];
     author: {
@@ -44,11 +34,20 @@ interface BlogFormProps {
     status: 'draft' | 'published';
     featured: boolean;
     readTime?: number;
+    publishedAt?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+    canonicalUrl?: string;
+    noIndex?: boolean;
+    structuredData?: Record<string, unknown>;
   };
   mode: 'create' | 'edit';
+  onClose: () => void;
 }
 
-export default function BlogForm({ initialData, mode }: BlogFormProps) {
+const categories = ['General', 'Technology', 'Programming', 'Web Development', 'Career'];
+
+export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +55,10 @@ export default function BlogForm({ initialData, mode }: BlogFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(initialData?.coverImage || null);
   const [previewMode, setPreviewMode] = useState(false);
   const [currentTag, setCurrentTag] = useState('');
+  const [showSeoFields, setShowSeoFields] = useState(false);
+  const [showAuthorFields, setShowAuthorFields] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [authorName, setAuthorName] = useState<string>('');
   
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -63,10 +66,11 @@ export default function BlogForm({ initialData, mode }: BlogFormProps) {
     excerpt: initialData?.excerpt || '',
     content: initialData?.content || '',
     coverImage: initialData?.coverImage || '',
+    coverImageId: initialData?.coverImageId || '',
     category: initialData?.category || 'General',
     tags: initialData?.tags || [],
     author: {
-      name: initialData?.author?.name || 'Admin',
+      name: initialData?.author?.name || authorName || 'Portfolio Admin',
       email: initialData?.author?.email || '',
       bio: initialData?.author?.bio || '',
       avatar: initialData?.author?.avatar || '',
@@ -79,103 +83,42 @@ export default function BlogForm({ initialData, mode }: BlogFormProps) {
     },
     status: initialData?.status || 'draft',
     featured: initialData?.featured || false,
+    publishedAt: initialData?.publishedAt || '',
+    metaTitle: initialData?.metaTitle || '',
+    metaDescription: initialData?.metaDescription || '',
+    canonicalUrl: initialData?.canonicalUrl || '',
+    noIndex: initialData?.noIndex || false,
+    structuredData: initialData?.structuredData || {},
   });
 
-  // Rich text editor configuration
-  const quillModules = useMemo(() => ({
-    toolbar: {
-      container: [
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'indent': '-1'}, { 'indent': '+1' }],
-        [{ 'align': [] }],
-        ['blockquote', 'code-block'],
-        ['link', 'image', 'video'],
-        ['clean']
-      ],
-      handlers: {
-        image: function() {
-          const input = document.createElement('input');
-          input.setAttribute('type', 'file');
-          input.setAttribute('accept', 'image/*');
-          input.click();
-          
-          input.onchange = async () => {
-            const file = input.files?.[0];
-            if (file) {
-              await handleImageUpload.call(this, file);
-            }
-          };
+  // Fetch settings when component mounts
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        if (data.success && data.data.fullName) {
+          setAuthorName(data.data.fullName);
         }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
       }
-    },
-    clipboard: {
-      matchVisual: false,
+    };
+    fetchSettings();
+  }, []);
+
+  // Update author name when settings are fetched
+  useEffect(() => {
+    if (authorName && !initialData?.author?.name) {
+      setFormData(prev => ({
+        ...prev,
+        author: {
+          ...prev.author,
+          name: authorName
+        }
+      }));
     }
-  }), []);
-
-  // Image upload handler
-  const handleImageUpload = async function(file: File) {
-    try {
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size must be less than 5MB');
-        return;
-      }
-
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
-        return;
-      }
-
-      // Create form data for upload
-      const uploadData = new FormData();
-      uploadData.append('image', file);
-
-      // Show loading indicator
-      const quill = this.quill;
-      const range = quill.getSelection(true);
-      const loadingText = `📷 Uploading ${file.name}...`;
-      quill.insertText(range.index, loadingText, 'italic', true);
-      quill.setSelection(range.index + loadingText.length);
-
-      // Upload image
-      const response = await fetch('/api/blogs/upload-image', {
-        method: 'POST',
-        body: uploadData
-      });
-
-      const data = await response.json();
-      
-      // Remove loading text
-      quill.deleteText(range.index, loadingText.length);
-      
-      if (data.success) {
-        // Insert image at cursor position
-        quill.insertEmbed(range.index, 'image', data.url);
-        quill.setSelection(range.index + 1);
-        
-        // Add a line break after image for better spacing
-        quill.insertText(range.index + 1, '\n');
-      } else {
-        throw new Error(data.error || 'Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Image upload error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Failed to upload image: ${errorMessage}`);
-    }
-  };
-
-  const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'color', 'background', 'list', 'bullet', 'indent',
-    'align', 'blockquote', 'code-block', 'link', 'image', 'video', 'clean'
-  ];
+  }, [authorName, initialData?.author?.name]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -188,68 +131,138 @@ export default function BlogForm({ initialData, mode }: BlogFormProps) {
     }
   }, [formData.title, mode]);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      const file = e.target.files?.[0];
-      if (!file) return;
+  // Calculate reading time
+  useEffect(() => {
+    if (formData.content) {
+      try {
+        const content = typeof formData.content === 'string' ? JSON.parse(formData.content) : formData.content;
+        const text = content.blocks.map((block: any) => block.text).join(' ');
+        const wordsPerMinute = 200;
+        const wordCount = text.split(/\s+/).length;
+        const readTime = Math.ceil(wordCount / wordsPerMinute);
+        setFormData(prev => ({ ...prev, readTime }));
+      } catch (error) {
+        console.warn('Failed to calculate reading time:', error);
+      }
+    }
+  }, [formData.content]);
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  // Handle publish date when status changes to published
+  useEffect(() => {
+    if (formData.status === 'published' && !formData.publishedAt) {
+      setFormData(prev => ({ ...prev, publishedAt: new Date().toISOString() }));
+    }
+  }, [formData.status]);
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image size must be less than 5MB');
+      }
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      }
 
       // Create form data for upload
       const uploadData = new FormData();
-      uploadData.append('file', file);
-      uploadData.append('folder', 'portfolio/blogs');
+      uploadData.append('image', file);
 
       // Upload image
-      setLoading(true);
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/blogs/upload-image', {
         method: 'POST',
         body: uploadData
       });
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error);
+      
+      if (data.success) {
+        // Return the image URL to be inserted in the editor
+        return data.url;
+      } else {
+        throw new Error(data.error || 'Failed to upload image');
       }
-
-      // Update form data with new image
-      setFormData(prev => ({
-        ...prev,
-        coverImage: data.data.url
-      }));
-
-      setSuccess('Cover image uploaded successfully');
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to upload image');
+      console.error('Image upload error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload image');
+      return null;
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setLoading(true);
+      const imageUrl = await handleImageUpload(file);
+      
+      if (imageUrl) {
+        setImagePreview(imageUrl);
+        setFormData(prev => ({ ...prev, coverImage: imageUrl }));
+        toast.success('Cover image uploaded successfully');
+      }
+    } catch (error) {
+      console.error('Cover image upload error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      try {
+        setLoading(true);
+        const imageUrl = await handleImageUpload(file);
+        
+        if (imageUrl) {
+          setImagePreview(imageUrl);
+          setFormData(prev => ({ ...prev, coverImage: imageUrl }));
+          toast.success('Cover image uploaded successfully');
+        }
+      } catch (error) {
+        console.error('Cover image upload error:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
-    } else if (e.key === ',' || e.key === 'Tab') {
+    if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
       addTag();
     }
   };
 
   const addTag = () => {
-    const trimmedTag = currentTag.trim();
-    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, trimmedTag]
-      }));
+    const tag = currentTag.trim().toLowerCase();
+    if (tag && !formData.tags.includes(tag)) {
+      setFormData(prev => ({ ...prev, tags: [...prev.tags, tag] }));
+      setCurrentTag('');
     }
-    setCurrentTag('');
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -259,421 +272,617 @@ export default function BlogForm({ initialData, mode }: BlogFormProps) {
     }));
   };
 
+  const validateContent = (content: string): { isValid: boolean; error?: string } => {
+    try {
+      const parsedContent = JSON.parse(content);
+      
+      // Check if content has blocks
+      if (!Array.isArray(parsedContent.blocks) || parsedContent.blocks.length === 0) {
+        return { isValid: false, error: 'Content must not be empty' };
+      }
+
+      // Check if content has actual text
+      const hasText = parsedContent.blocks.some((block: any) => 
+        block.text && block.text.trim().length > 0
+      );
+
+      if (!hasText) {
+        return { isValid: false, error: 'Content must contain some text' };
+      }
+
+      return { isValid: true };
+    } catch (error) {
+      return { isValid: false, error: 'Invalid content format' };
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
 
+    // Validate required fields
+    const missingFields: string[] = [];
+    
+    if (!formData.title?.trim()) missingFields.push('Title');
+    if (!formData.excerpt?.trim()) missingFields.push('Excerpt');
+    if (!formData.category?.trim()) missingFields.push('Category');
+    if (!formData.author?.name?.trim()) missingFields.push('Author Name');
+
+    if (missingFields.length > 0) {
+      setError(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      setLoading(false);
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Validate content format and length
+    const contentValidation = validateContent(formData.content);
+    if (!contentValidation.isValid) {
+      setError(contentValidation.error || 'Invalid content');
+      setLoading(false);
+      toast.error(contentValidation.error || 'Invalid content');
+      return;
+    }
+
     try {
-      // Generate slug if empty
-      if (!formData.slug) {
-        formData.slug = formData.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
+      const endpoint = mode === 'create' ? '/api/blogs' : `/api/blogs/${initialData?._id}`;
+      const method = mode === 'create' ? 'POST' : 'PUT';
+
+      // Generate structured data if not provided
+      if (!formData.structuredData || Object.keys(formData.structuredData).length === 0) {
+        const structuredData = {
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          "headline": formData.metaTitle || formData.title,
+          "description": formData.metaDescription || formData.excerpt,
+          "author": {
+            "@type": "Person",
+            "name": formData.author.name,
+            "url": formData.author.social?.website
+          },
+          "datePublished": formData.publishedAt,
+          "dateModified": new Date().toISOString(),
+          "image": formData.coverImage,
+          "publisher": {
+            "@type": "Organization",
+            "name": "Avishek Portfolio",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "/logo.png"
+            }
+          }
+        };
+        setFormData(prev => ({ ...prev, structuredData }));
       }
 
-      // Debug logging
-      console.log('=== BLOG FORM DEBUG ===');
-      console.log('Mode:', mode);
-      console.log('Form Data:', JSON.stringify(formData, null, 2));
-
-      let url: string;
-      if (mode === 'create') {
-        url = '/api/blogs';
-      } else {
-        // For edit mode, we need a valid identifier
-        const identifier = initialData?.id || initialData?._id || initialData?.slug;
-        if (!identifier) {
-          throw new Error('Blog post ID is required for editing');
-        }
-        url = `/api/blogs/${identifier}`;
-      }
-
-      console.log('Request URL:', url);
-      console.log('Request Method:', mode === 'create' ? 'POST' : 'PUT');
-
-      const response = await fetch(url, {
-        method: mode === 'create' ? 'POST' : 'PUT',
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
-      console.log('Response Status:', response.status);
-      console.log('Response OK:', response.ok);
-
       const data = await response.json();
-      console.log('Response Data:', JSON.stringify(data, null, 2));
 
-      if (!data.success) {
-        throw new Error(data.error || data.message || 'Failed to save blog post');
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
       }
 
-      setSuccess(`Blog post ${mode === 'create' ? 'created' : 'updated'} successfully!`);
-      
-      // Redirect after successful save
-      setTimeout(() => {
-        router.push('/dashboard/posts');
-      }, 1500);
-
+      if (data.success) {
+        setSuccess(mode === 'create' ? 'Blog post created successfully!' : 'Blog post updated successfully!');
+        toast.success(mode === 'create' ? 'Blog post created!' : 'Blog post updated!');
+        router.refresh();
+        onClose();
+      } else {
+        throw new Error(data.error || 'Something went wrong');
+      }
     } catch (error) {
-      console.error('=== ERROR DETAILS ===');
-      console.error('Error saving blog post:', error);
-      console.error('Error type:', typeof error);
-      console.error('Error constructor:', error?.constructor?.name);
-      if (error instanceof Error) {
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-      }
+      console.error('Form submission error:', error);
       setError(error instanceof Error ? error.message : 'Failed to save blog post');
+      toast.error(error instanceof Error ? error.message : 'Failed to save blog post');
     } finally {
       setLoading(false);
     }
   };
 
-  const categories = [
-    'General',
-    'Web Development',
-    'Mobile Development',
-    'AI/ML',
-    'DevOps',
-    'UI/UX',
-    'Tutorial',
-    'Technology',
-    'Career',
-    'Opinion'
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {mode === 'create' ? 'Create New Blog Post' : 'Edit Blog Post'}
-              </h1>
-              <p className="text-gray-600">
-                {mode === 'create' 
-                  ? 'Write and format your blog post with rich text capabilities'
-                  : 'Update your blog post content and settings'
-                }
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button
-                type="button"
-                onClick={() => setPreviewMode(!previewMode)}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
-                  previewMode 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                <FaEye className="w-4 h-4" />
-                <span>{previewMode ? 'Edit' : 'Preview'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Success/Error Messages */}
-        {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-600 rounded-lg">
-            {success}
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Title */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Title <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+            !formData.title ? 'border-red-300' : 'border-gray-300'
+          }`}
+          placeholder="Enter blog post title"
+          required
+        />
+        {!formData.title && (
+          <p className="mt-1 text-sm text-red-500">Title is required</p>
         )}
+      </div>
+
+      {/* Author Settings */}
+      <div className="border-t pt-6">
+        <button
+          type="button"
+          onClick={() => setShowAuthorFields(!showAuthorFields)}
+          className="flex items-center gap-2 text-gray-700 hover:text-purple-600 transition-colors"
+        >
+          <FaUser className="w-4 h-4" />
+          <span className="font-medium">Author Settings</span>
+          <span className="text-sm text-gray-500">({showAuthorFields ? 'Hide' : 'Show'})</span>
+        </button>
         
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Title & Slug */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Enter blog title..."
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Slug *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="url-friendly-slug"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Excerpt */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        {showAuthorFields && (
+          <div className="mt-4 space-y-4">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Excerpt *
+                Author Name <span className="text-red-500">*</span>
               </label>
-              <textarea
-                value={formData.excerpt}
-                onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                placeholder="Brief description of your blog post..."
+              <input
+                type="text"
+                value={formData.author.name}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  author: { ...formData.author, name: e.target.value }
+                })}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                  !formData.author.name ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Enter author name"
                 required
               />
-            </div>
-
-            {/* Content Editor */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-4">
-                Content *
-              </label>
-              {!previewMode ? (
-                <div className="border border-gray-300 rounded-lg overflow-hidden">
-                  <ReactQuill
-                    value={formData.content}
-                    onChange={(content) => setFormData(prev => ({ ...prev, content }))}
-                    modules={quillModules}
-                    formats={quillFormats}
-                    placeholder="Start writing your blog post..."
-                    className="min-h-96"
-                  />
-                </div>
-              ) : (
-                <div className="min-h-96 p-6 border border-gray-300 rounded-lg bg-gray-50">
-                  <div 
-                    className="prose max-w-none"
-                    dangerouslySetInnerHTML={{ __html: formData.content }}
-                  />
-                </div>
+              {!formData.author.name && (
+                <p className="mt-1 text-sm text-red-500">Author name is required</p>
               )}
             </div>
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Publishing Options */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <FaSave className="w-5 h-5 mr-2 text-blue-600" />
-                Publishing
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                  </select>
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="featured"
-                    checked={formData.featured}
-                    onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label htmlFor="featured" className="ml-2 text-sm text-gray-700">
-                    Featured Post
-                  </label>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={formData.author.email}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  author: { ...formData.author, email: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Enter author email"
+              />
+            </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center justify-center space-x-2"
-                >
-                  {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  ) : (
-                    <>
-                      <FaSave className="w-4 h-4" />
-                      <span>{mode === 'create' ? 'Create Post' : 'Update Post'}</span>
-                    </>
-                  )}
-                </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bio
+              </label>
+              <textarea
+                value={formData.author.bio}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  author: { ...formData.author, bio: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                rows={3}
+                placeholder="Enter author bio"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Avatar URL
+              </label>
+              <input
+                type="url"
+                value={formData.author.avatar}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  author: { ...formData.author, avatar: e.target.value }
+                })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Enter avatar URL"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium text-gray-900">Social Links</h4>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Twitter Profile
+                </label>
+                <input
+                  type="url"
+                  value={formData.author.social?.twitter}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    author: {
+                      ...formData.author,
+                      social: { ...formData.author.social, twitter: e.target.value }
+                    }
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder="Twitter profile URL"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  LinkedIn Profile
+                </label>
+                <input
+                  type="url"
+                  value={formData.author.social?.linkedin}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    author: {
+                      ...formData.author,
+                      social: { ...formData.author.social, linkedin: e.target.value }
+                    }
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder="LinkedIn profile URL"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  GitHub Profile
+                </label>
+                <input
+                  type="url"
+                  value={formData.author.social?.github}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    author: {
+                      ...formData.author,
+                      social: { ...formData.author.social, github: e.target.value }
+                    }
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder="GitHub profile URL"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Personal Website
+                </label>
+                <input
+                  type="url"
+                  value={formData.author.social?.website}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    author: {
+                      ...formData.author,
+                      social: { ...formData.author.social, website: e.target.value }
+                    }
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder="Personal website URL"
+                />
               </div>
             </div>
+          </div>
+        )}
+      </div>
 
-            {/* Cover Image */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <FaImage className="w-5 h-5 mr-2 text-green-600" />
-                Cover Image
-              </h3>
-              
-              {imagePreview && (
-                <div className="mb-4 relative">
-                  <Image
-                    src={imagePreview}
-                    alt="Cover preview"
-                    width={300}
-                    height={200}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImagePreview(null);
-                      setFormData(prev => ({ ...prev, coverImage: '' }));
-                    }}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+      {/* Content */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Content <span className="text-red-500">*</span>
+        </label>
+        <DraftEditor
+          value={formData.content}
+          onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+          className={`min-h-[400px] ${
+            !formData.content ? 'border-red-300' : ''
+          }`}
+          placeholder="Write your blog post content here..."
+        />
+        {!formData.content && (
+          <p className="mt-1 text-sm text-red-500">Content is required</p>
+        )}
+      </div>
+
+      {/* Excerpt */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Excerpt <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          value={formData.excerpt}
+          onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+            !formData.excerpt ? 'border-red-300' : 'border-gray-300'
+          }`}
+          rows={3}
+          placeholder="Enter a brief excerpt of your blog post"
+          required
+        />
+        {!formData.excerpt && (
+          <p className="mt-1 text-sm text-red-500">Excerpt is required</p>
+        )}
+      </div>
+
+      {/* Cover Image */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Cover Image
+        </label>
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <div 
+              className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors duration-200 ${
+                isDragging 
+                  ? 'border-purple-500 bg-purple-50' 
+                  : 'border-gray-300 hover:border-purple-400'
+              }`}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="space-y-1 text-center">
+                <div className="flex text-sm text-gray-600">
+                  <label
+                    htmlFor="cover-image"
+                    className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500"
                   >
-                    <FaTimes className="w-3 h-3" />
-                  </button>
+                    <span>Upload a file</span>
+                    <input
+                      id="cover-image"
+                      name="cover-image"
+                      type="file"
+                      className="sr-only"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
                 </div>
-              )}
-              
-              <input
-                type="file"
-                onChange={handleImageChange}
-                accept="image/*"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Recommended: 1200x630px, Max: 5MB
-              </p>
-            </div>
-
-            {/* Category */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <FaPalette className="w-5 h-5 mr-2 text-purple-600" />
-                Category
-              </h3>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Tags */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <FaCode className="w-5 h-5 mr-2 text-orange-600" />
-                Tags
-              </h3>
-              
-              <div className="space-y-3">
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={currentTag}
-                    onChange={(e) => setCurrentTag(e.target.value)}
-                    onKeyDown={handleTagKeyDown}
-                    placeholder="Add a tag..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={addTag}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <FaPlus className="w-3 h-3" />
-                  </button>
-                </div>
-                
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-2 hover:text-red-600 transition-colors"
-                        >
-                          <FaTimes className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
+                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                {loading && (
+                  <div className="mt-2 text-sm text-purple-600">
+                    <span className="animate-spin inline-block mr-2">⌛</span>
+                    Uploading...
                   </div>
                 )}
               </div>
             </div>
+          </div>
+          {imagePreview && (
+            <div className="relative w-24 h-24">
+              <Image
+                src={imagePreview}
+                alt="Cover image preview"
+                fill
+                className="object-cover rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setImagePreview(null);
+                  setFormData(prev => ({ ...prev, coverImage: '' }));
+                }}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+              >
+                <FaTimes size={12} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
 
-            {/* Author Details */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <FaUser className="w-5 h-5 mr-2 text-indigo-600" />
-                Author Details
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.author.name}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      author: { ...prev.author, name: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.author.email}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      author: { ...prev.author, email: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                </div>
-              </div>
+      {/* Category */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Category <span className="text-red-500">*</span>
+        </label>
+        <select
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+            !formData.category ? 'border-red-300' : 'border-gray-300'
+          }`}
+          required
+        >
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+        {!formData.category && (
+          <p className="mt-1 text-sm text-red-500">Category is required</p>
+        )}
+      </div>
+
+      {/* Tags */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Tags
+        </label>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {formData.tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
+            >
+              {tag}
+              <button
+                type="button"
+                onClick={() => removeTag(tag)}
+                className="ml-2 inline-flex items-center justify-center"
+              >
+                <FaTimes size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={currentTag}
+            onChange={(e) => setCurrentTag(e.target.value)}
+            onKeyDown={handleTagKeyDown}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            placeholder="Add a tag"
+          />
+          <button
+            type="button"
+            onClick={addTag}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+          >
+            <FaPlus size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Status and Featured */}
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Status
+          </label>
+          <select
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+        <div className="flex items-end">
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={formData.featured}
+              onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+              className="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+            />
+            <span className="ml-2 text-sm text-gray-600">Featured</span>
+          </label>
+        </div>
+      </div>
+
+      {/* SEO Settings */}
+      <div className="border-t pt-6">
+        <button
+          type="button"
+          onClick={() => setShowSeoFields(!showSeoFields)}
+          className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors"
+        >
+          <FaSearch className="w-4 h-4" />
+          <span className="font-medium">SEO Settings</span>
+          <span className="text-sm text-gray-500">({showSeoFields ? 'Hide' : 'Show'})</span>
+        </button>
+        
+        {showSeoFields && (
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Title
+              </label>
+              <input
+                type="text"
+                value={formData.metaTitle}
+                onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Enter meta title for SEO"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Description
+              </label>
+              <textarea
+                value={formData.metaDescription}
+                onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                rows={3}
+                placeholder="Enter meta description for SEO"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Canonical URL
+              </label>
+              <input
+                type="url"
+                value={formData.canonicalUrl}
+                onChange={(e) => setFormData({ ...formData, canonicalUrl: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Enter canonical URL if this is a duplicate"
+              />
+            </div>
+
+            <div>
+              <label className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  checked={formData.noIndex}
+                  onChange={(e) => setFormData({ ...formData, noIndex: e.target.checked })}
+                  className="rounded border-gray-300 text-purple-600 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                />
+                <span className="ml-2 text-sm text-gray-600">Prevent search engines from indexing this post</span>
+              </label>
             </div>
           </div>
-        </form>
+        )}
       </div>
-    </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="text-red-500 text-sm">{error}</div>
+      )}
+
+      {/* Success Message */}
+      {success && (
+        <div className="text-green-500 text-sm">{success}</div>
+      )}
+
+      {/* Form Actions */}
+      <div className="flex justify-end gap-4">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+          disabled={loading}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <span className="animate-spin">⌛</span>
+              Saving...
+            </>
+          ) : (
+            <>
+              <FaSave />
+              Save
+            </>
+          )}
+        </button>
+      </div>
+    </form>
   );
 } 

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
-import Notification from '@/models/Notification';
+import Notification, { INotification } from '@/models/Notification';
+import { Model } from 'mongoose';
+
+interface NotificationModel extends Model<INotification> {
+  markAsRead(id: string): Promise<INotification | null>;
+  markAsUnread(id: string): Promise<INotification | null>;
+}
 
 // GET /api/notifications/[id] - Get specific notification
 export async function GET(
@@ -10,7 +16,7 @@ export async function GET(
   try {
     await connectDB();
 
-    const notification = await Notification.findById(params.id);
+    const notification = await (Notification as any).findById(params.id);
 
     if (!notification) {
       return NextResponse.json(
@@ -48,26 +54,23 @@ export async function PUT(
     const body = await request.json();
     const { action, ...updateData } = body;
 
-    let notification;
-
-    if (action === 'markAsRead') {
-      notification = await Notification.markAsRead(params.id);
-    } else if (action === 'markAsUnread') {
-      notification = await Notification.markAsUnread(params.id);
-    } else {
-      // General update
-      notification = await Notification.findByIdAndUpdate(
-        params.id,
-        updateData,
-        { new: true, runValidators: true }
-      );
-    }
+    const notification = await Notification.findById(params.id);
 
     if (!notification) {
       return NextResponse.json(
         { success: false, error: 'Notification not found' },
         { status: 404 }
       );
+    }
+
+    if (action === 'markAsRead') {
+      await notification.markAsRead();
+    } else if (action === 'markAsUnread') {
+      await notification.markAsUnread();
+    } else {
+      // General update
+      Object.assign(notification, updateData);
+      await notification.save();
     }
 
     return NextResponse.json({
@@ -97,7 +100,7 @@ export async function DELETE(
   try {
     await connectDB();
 
-    const notification = await Notification.findByIdAndDelete(params.id);
+    const notification = await (Notification as any).findByIdAndDelete(params.id);
 
     if (!notification) {
       return NextResponse.json(

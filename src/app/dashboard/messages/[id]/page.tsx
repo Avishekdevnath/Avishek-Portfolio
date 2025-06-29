@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Send } from 'lucide-react';
-import { IMessage, MessageStatus } from '@/models/Message';
+import { IMessage } from '@/models/Message';
+import { MessageStatus } from '@/types/message';
 
 export default function MessageDetailsPage() {
   const params = useParams();

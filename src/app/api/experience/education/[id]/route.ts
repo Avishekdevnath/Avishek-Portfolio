@@ -1,7 +1,6 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { Education } from '@/models/Experience';
-import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 
 // GET /api/experience/education/[id] - Get a specific education entry
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -11,12 +10,22 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const education = await Education.findById(params.id);
     
     if (!education) {
-      return sendError('Education entry not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Education entry not found'
+      }, { status: 404 });
     }
 
-    return sendSuccess(education);
+    return NextResponse.json({
+      success: true,
+      data: education
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error fetching education entry:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch education entry'
+    });
   }
 }
 
@@ -43,12 +52,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     );
     
     if (!education) {
-      return sendError('Education entry not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Education entry not found'
+      }, { status: 404 });
     }
 
-    return sendSuccess(education, 'Education entry updated successfully');
+    return NextResponse.json({
+      success: true,
+      data: education,
+      message: 'Education entry updated successfully'
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error updating education entry:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update education entry'
+    });
   }
 }
 
@@ -60,11 +80,21 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const education = await Education.findByIdAndDelete(params.id);
     
     if (!education) {
-      return sendError('Education entry not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Education entry not found'
+      }, { status: 404 });
     }
 
-    return sendSuccess(null, 'Education entry deleted successfully');
+    return NextResponse.json({
+      success: true,
+      message: 'Education entry deleted successfully'
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error deleting education entry:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete education entry'
+    });
   }
 } 

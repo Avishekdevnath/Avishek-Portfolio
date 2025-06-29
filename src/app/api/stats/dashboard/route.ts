@@ -7,6 +7,15 @@ import Message from '@/models/Message';
 import Skill from '@/models/Skill';
 import Notification from '@/models/Notification';
 
+interface BlogStatsResult {
+  _id: string;
+  title: string;
+  views: number;
+  likes: number;
+  comments: number;
+  score: number;
+}
+
 export async function GET() {
   try {
     await connectDB();
@@ -79,7 +88,7 @@ export async function GET() {
           ]
         }
       }
-    ]);
+    ]) as [{ counts: any[], trending: BlogStatsResult[] }];
 
     // Get project stats with active projects
     const projectStats = await Project.aggregate([

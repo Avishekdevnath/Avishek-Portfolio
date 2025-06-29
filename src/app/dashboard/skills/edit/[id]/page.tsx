@@ -6,7 +6,17 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import IconSelector from '@/components/IconSelector';
 
-const CATEGORIES = ['Frontend', 'Backend', 'Database', 'DevOps', 'Tools', 'Other'] as const;
+const CATEGORIES = [
+  'Core Languages',
+  'Front End',
+  'Back End',
+  'Frameworks',
+  'Tools',
+  'Graphic Design',
+  'Video Editing',
+  'Office & Productivity',
+  'Language'
+] as const;
 
 interface SkillFormData {
   name: string;
@@ -26,7 +36,7 @@ export default function EditSkillPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<SkillFormData>({
     name: '',
-    category: 'Frontend',
+    category: 'Front End',
     proficiency: 3,
     icon: '',
     iconSet: '',

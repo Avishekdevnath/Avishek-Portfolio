@@ -1,15 +1,13 @@
+"use client";
+
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
 import { toast } from 'react-hot-toast';
 import { FiUpload, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
 import { uploadImage } from '@/lib/cloudinary';
-
-// Import rich text editor dynamically
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
-import './quill.css';
+import { FaSave, FaTimes } from 'react-icons/fa';
+import DraftEditor from '../shared/DraftEditor';
 
 const CATEGORIES = [
   'Web Development',
@@ -197,360 +195,428 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
 
       const missingFields = Object.entries(requiredFields)
         .filter(([key, label]) => {
-          if (key === 'technologies') return !formData.technologies.some(tech => tech.name.trim());
-          if (key === 'repositories') return !formData.repositories.some(repo => repo.url.trim() && repo.type);
+          if (key === 'technologies') return formData.technologies.length === 0;
+          if (key === 'repositories') return formData.repositories.length === 0;
           return !formData[key as keyof typeof formData];
         })
         .map(([_, label]) => label);
 
       if (missingFields.length > 0) {
-        throw new Error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+        toast.error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+        return;
       }
 
-      // Filter out empty items from arrays
+      // Prepare data for submission
       const projectData = {
         ...formData,
-        technologies: formData.technologies.filter(tech => tech.name.trim()),
-        repositories: formData.repositories.filter(repo => repo.url.trim() && repo.type).map(repo => ({
-          name: repo.name || repo.type,
-          url: repo.url,
-          type: repo.type
-        })),
-        demoUrls: formData.demoUrls.filter(demo => demo.url.trim()).map(demo => ({
-          name: demo.name || 'Demo',
-          url: demo.url
-        }))
+        technologies: formData.technologies.filter(tech => tech.name.trim() !== ''),
+        repositories: formData.repositories.filter(repo => repo.name.trim() !== '' && repo.url.trim() !== ''),
+        demoUrls: formData.demoUrls.filter(demo => demo.name.trim() !== '' && demo.url.trim() !== '')
       };
 
-      // Send request
-      const response = await fetch(`/api/projects${isEdit && initialData?._id ? `/${initialData._id}` : ''}`, {
+      // Make API request
+      const url = isEdit && initialData?._id
+        ? `/api/projects/${initialData._id}`
+        : '/api/projects';
+
+      const response = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
       });
 
       const data = await response.json();
-      if (!data.success) throw new Error(data.error || data.details?.join(', ') || 'Failed to save project');
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save project');
+      }
 
       toast.success(isEdit ? 'Project updated successfully' : 'Project created successfully');
       router.push('/dashboard/projects');
       router.refresh();
+
     } catch (error) {
-      console.error('Error saving project:', error);
+      console.error('Submit error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save project');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Handle image removal
+  const handleRemoveImage = useCallback(async () => {
+    if (!formData.imagePublicId) return;
+
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(`/api/upload?public_id=${formData.imagePublicId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || 'Failed to delete image');
+
+      setFormData(prev => ({
+        ...prev,
+        image: '',
+        imagePublicId: '',
+      }));
+      setImagePreview('');
+      setImageFile(null);
+
+      toast.success('Image removed successfully');
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete image');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [formData.imagePublicId]);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Basic Information */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Basic Information</h3>
-        
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium">Title</label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={e => handleChange('title', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-              required
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto">
+      {/* Title */}
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          Title *
+        </label>
+        <input
+          type="text"
+          id="title"
+          value={formData.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          placeholder="Enter project title"
+        />
+      </div>
 
-          <div>
-            <label className="block text-sm font-medium">Category</label>
-            <select
-              value={formData.category}
-              onChange={e => handleChange('category', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-              required
-            >
-              {CATEGORIES.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
+      {/* Short Description */}
+      <div>
+        <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700">
+          Short Description *
+        </label>
+        <input
+          type="text"
+          id="shortDescription"
+          value={formData.shortDescription}
+          onChange={(e) => handleChange('shortDescription', e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          placeholder="Brief description for project cards"
+        />
+      </div>
 
-          <div>
-            <label className="block text-sm font-medium">Completion Date</label>
-            <input
-              type="date"
-              value={formData.completionDate}
-              onChange={e => handleChange('completionDate', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-              required
-            />
-          </div>
+      {/* Full Description */}
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+          Full Description *
+        </label>
+        <DraftEditor
+          value={formData.description}
+          onChange={(value) => handleChange('description', value)}
+          placeholder="Enter detailed project description"
+          className="min-h-[300px]"
+        />
+      </div>
 
-          <div>
-            <label className="block text-sm font-medium">Status</label>
-            <select
-              value={formData.status}
-              onChange={e => handleChange('status', e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
+      {/* Category */}
+      <div>
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+          Category *
+        </label>
+        <select
+          id="category"
+          value={formData.category}
+          onChange={(e) => handleChange('category', e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+        >
+          {CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Technologies */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Technologies *
+          </label>
+          <button
+            type="button"
+            onClick={() => handleAddArrayItem('technologies')}
+            className="text-purple-600 hover:text-purple-700"
+          >
+            <FiPlus className="w-5 h-5" />
+          </button>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium">Description</label>
-          <ReactQuill
-            value={formData.description}
-            onChange={value => handleChange('description', value)}
-            className="mt-1"
-          />
+        <div className="space-y-4">
+          {formData.technologies.map((tech, index) => (
+            <div key={index} className="flex gap-4 items-start">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={tech.name}
+                  onChange={(e) => handleArrayFieldChange('technologies', index, 'name', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  placeholder="Technology name"
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={tech.icon || ''}
+                  onChange={(e) => handleArrayFieldChange('technologies', index, 'icon', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  placeholder="Icon URL (optional)"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveArrayItem('technologies', index)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <FiMinus className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium">Short Description</label>
-          <textarea
-            value={formData.shortDescription}
-            onChange={e => handleChange('shortDescription', e.target.value)}
-            rows={2}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-            required
-          />
+      {/* Repositories */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Repositories *
+          </label>
+          <button
+            type="button"
+            onClick={() => handleAddArrayItem('repositories')}
+            className="text-purple-600 hover:text-purple-700"
+          >
+            <FiPlus className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          {formData.repositories.map((repo, index) => (
+            <div key={index} className="flex gap-4 items-start">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={repo.name}
+                  onChange={(e) => handleArrayFieldChange('repositories', index, 'name', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  placeholder="Repository name"
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={repo.url}
+                  onChange={(e) => handleArrayFieldChange('repositories', index, 'url', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  placeholder="Repository URL"
+                />
+              </div>
+              <div className="w-40">
+                <select
+                  value={repo.type}
+                  onChange={(e) => handleArrayFieldChange('repositories', index, 'type', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                >
+                  {REPOSITORY_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveArrayItem('repositories', index)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <FiMinus className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Demo URLs */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Demo URLs
+          </label>
+          <button
+            type="button"
+            onClick={() => handleAddArrayItem('demoUrls')}
+            className="text-purple-600 hover:text-purple-700"
+          >
+            <FiPlus className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          {formData.demoUrls.map((demo, index) => (
+            <div key={index} className="flex gap-4 items-start">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={demo.name}
+                  onChange={(e) => handleArrayFieldChange('demoUrls', index, 'name', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  placeholder="Demo name"
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={demo.url}
+                  onChange={(e) => handleArrayFieldChange('demoUrls', index, 'url', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  placeholder="Demo URL"
+                />
+              </div>
+              <div className="w-40">
+                <select
+                  value={demo.type}
+                  onChange={(e) => handleArrayFieldChange('demoUrls', index, 'type', e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                >
+                  {DEMO_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveArrayItem('demoUrls', index)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <FiMinus className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Project Image */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Project Image</h3>
-        
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Project Image *
+        </label>
         <div className="flex items-center gap-4">
-          <div className="relative h-32 w-32 overflow-hidden rounded-lg bg-gray-100">
-            {imagePreview && (
+          <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
+            {imagePreview ? (
               <Image
                 src={imagePreview}
                 alt="Project preview"
                 fill
                 className="object-cover"
               />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                <span className="text-gray-400">No image</span>
+              </div>
             )}
           </div>
-          
-          <div className="flex-1">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-lg file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-            />
-            <p className="mt-2 text-sm text-gray-500">
-              {isLoading ? 'Uploading...' : 'Upload a project image (required)'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Technologies */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Technologies</h3>
-        
-        {formData.technologies.map((tech, index) => (
-          <div key={index} className="flex gap-4">
-            <div className="flex-1">
+          <div className="flex flex-col gap-2">
+            <label className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+              <span className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <FiUpload className="w-5 h-5 mr-2" />
+                Upload Image
+              </span>
               <input
-                type="text"
-                value={tech.name}
-                onChange={e => handleArrayFieldChange('technologies', index, 'name', e.target.value)}
-                placeholder="Technology name"
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
+                type="file"
+                className="sr-only"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={isLoading}
               />
-            </div>
-            <div className="flex-1">
-              <input
-                type="text"
-                value={tech.icon || ''}
-                onChange={e => handleArrayFieldChange('technologies', index, 'icon', e.target.value)}
-                placeholder="Icon URL (optional)"
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => handleRemoveArrayItem('technologies', index)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <FiTrash2 className="h-5 w-5" />
-            </button>
-          </div>
-        ))}
-        
-        <button
-          type="button"
-          onClick={() => handleAddArrayItem('technologies')}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-        >
-          <FiPlus className="h-4 w-4" />
-          Add Technology
-        </button>
-      </div>
-
-      {/* Repositories */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Repositories</h3>
-        
-        {formData.repositories.map((repo, index) => (
-          <div key={index} className="flex gap-4">
-            <div className="w-32">
-              <select
-                value={repo.type}
-                onChange={e => handleArrayFieldChange('repositories', index, 'type', e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
+            </label>
+            {imagePreview && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                disabled={isLoading}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-gray-50"
               >
-                {REPOSITORY_TYPES.map(type => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1">
-              <input
-                type="url"
-                value={repo.url}
-                onChange={e => handleArrayFieldChange('repositories', index, 'url', e.target.value)}
-                placeholder="Repository URL"
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-              />
-            </div>
-            <div className="flex-1">
-              <input
-                type="text"
-                value={repo.name}
-                onChange={e => handleArrayFieldChange('repositories', index, 'name', e.target.value)}
-                placeholder="Repository name (optional)"
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => handleRemoveArrayItem('repositories', index)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <FiTrash2 className="h-5 w-5" />
-            </button>
+                <FiTrash2 className="w-5 h-5 mr-2" />
+                Remove Image
+              </button>
+            )}
           </div>
-        ))}
-        
-        <button
-          type="button"
-          onClick={() => handleAddArrayItem('repositories')}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-        >
-          <FiPlus className="h-4 w-4" />
-          Add Repository
-        </button>
-      </div>
-
-      {/* Demo URLs */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Demo URLs</h3>
-        
-        {formData.demoUrls.map((demo, index) => (
-          <div key={index} className="flex gap-4">
-            <div className="w-32">
-              <select
-                value={demo.type}
-                onChange={e => handleArrayFieldChange('demoUrls', index, 'type', e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-              >
-                {DEMO_TYPES.map(type => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1">
-              <input
-                type="url"
-                value={demo.url}
-                onChange={e => handleArrayFieldChange('demoUrls', index, 'url', e.target.value)}
-                placeholder="Demo URL"
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-              />
-            </div>
-            <div className="flex-1">
-              <input
-                type="text"
-                value={demo.name}
-                onChange={e => handleArrayFieldChange('demoUrls', index, 'name', e.target.value)}
-                placeholder="Demo name (optional)"
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => handleRemoveArrayItem('demoUrls', index)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <FiTrash2 className="h-5 w-5" />
-            </button>
-          </div>
-        ))}
-        
-        <button
-          type="button"
-          onClick={() => handleAddArrayItem('demoUrls')}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
-        >
-          <FiPlus className="h-4 w-4" />
-          Add Demo URL
-        </button>
-      </div>
-
-      {/* Featured and Status Toggle */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Featured Toggle */}
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="featured"
-            checked={formData.featured}
-            onChange={(e) => handleChange('featured', e.target.checked)}
-            className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-          />
-          <label htmlFor="featured" className="text-sm font-medium text-gray-700">
-            Feature this project
-          </label>
-        </div>
-
-        {/* Status Toggle */}
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="status"
-            checked={formData.status === 'published'}
-            onChange={(e) => handleChange('status', e.target.checked ? 'published' : 'draft')}
-            className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-          />
-          <label htmlFor="status" className="text-sm font-medium text-gray-700">
-            Publish this project
-          </label>
-          <span className="ml-2 text-sm text-gray-500">
-            ({formData.status === 'published' ? 'Published' : 'Draft'})
-          </span>
         </div>
       </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-end">
+      {/* Completion Date */}
+      <div>
+        <label htmlFor="completionDate" className="block text-sm font-medium text-gray-700">
+          Completion Date *
+        </label>
+        <input
+          type="date"
+          id="completionDate"
+          value={formData.completionDate}
+          onChange={(e) => handleChange('completionDate', e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+        />
+      </div>
+
+      {/* Featured Project */}
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="featured"
+          checked={formData.featured}
+          onChange={(e) => handleChange('featured', e.target.checked)}
+          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+        />
+        <label htmlFor="featured" className="ml-2 block text-sm text-gray-900">
+          Featured Project
+        </label>
+      </div>
+
+      {/* Project Status */}
+      <div>
+        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+          Status
+        </label>
+        <select
+          id="status"
+          value={formData.status}
+          onChange={(e) => handleChange('status', e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+        >
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
+      </div>
+
+      {/* Form Actions */}
+      <div className="flex justify-end gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <FaTimes className="w-4 h-4 mr-2" />
+          Cancel
+        </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
         >
-          {isLoading ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update Project' : 'Create Project')}
+          <FaSave className="w-4 h-4 mr-2" />
+          {isLoading ? 'Saving...' : isEdit ? 'Update Project' : 'Create Project'}
         </button>
       </div>
     </form>

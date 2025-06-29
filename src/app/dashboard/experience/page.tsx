@@ -3,39 +3,15 @@
 import { useState, useEffect } from 'react';
 import { PlusCircle, Pencil, Trash2, Building2, Calendar, MapPin, Star, Briefcase, Users, TrendingUp, Award, Eye, X, User, Globe, DollarSign, Clock, Code, Target, CheckCircle } from 'lucide-react';
 import ExperienceForm from '@/components/dashboard/ExperienceForm';
-
-interface WorkExperience {
-  _id: string;
-  type: 'work';
-  title: string;
-  organization: string;
-  location: string;
-  startDate: string;
-  endDate?: string;
-  isCurrent: boolean;
-  description: string;
-  featured: boolean;
-  order: number;
-  status: 'draft' | 'published';
-  // Work-specific (support both old and new)
-  position?: string; // Old field
-  jobTitle?: string; // New field
-  level?: string; // New field
-  company?: string;
-  employmentType?: string;
-  technologies?: string[];
-  achievements?: string[];
-  responsibilities?: string[];
-  website?: string;
-  companySize?: string;
-}
+import DraftViewer from '@/components/shared/DraftViewer';
+import { IWorkExperience, ExperienceApiResponse, ExperienceListApiResponse } from '@/types/experience';
 
 // Work Experience Details Modal Component
 function WorkExperienceDetailsModal({ 
   experience, 
   onClose 
 }: { 
-  experience: WorkExperience; 
+  experience: IWorkExperience; 
   onClose: () => void; 
 }) {
   const formatDate = (date: string) => {
@@ -47,8 +23,8 @@ function WorkExperienceDetailsModal({
   };
 
   const getDateRange = () => {
-    const start = formatDate(experience.startDate);
-    const end = experience.isCurrent ? 'Present' : (experience.endDate ? formatDate(experience.endDate) : 'Present');
+    const start = formatDate(experience.startDate.toString());
+    const end = experience.isCurrent ? 'Present' : (experience.endDate ? formatDate(experience.endDate.toString()) : 'Present');
     return `${start} - ${end}`;
   };
 
@@ -208,7 +184,10 @@ function WorkExperienceDetailsModal({
               <Briefcase size={20} />
               Job Description
             </h3>
-            <p className="text-gray-700 leading-relaxed">{experience.description}</p>
+            <DraftViewer 
+              content={experience.description || ''} 
+              className="text-gray-700 leading-relaxed"
+            />
           </div>
 
           {/* Technologies */}
@@ -323,13 +302,16 @@ function WorkExperienceCard({
   onDelete,
   onView 
 }: {
-  experience: WorkExperience;
-  onEdit: (exp: WorkExperience) => void;
+  experience: IWorkExperience;
+  onEdit: (exp: IWorkExperience) => void;
   onDelete: (id: string) => void;
-  onView: (exp: WorkExperience) => void;
+  onView: (exp: IWorkExperience) => void;
 }) {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const formatDate = (date: string | Date) => {
+    return new Date(date).toLocaleDateString('en-US', { 
+      month: 'short',
+      year: 'numeric' 
+    });
   };
 
   const getDateRange = () => {
@@ -337,21 +319,17 @@ function WorkExperienceCard({
     const end = experience.isCurrent ? 'Present' : (experience.endDate ? formatDate(experience.endDate) : 'Present');
     return `${start} - ${end}`;
   };
-  
-  // Handle both new and old data structures for title display
+
   const getDisplayTitle = () => {
-    // Try new structure first (level + jobTitle)
     if (experience.jobTitle) {
       return experience.level ? `${experience.level} ${experience.jobTitle}` : experience.jobTitle;
     }
-    // Fallback to old structure (position)
     if (experience.position) {
       return experience.position;
     }
-    // Final fallback to title
     return experience.title;
   };
-  
+
   const title = getDisplayTitle();
   const subtitle = experience.company || experience.organization;
 
@@ -390,7 +368,12 @@ function WorkExperienceCard({
                 <span className="capitalize">{experience.employmentType.replace('-', ' ')}</span>
               )}
             </div>
-            <p className="text-gray-600 text-sm line-clamp-2">{experience.description}</p>
+            <div className="mt-3">
+              <DraftViewer 
+                content={experience.description || ''} 
+                className="text-gray-600 text-sm line-clamp-2"
+              />
+            </div>
             
             {/* Technologies */}
             {experience.technologies && experience.technologies.length > 0 && (
@@ -431,8 +414,9 @@ function WorkExperienceCard({
             <Pencil size={16} />
           </button>
           <button 
-            onClick={() => onDelete(experience._id)}
-            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            onClick={() => experience._id && onDelete(experience._id)}
+            disabled={!experience._id}
+            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
             title="Delete"
           >
             <Trash2 size={16} />
@@ -444,39 +428,26 @@ function WorkExperienceCard({
 }
 
 export default function ExperiencePage() {
-  const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>([]);
+  const [experiences, setExperiences] = useState<IWorkExperience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState<{
-    show: boolean;
-    mode: 'create' | 'edit';
-    data?: WorkExperience;
-  }>({ show: false, mode: 'create' });
-  const [viewingExperience, setViewingExperience] = useState<WorkExperience | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedExperience, setSelectedExperience] = useState<IWorkExperience | null>(null);
+  const [viewingExperience, setViewingExperience] = useState<IWorkExperience | null>(null);
 
   const fetchWorkExperiences = async () => {
     try {
-      setLoading(true);
-      console.log('💼 Fetching work experience data...');
-      
       const response = await fetch('/api/experience/work?status=all');
-      console.log('📡 Work Experience API Response Status:', response.status);
-      
-      const data = await response.json();
-      console.log('📊 Work Experience API Response Data:', data);
+      const result: ExperienceListApiResponse = await response.json();
 
-      if (data.success) {
-        const workData = data.data.workExperiences || [];
-        console.log('✅ Work experience entries found:', workData.length);
-        console.log('💼 Work experience data:', workData);
-        setWorkExperiences(workData);
-      } else {
-        console.error('❌ API returned error:', data.error);
-        setError(data.error || 'Failed to fetch work experiences');
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch experiences');
       }
-    } catch (error) {
-      console.error('💥 Error fetching work experiences:', error);
-      setError('Failed to fetch work experiences');
+
+      setExperiences(result.data?.experiences as IWorkExperience[] || []);
+    } catch (err) {
+      console.error('Error fetching work experiences:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch experiences');
     } finally {
       setLoading(false);
     }
@@ -487,41 +458,42 @@ export default function ExperiencePage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this work experience?')) return;
+    if (!confirm('Are you sure you want to delete this experience?')) {
+      return;
+    }
 
     try {
       const response = await fetch(`/api/experience/work/${id}`, {
         method: 'DELETE',
       });
 
-      const data = await response.json();
-      
-      if (data.success) {
-        fetchWorkExperiences();
-      } else {
-        alert('Failed to delete work experience');
+      const result: ExperienceApiResponse = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete experience');
       }
-    } catch (error) {
-      console.error('Error deleting work experience:', error);
-      alert('Failed to delete work experience');
+
+      // Remove the deleted experience from state
+      setExperiences(prev => prev.filter(exp => exp._id !== id));
+    } catch (err) {
+      console.error('Error deleting experience:', err);
+      alert(err instanceof Error ? err.message : 'Failed to delete experience');
     }
   };
 
-  const handleEdit = (experience: WorkExperience) => {
-    setShowForm({
-      show: true,
-      mode: 'edit',
-      data: experience
-    });
+  const handleEdit = (experience: IWorkExperience) => {
+    setSelectedExperience(experience);
+    setShowForm(true);
   };
 
-  const handleView = (experience: WorkExperience) => {
+  const handleView = (experience: IWorkExperience) => {
     setViewingExperience(experience);
   };
 
   const handleCloseForm = () => {
-    setShowForm({ show: false, mode: 'create' });
-    fetchWorkExperiences();
+    setShowForm(false);
+    setSelectedExperience(null);
+    fetchWorkExperiences(); // Refresh the list
   };
 
   const handleCloseView = () => {
@@ -529,138 +501,147 @@ export default function ExperiencePage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-gray-600">Loading work experiences...</div>
-      </div>
-    );
+    return <div className="p-8 text-center">Loading...</div>;
   }
 
-  if (showForm.show) {
-    return (
-      <ExperienceForm
-        type="work"
-        mode={showForm.mode}
-        initialData={showForm.data}
-        onClose={handleCloseForm}
-      />
-    );
+  if (error) {
+    return <div className="p-8 text-center text-red-600">{error}</div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Work Experience Management</h1>
-          <p className="text-gray-600 mt-1">Manage your professional work experience and career history</p>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Work Experience</h1>
         <button
-          onClick={() => setShowForm({ show: true, mode: 'create' })}
+          onClick={() => {
+            setSelectedExperience(null);
+            setShowForm(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <PlusCircle size={20} />
-          Add Work Experience
+          Add Experience
         </button>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Briefcase className="text-blue-600" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Experiences</p>
-              <p className="text-2xl font-bold text-gray-900">{workExperiences.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="text-green-600" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Published</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {workExperiences.filter(exp => exp.status === 'published').length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Star className="text-yellow-600" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Featured</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {workExperiences.filter(exp => exp.featured).length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Award className="text-purple-600" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Current Role</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {workExperiences.filter(exp => exp.isCurrent).length}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Work Experience List */}
-      {workExperiences.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
-          <Building2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No work experiences found</h3>
-          <p className="text-gray-600 mb-6">Get started by adding your first work experience.</p>
-          <button
-            onClick={() => setShowForm({ show: true, mode: 'create' })}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <PlusCircle size={20} />
-            Add Work Experience
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {workExperiences.map((experience) => (
-            <WorkExperienceCard
-              key={experience._id}
-              experience={experience}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onView={handleView}
+      {/* Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <ExperienceForm
+              type="work"
+              mode={selectedExperience ? 'edit' : 'create'}
+              initialData={selectedExperience || undefined}
+              onClose={handleCloseForm}
             />
-          ))}
+          </div>
         </div>
       )}
 
-      {/* Work Experience Details Modal */}
+      {/* View Modal */}
       {viewingExperience && (
         <WorkExperienceDetailsModal
           experience={viewingExperience}
           onClose={handleCloseView}
         />
+      )}
+
+      {/* Content */}
+      {loading ? (
+        <div className="p-8 text-center">Loading...</div>
+      ) : error ? (
+        <div className="p-8 text-center text-red-600">{error}</div>
+      ) : (
+        <>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Briefcase className="text-blue-600" size={20} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Experiences</p>
+                  <p className="text-2xl font-bold text-gray-900">{experiences.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <TrendingUp className="text-green-600" size={20} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Published</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {experiences.filter(exp => exp.status === 'published').length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Star className="text-yellow-600" size={20} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Featured</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {experiences.filter(exp => exp.featured).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Award className="text-purple-600" size={20} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Current Role</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {experiences.filter(exp => exp.isCurrent).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Work Experience List */}
+          {experiences.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow-sm border">
+              <Building2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No work experiences found</h3>
+              <p className="text-gray-600 mb-6">Get started by adding your first work experience.</p>
+              <button
+                onClick={() => {
+                  setSelectedExperience(null);
+                  setShowForm(true);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <PlusCircle size={20} />
+                Add Experience
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {experiences.map((experience) => (
+                <WorkExperienceCard
+                  key={experience._id}
+                  experience={experience}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -9,53 +9,25 @@ import {
   FaPaintBrush,
   FaGlobe,
   FaGraduationCap,
-  FaFilter,
   FaChevronDown,
-  FaChevronUp,
-  FaDatabase,
-  FaServer,
-  FaTools,
+  FaChevronUp
 } from "react-icons/fa";
 import { programmingSkills, softwareSkills, languages } from "../../data/data";
-import ProjectCard from "../../components/ProjectCard";
+import ProjectGrid from "@/components/ProjectGrid";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import ExperienceSection from "@/components/ExperienceSection";
+import { Project, ProjectListApiResponse } from '@/types/dashboard';
 
-interface Technology {
-  name: string;
-  icon?: string;
+interface SkillProgressBarProps {
+  skill: { name: string; level: string };
+  delay?: number;
 }
 
-interface Repository {
-  name: string;
-  url: string;
-  type: 'github' | 'gitlab' | 'bitbucket' | 'other';
-}
-
-interface DemoURL {
-  name: string;
-  url: string;
-  type: 'live' | 'staging' | 'demo' | 'documentation';
-}
-
-interface Project {
-  _id: string;
-  title: string;
-  description: string;
-  shortDescription: string;
-  category: string;
-  technologies: Technology[];
-  repositories: Repository[];
-  demoUrls: DemoURL[];
-  image: string;
-  imagePublicId: string;
-  completionDate: Date;
-  featured: boolean;
-  status: 'draft' | 'published';
-  order: number;
-  createdAt: Date;
-  updatedAt: Date;
+interface AnimatedCounterProps {
+  end: number;
+  duration?: number;
+  suffix?: string;
 }
 
 // Animated Counter Component
@@ -63,11 +35,7 @@ function AnimatedCounter({
   end,
   duration = 2000,
   suffix = "",
-}: {
-  end: number;
-  duration?: number;
-  suffix?: string;
-}) {
+}: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
@@ -118,10 +86,7 @@ function AnimatedCounter({
 function SkillProgressBar({
   skill,
   delay = 0,
-}: {
-  skill: { name: string; level: string };
-  delay?: number;
-}) {
+}: SkillProgressBarProps) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -184,49 +149,37 @@ export default function About() {
   const [activeSkillTab, setActiveSkillTab] = useState<
     "programming" | "software" | "languages"
   >("programming");
-  const [projectFilter, setProjectFilter] = useState<string>("all");
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set()
   );
-  const [isScrolled, setIsScrolled] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const profileImage = "/assets/home/profile-img.jpg";
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/projects');
-        const data = await response.json();
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/projects?status=published');
+      const data: ProjectListApiResponse = await response.json();
 
-        if (data.success) {
-          setProjects(data.data.projects);
-        } else {
-          throw new Error(data.error || 'Failed to fetch projects');
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      } finally {
-        setLoading(false);
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch projects');
       }
-    };
 
+      setProjects(data.data?.projects || []);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch projects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProjects();
   }, []);
-
-  // Get unique technologies for project filtering
-  const allTechnologies = Array.from(
-    new Set(projects.flatMap((project) => project.technologies.map(tech => tech.name)))
-  );
-
-  const filteredProjects =
-    projectFilter === "all"
-      ? projects
-      : projects.filter((project) =>
-          project.technologies.some(tech => tech.name === projectFilter)
-        );
 
   const toggleSection = (section: string) => {
     const newExpanded = new Set(expandedSections);
@@ -237,15 +190,6 @@ export default function About() {
     }
     setExpandedSections(newExpanded);
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -370,10 +314,23 @@ export default function About() {
               </div>
             </section>
 
+            {/* Dynamic Experience Section */}
+            <section className="py-12 sm:py-16 bg-white">
+              <ExperienceSection 
+                type="both"
+                variant="compact"
+                showFeaturedOnly={true}
+                limit={6}
+                title="Experience & Education"
+                subtitle="Professional journey and academic background"
+                className="bg-transparent"
+              />
+            </section>
+
             {/* Skills Section */}
             <section
               id="skills"
-              className="py-12 sm:py-16 flex flex-col items-center bg-white"
+              className="py-12 sm:py-16 flex flex-col items-center bg-gray-100"
             >
               <div className="text-center mb-8 sm:mb-12">
                 <h4 className="text-sm sm:text-md text-gray-600">Explore My</h4>
@@ -431,7 +388,7 @@ export default function About() {
                   {activeSkillTab === "programming" && (
                     <div className="space-y-8">
                       {Object.entries(programmingSkills).map(
-                        ([category, skills], index) => (
+                        ([category, skills]) => (
                           <div key={category} className="space-y-4">
                             <button
                               onClick={() => toggleSection(category)}
@@ -513,19 +470,6 @@ export default function About() {
               </div>
             </section>
 
-            {/* Dynamic Experience Section */}
-            <section className="py-12 sm:py-16 bg-white">
-              <ExperienceSection 
-                type="both"
-                variant="compact"
-                showFeaturedOnly={true}
-                limit={6}
-                title="Experience & Education"
-                subtitle="Professional journey and academic background"
-                className="bg-transparent"
-              />
-            </section>
-
             {/* Projects Section */}
             <section
               id="projects"
@@ -538,58 +482,22 @@ export default function About() {
                 </h2>
               </div>
 
-              {/* Project Filter */}
-              <div className="mb-8 flex flex-wrap justify-center gap-2">
-                <button
-                  onClick={() => setProjectFilter("all")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    projectFilter === "all"
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <FaFilter className="inline mr-2" />
-                  All Projects
-                </button>
-                {allTechnologies.slice(0, 6).map((tech) => (
-                  <button
-                    key={tech}
-                    onClick={() => setProjectFilter(tech)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                      projectFilter === tech
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "bg-white text-gray-600 hover:bg-gray-100"
-                    }`}
-                  >
-                    {tech}
-                  </button>
-                ))}
-              </div>
-
               <div className="w-full max-w-[90%] sm:max-w-6xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4">
-                  {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  ) : filteredProjects.length > 0 ? (
-                    filteredProjects.map((project, index) => (
-                      <div
-                        key={project._id}
-                        className="animate-fade-in"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        <ProjectCard project={project} />
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-gray-500 text-lg">
-                        No projects found with the selected technology.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-gray-600">Loading projects...</p>
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <p className="text-red-500">{error}</p>
+                  </div>
+                ) : (
+                  <ProjectGrid 
+                    projects={projects}
+                    defaultStatus="published"
+                  />
+                )}
               </div>
             </section>
 

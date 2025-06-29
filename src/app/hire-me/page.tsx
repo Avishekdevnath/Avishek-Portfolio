@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import ExperienceSection from "@/components/ExperienceSection";
+import Stats from "@/components/pages/home/Stats";
 import {
     FaCode,
     FaUsers,
@@ -64,6 +65,11 @@ export default function HireMe() {
                         </Link>
                     </div>
 
+                    {/* Stats Section */}
+                    <div className="mb-16">
+                        <Stats />
+                    </div>
+
                     {/* Key Skills */}
                     <div className="mb-16">
                         <h3 className="text-3xl font-semibold text-gray-800 text-center mb-8">
@@ -98,8 +104,21 @@ export default function HireMe() {
                         />
                     </div>
 
+                    {/* Education Section */}
+                    <div className="mb-16">
+                        <ExperienceSection 
+                            type="education"
+                            variant="detailed"
+                            showFeaturedOnly={false}
+                            limit={5}
+                            title="Education"
+                            subtitle="My academic background and qualifications"
+                            className="bg-transparent py-0"
+                        />
+                    </div>
+
                     {/* Employment Inquiry Form */}
-                    <div className="bg-white p-6 rounded-xl shadow-md">
+                    <div className="bg-white p-8 rounded-xl shadow-md">
                         <h3 className="text-3xl font-semibold text-gray-800 text-center mb-8">
                             Interested in Hiring Me?
                         </h3>
@@ -110,7 +129,7 @@ export default function HireMe() {
                                     htmlFor="company"
                                     className="flex items-center space-x-2 text-lg font-medium text-gray-700"
                                 >
-                                    <FaBuilding />
+                                    <FaBuilding className="text-gray-500" />
                                     <span>Company Name</span>
                                 </label>
                                 <input
@@ -128,7 +147,7 @@ export default function HireMe() {
                                     htmlFor="email"
                                     className="flex items-center space-x-2 text-lg font-medium text-gray-700"
                                 >
-                                    <FaEnvelope />
+                                    <FaEnvelope className="text-gray-500" />
                                     <span>Email</span>
                                 </label>
                                 <input
@@ -146,7 +165,7 @@ export default function HireMe() {
                                     htmlFor="role"
                                     className="flex items-center space-x-2 text-lg font-medium text-gray-700"
                                 >
-                                    <FaTag />
+                                    <FaTag className="text-gray-500" />
                                     <span>Role</span>
                                 </label>
                                 <input
@@ -164,7 +183,7 @@ export default function HireMe() {
                                     htmlFor="message"
                                     className="flex items-center space-x-2 text-lg font-medium text-gray-700"
                                 >
-                                    <FaComment />
+                                    <FaComment className="text-gray-500" />
                                     <span>Message</span>
                                 </label>
                                 <textarea

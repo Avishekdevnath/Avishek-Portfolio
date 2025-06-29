@@ -3,42 +3,46 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import Toast from '@/components/shared/Toast';
 
-interface ToastOptions {
+export type ToastStatus = 'success' | 'error' | 'info';
+
+export interface ToastProps {
   title: string;
   description?: string;
-  status: 'success' | 'error' | 'info';
+  status: ToastStatus;
   duration?: number;
-  isClosable?: boolean;
 }
 
 interface ToastContextType {
-  toast: (options: ToastOptions) => void;
+  showToast: (props: ToastProps) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<(ToastOptions & { id: number })[]>([]);
+  const [toast, setToast] = useState<ToastProps | null>(null);
 
-  const toast = useCallback((options: ToastOptions) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { ...options, id }]);
-  }, []);
-
-  const removeToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  const showToast = useCallback((props: ToastProps) => {
+    setToast(props);
+    
+    // Auto-hide toast after duration
+    if (props.duration !== 0) {
+      const duration = props.duration || 5000;
+      setTimeout(() => {
+        setToast(null);
+      }, duration);
+    }
   }, []);
 
   return (
-    <ToastContext.Provider value={{ toast }}>
+    <ToastContext.Provider value={{ showToast }}>
       {children}
-      {toasts.map((toast) => (
+      {toast && (
         <Toast
-          key={toast.id}
           {...toast}
-          onClose={() => removeToast(toast.id)}
+          onClose={() => setToast(null)}
+          isClosable={true}
         />
-      ))}
+      )}
     </ToastContext.Provider>
   );
 }

@@ -1,4 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import {
+  ExperienceStatus,
+  EmploymentType,
+  ExperienceType,
+  IWorkExperience as IWorkExperienceType,
+  IEducation as IEducationType,
+  DraftContent
+} from '@/types/experience';
 
 // Base interface for common fields
 interface BaseExperience {
@@ -8,65 +16,52 @@ interface BaseExperience {
   startDate: Date;
   endDate?: Date;
   isCurrent: boolean;
-  description: string;
+  description: string | DraftContent;
   order: number;
   featured: boolean;
   status: 'draft' | 'published';
 }
 
-// Work Experience interface
-export interface IWorkExperience extends BaseExperience, Document {
-  type: 'work';
-  jobTitle?: string; // New field - main job title
-  level?: string; // New field - position level
-  position?: string; // Keep old field for backward compatibility
-  company: string;
-  employmentType: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
-  technologies: string[];
-  achievements: string[];
-  responsibilities: string[];
-  website?: string;
-  companySize?: string;
-}
+// Work Experience interface with Document
+export interface IWorkExperience extends Omit<IWorkExperienceType, '_id'>, Document {}
 
-// Education interface
-export interface IEducation extends BaseExperience, Document {
-  type: 'education';
-  degree: string;
-  institution: string;
-  fieldOfStudy: string;
-  gpa?: number;
-  maxGpa?: number;
-  activities: string[];
-  honors: string[];
-  coursework: string[];
-  thesis?: {
-    title: string;
-    description: string;
-    supervisor: string;
-  };
-}
+// Education interface with Document
+export interface IEducation extends Omit<IEducationType, '_id'>, Document {}
+
+// Validator for DraftContent
+const isDraftContent = (value: string | DraftContent) => {
+  if (typeof value === 'string') return true;
+  if (typeof value === 'object' && value !== null) {
+    return (
+      'blocks' in value &&
+      Array.isArray(value.blocks) &&
+      'entityMap' in value &&
+      typeof value.entityMap === 'object'
+    );
+  }
+  return false;
+};
 
 // Common schema fields
 const baseExperienceSchema = {
   title: {
     type: String,
-    required: [true, 'Title is required'],
+    required: true,
     trim: true,
   },
   organization: {
     type: String,
-    required: [true, 'Organization is required'],
+    required: true,
     trim: true,
   },
   location: {
     type: String,
-    required: [true, 'Location is required'],
+    required: true,
     trim: true,
   },
   startDate: {
     type: Date,
-    required: [true, 'Start date is required'],
+    required: true,
   },
   endDate: {
     type: Date,
@@ -77,9 +72,12 @@ const baseExperienceSchema = {
     default: false,
   },
   description: {
-    type: String,
-    required: [true, 'Description is required'],
-    maxlength: [1000, 'Description cannot exceed 1000 characters'],
+    type: Schema.Types.Mixed,
+    required: true,
+    validate: {
+      validator: isDraftContent,
+      message: 'Description must be either a string or a valid Draft.js content object'
+    }
   },
   order: {
     type: Number,
@@ -91,8 +89,13 @@ const baseExperienceSchema = {
   },
   status: {
     type: String,
-    enum: ['draft', 'published'],
+    enum: ['draft', 'published'] as ExperienceStatus[],
     default: 'published',
+  },
+  type: {
+    type: String,
+    enum: ['work', 'education'] as ExperienceType[],
+    required: true,
   },
 };
 
@@ -101,11 +104,12 @@ const workExperienceSchema = new Schema({
   ...baseExperienceSchema,
   type: {
     type: String,
-    default: 'work',
+    default: 'work' as ExperienceType,
     immutable: true,
   },
   jobTitle: {
     type: String,
+    required: true,
     trim: true,
   },
   level: {
@@ -118,13 +122,13 @@ const workExperienceSchema = new Schema({
   },
   company: {
     type: String,
-    required: [true, 'Company is required'],
+    required: true,
     trim: true,
   },
   employmentType: {
     type: String,
-    enum: ['full-time', 'part-time', 'contract', 'freelance', 'internship'],
-    required: [true, 'Employment type is required'],
+    enum: ['full-time', 'part-time', 'contract', 'freelance', 'internship'] as EmploymentType[],
+    required: true,
   },
   technologies: [{
     type: String,
@@ -148,6 +152,14 @@ const workExperienceSchema = new Schema({
   },
 }, {
   timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      ret._id = ret._id.toString();
+      if (ret.startDate) ret.startDate = ret.startDate.toISOString();
+      if (ret.endDate) ret.endDate = ret.endDate.toISOString();
+      return ret;
+    }
+  }
 });
 
 // Education Schema
@@ -155,22 +167,22 @@ const educationSchema = new Schema({
   ...baseExperienceSchema,
   type: {
     type: String,
-    default: 'education',
+    default: 'education' as ExperienceType,
     immutable: true,
   },
   degree: {
     type: String,
-    required: [true, 'Degree is required'],
+    required: true,
     trim: true,
   },
   institution: {
     type: String,
-    required: [true, 'Institution is required'],
+    required: true,
     trim: true,
   },
   fieldOfStudy: {
     type: String,
-    required: [true, 'Field of study is required'],
+    required: true,
     trim: true,
   },
   gpa: {
@@ -199,8 +211,11 @@ const educationSchema = new Schema({
       trim: true,
     },
     description: {
-      type: String,
-      trim: true,
+      type: Schema.Types.Mixed,
+      validate: {
+        validator: isDraftContent,
+        message: 'Thesis description must be either a string or a valid Draft.js content object'
+      }
     },
     supervisor: {
       type: String,
@@ -209,6 +224,14 @@ const educationSchema = new Schema({
   },
 }, {
   timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      ret._id = ret._id.toString();
+      if (ret.startDate) ret.startDate = ret.startDate.toISOString();
+      if (ret.endDate) ret.endDate = ret.endDate.toISOString();
+      return ret;
+    }
+  }
 });
 
 // Add indexes for better performance
@@ -237,9 +260,7 @@ educationSchema.virtual('dateRange').get(function() {
 workExperienceSchema.set('toJSON', { virtuals: true });
 educationSchema.set('toJSON', { virtuals: true });
 
-// Create models
-const WorkExperience = mongoose.models.WorkExperience || mongoose.model<IWorkExperience>('WorkExperience', workExperienceSchema);
-const Education = mongoose.models.Education || mongoose.model<IEducation>('Education', educationSchema);
-
-export { WorkExperience, Education };
+// Create and export the models
+export const WorkExperience = mongoose.models.WorkExperience || mongoose.model<IWorkExperience>('WorkExperience', workExperienceSchema);
+export const Education = mongoose.models.Education || mongoose.model<IEducation>('Education', educationSchema);
 export default { WorkExperience, Education }; 

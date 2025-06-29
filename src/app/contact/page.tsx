@@ -5,18 +5,9 @@ import { useState, useRef } from "react";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import { useToast } from "@/context/ToastContext";
-import {
-  FaEnvelope,
-  FaLinkedin,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaCopy,
-  FaGithub,
-  FaTwitter,
-} from "react-icons/fa";
-import { Send, User, Mail, MessageSquare, Clock } from "lucide-react";
+import { Send, User, Mail, MessageSquare } from "lucide-react";
+import ContactInfo from "@/components/shared/ContactInfo";
+import SocialLinks from "@/components/shared/SocialLinks";
 
 interface FormData {
   name: string;
@@ -33,7 +24,7 @@ interface FormErrors {
 }
 
 export default function Contact() {
-  const { toast } = useToast();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -46,60 +37,7 @@ export default function Contact() {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  const contactInfo = [
-    {
-      icon: <FaEnvelope />,
-      label: "Email",
-      value: "avishek@example.com",
-      link: "mailto:avishek@example.com",
-      copyable: true,
-    },
-    {
-      icon: <FaPhone />,
-      label: "Phone",
-      value: "+1 (555) 123-4567",
-      link: "tel:+15551234567",
-      copyable: true,
-    },
-    {
-      icon: <FaMapMarkerAlt />,
-      label: "Location",
-      value: "Dhaka, Bangladesh",
-      link: "#",
-      copyable: false,
-    },
-    {
-      icon: <Clock />,
-      label: "Response Time",
-      value: "Within 24 hours",
-      link: "#",
-      copyable: false,
-    },
-  ];
-
-  const socialLinks = [
-    {
-      icon: <FaLinkedin />,
-      label: "LinkedIn",
-      url: "https://www.linkedin.com/in/yourprofile",
-      color: "bg-orange-500 hover:bg-orange-600",
-    },
-    {
-      icon: <FaGithub />,
-      label: "GitHub",
-      url: "https://github.com/yourprofile",
-      color: "bg-gray-800 hover:bg-gray-900",
-    },
-    {
-      icon: <FaTwitter />,
-      label: "Twitter",
-      url: "https://twitter.com/yourprofile",
-      color: "bg-orange-400 hover:bg-orange-500",
-    },
-  ];
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -165,50 +103,31 @@ export default function Contact() {
       if (data.success) {
         setSubmitStatus("success");
         setFormData({ name: "", email: "", subject: "", message: "" });
-        toast({
+        showToast({
           title: "Message sent successfully!",
           description: "I'll get back to you as soon as possible.",
           status: "success",
-          duration: 5000,
-          isClosable: true,
+          duration: 5000
         });
       } else {
         throw new Error(data.error || 'Failed to send message');
       }
     } catch (error) {
       setSubmitStatus("error");
-      toast({
+      showToast({
         title: "Error sending message",
         description: error instanceof Error ? error.message : "Please try again later",
         status: "error",
-        duration: 5000,
-        isClosable: true,
+        duration: 5000
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const copyToClipboard = async (text: string, field: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedField(field);
-      setTimeout(() => setCopiedField(null), 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setErrors({});
-    setSubmitStatus("idle");
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 bg-opacity-10">
       <div className="pt-6">
-        {" "}
         <Header />
       </div>
 
@@ -242,273 +161,143 @@ export default function Contact() {
             </div>
 
             {/* Contact Info Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {contactInfo.map((info, index) => (
-                <div
-                  key={index}
-                  className="bg-white bg-opacity-80 backdrop-blur-sm p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 border border-orange-100"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-orange-500 text-xl">{info.icon}</div>
-                    {info.copyable && (
-                      <button
-                        onClick={() => copyToClipboard(info.value, info.label)}
-                        className="text-gray-400 hover:text-orange-500 transition-colors"
-                        title="Copy to clipboard"
-                      >
-                        {copiedField === info.label ? (
-                          <FaCheckCircle className="text-green-500" />
-                        ) : (
-                          <FaCopy />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    {info.label}
-                  </h3>
-                  <a
-                    href={info.link}
-                    className="text-gray-600 hover:text-orange-500 transition-colors"
-                  >
-                    {info.value}
-                  </a>
-                </div>
-              ))}
+            <div className="bg-white bg-opacity-80 backdrop-blur-sm p-8 rounded-xl shadow-sm">
+              <ContactInfo />
             </div>
 
             {/* Social Links */}
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Follow Me
-              </h3>
-              <div className="flex space-x-4">
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={index}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${social.color} text-white p-3 rounded-full transition-all duration-300 transform hover:scale-110 hover:shadow-lg opacity-90 hover:opacity-100`}
-                    title={social.label}
-                  >
-                    {social.icon}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Response Promise */}
-            <div className="bg-[#FFE4CC] text-[#FF8C00] bg-opacity-30  p-6 rounded-xl">
-              <div className="flex items-center mb-3">
-                <Clock className="mr-3" />
-                <h3 className="font-semibold">Quick Response Guarantee</h3>
-              </div>
-              <p className="text-gray-600">
-                I typically respond to all messages within 24 hours. For urgent
-                matters, feel free to call directly.
-              </p>
+            <div className="bg-white bg-opacity-80 backdrop-blur-sm p-8 rounded-xl shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Connect With Me</h3>
+              <SocialLinks showLabels />
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white bg-opacity-90 backdrop-blur-sm p-8 rounded-2xl shadow-md border border-orange-100">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Send a Message
-              </h2>
-              <p className="text-gray-600">
-                Fill out the form below and I'll get back to you soon.
-              </p>
-            </div>
-
-            {submitStatus === "success" && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
-                <FaCheckCircle className="text-green-500 mr-3" />
-                <div>
-                  <p className="text-green-800 font-medium">
-                    Message sent successfully!
-                  </p>
-                  <p className="text-green-600 text-sm">
-                    I'll get back to you within 24 hours.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {submitStatus === "error" && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-                <FaExclamationTriangle className="text-red-500 mr-3" />
-                <div>
-                  <p className="text-red-800 font-medium">
-                    Failed to send message
-                  </p>
-                  <p className="text-red-600 text-sm">
-                    Please try again or contact me directly.
-                  </p>
-                </div>
-              </div>
-            )}
-
+          <div className="bg-white bg-opacity-80 backdrop-blur-sm p-8 rounded-xl shadow-sm">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Send a Message</h2>
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-              {/* Name Field */}
               <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  <User className="inline w-4 h-4 mr-1" />
-                  Full Name
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Your Name
                 </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all ${
-                    errors.name ? "border-red-500 bg-red-50" : "border-gray-300"
-                  }`}
-                  placeholder="Enter your full name"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={`block w-full pl-10 pr-3 py-2 border ${
+                      errors.name ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    placeholder="John Doe"
+                  />
+                </div>
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <FaExclamationTriangle className="mr-1" />
-                    {errors.name}
-                  </p>
+                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
                 )}
               </div>
 
-              {/* Email Field */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  <Mail className="inline w-4 h-4 mr-1" />
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   Email Address
                 </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all ${
-                    errors.email
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300"
-                  }`}
-                  placeholder="Enter your email address"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`block w-full pl-10 pr-3 py-2 border ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    placeholder="john@example.com"
+                  />
+                </div>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <FaExclamationTriangle className="mr-1" />
-                    {errors.email}
-                  </p>
+                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
                 )}
               </div>
 
-              {/* Subject Field */}
               <div>
-                <label
-                  htmlFor="subject"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  <MessageSquare className="inline w-4 h-4 mr-1" />
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   Subject
                 </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all ${
-                    errors.subject
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300"
-                  }`}
-                  placeholder="What's this about?"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MessageSquare className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    className={`block w-full pl-10 pr-3 py-2 border ${
+                      errors.subject ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    placeholder="What's this about?"
+                  />
+                </div>
                 {errors.subject && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <FaExclamationTriangle className="mr-1" />
-                    {errors.subject}
-                  </p>
+                  <p className="mt-1 text-sm text-red-500">{errors.subject}</p>
                 )}
               </div>
 
-              {/* Message Field */}
               <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  <MessageSquare className="inline w-4 h-4 mr-1" />
+                <label className="block text-gray-700 text-sm font-medium mb-2">
                   Message
                 </label>
                 <textarea
-                  id="message"
                   name="message"
-                  rows={6}
                   value={formData.message}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all resize-none ${
-                    errors.message
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-300"
-                  }`}
-                  placeholder="Tell me about your project or just say hello..."
+                  rows={6}
+                  className={`block w-full px-3 py-2 border ${
+                    errors.message ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  placeholder="Tell me about your project, ideas, or questions..."
                 />
-                <div className="flex justify-between items-center mt-2">
-                  {errors.message ? (
-                    <p className="text-sm text-red-600 flex items-center">
-                      <FaExclamationTriangle className="mr-1" />
-                      {errors.message}
-                    </p>
-                  ) : (
-                    <div></div>
-                  )}
-                  <span className="text-sm text-gray-500">
-                    {formData.message.length}/500
-                  </span>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 bg-[#FFE4CC] text-[#FF8C00] border border-[#FF8C00] py-3 px-6 rounded-full font-medium hover:bg-[#FFCC99] hover:border-[#FF7000] focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#FF8C00] mr-2"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5 mr-2" />
-                      Send Message
-                    </>
-                  )}
-                </button>
-
-                {(Object.keys(formData).some(
-                  (key) => formData[key as keyof FormData] !== ""
-                ) ||
-                  submitStatus !== "idle") && (
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Reset
-                  </button>
+                {errors.message && (
+                  <p className="mt-1 text-sm text-red-500">{errors.message}</p>
                 )}
               </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-medium
+                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-600"}
+                  transition-colors duration-200`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-5 w-5" />
+                    <span>Send Message</span>
+                  </>
+                )}
+              </button>
+
+              {submitStatus === "success" && (
+                <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-lg">
+                  Message sent successfully! I'll get back to you soon.
+                </div>
+              )}
+
+              {submitStatus === "error" && (
+                <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg">
+                  Failed to send message. Please try again.
+                </div>
+              )}
             </form>
           </div>
         </div>

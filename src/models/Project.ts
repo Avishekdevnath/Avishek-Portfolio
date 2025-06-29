@@ -1,30 +1,30 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export interface ITechnology {
+export interface Technology {
   name: string;
   icon?: string;
 }
 
-export interface IRepository {
+export interface Repository {
   name: string;
   url: string;
   type: 'github' | 'gitlab' | 'bitbucket' | 'other';
 }
 
-export interface IDemoURL {
+export interface DemoURL {
   name: string;
   url: string;
   type: 'live' | 'staging' | 'demo' | 'documentation';
 }
 
-export interface IProject extends Document {
+export interface Project extends Document {
   title: string;
   description: string;
   shortDescription: string;
   category: string;
-  technologies: ITechnology[];
-  repositories: IRepository[];
-  demoUrls: IDemoURL[];
+  technologies: Technology[];
+  repositories: Repository[];
+  demoUrls: DemoURL[];
   image: string;
   imagePublicId: string;
   completionDate: Date;
@@ -35,7 +35,7 @@ export interface IProject extends Document {
   updatedAt: Date;
 }
 
-const technologySchema = new Schema<ITechnology>({
+const technologySchema = new Schema<Technology>({
   name: { 
     type: String, 
     required: [true, 'Technology name is required'],
@@ -47,7 +47,7 @@ const technologySchema = new Schema<ITechnology>({
   }
 });
 
-const repositorySchema = new Schema<IRepository>({
+const repositorySchema = new Schema<Repository>({
   name: { 
     type: String, 
     required: [true, 'Repository name is required'],
@@ -79,7 +79,7 @@ const repositorySchema = new Schema<IRepository>({
   }
 });
 
-const demoUrlSchema = new Schema<IDemoURL>({
+const demoUrlSchema = new Schema<DemoURL>({
   name: { 
     type: String, 
     required: [true, 'Demo name is required'],
@@ -111,7 +111,7 @@ const demoUrlSchema = new Schema<IDemoURL>({
   }
 });
 
-const projectSchema = new Schema<IProject>({
+const projectSchema = new Schema<Project>({
   title: {
     type: String,
     required: [true, 'Title is required'],
@@ -153,23 +153,23 @@ const projectSchema = new Schema<IProject>({
   },
   technologies: {
     type: [technologySchema],
-    required: [true, 'At least one technology is required'],
+    required: true,
     validate: {
-      validator: (value: ITechnology[]) => value.length > 0,
-      message: 'At least one technology is required'
-    }
+      validator: (value: Technology[]) => value.length > 0,
+      message: 'At least one technology is required',
+    },
   },
   repositories: {
     type: [repositorySchema],
-    required: [true, 'At least one repository is required'],
+    required: true,
     validate: {
-      validator: (value: IRepository[]) => value.length > 0,
-      message: 'At least one repository is required'
-    }
+      validator: (value: Repository[]) => value.length > 0,
+      message: 'At least one repository is required',
+    },
   },
   demoUrls: {
     type: [demoUrlSchema],
-    default: []
+    default: [],
   },
   image: {
     type: String,
@@ -231,12 +231,12 @@ projectSchema.index({ 'technologies.name': 1 });
 projectSchema.index({ order: 1, createdAt: -1 });
 
 // Virtual for project URL
-projectSchema.virtual('url').get(function(this: IProject) {
+projectSchema.virtual('url').get(function(this: Project) {
   return `/projects/${this._id}`;
 });
 
 // Pre-save middleware to ensure order is set
-projectSchema.pre('save', async function(this: IProject & { constructor: Model<IProject> }) {
+projectSchema.pre('save', async function(this: Project & { constructor: Model<Project> }) {
   if (this.isNew && !this.order) {
     const lastProject = await this.constructor.findOne().sort({ order: -1 });
     this.order = lastProject ? lastProject.order + 1 : 0;
@@ -244,7 +244,7 @@ projectSchema.pre('save', async function(this: IProject & { constructor: Model<I
 });
 
 // Ensure old image is deleted when project is deleted
-projectSchema.pre('deleteOne', { document: true }, async function(this: IProject) {
+projectSchema.pre('deleteOne', { document: true }, async function(this: Project) {
   if (this.imagePublicId) {
     const { deleteImage } = await import('@/lib/cloudinary');
     await deleteImage(this.imagePublicId);
@@ -267,6 +267,6 @@ projectSchema.index({
 });
 
 // Create the model
-const Project = mongoose.models.Project || mongoose.model<IProject>('Project', projectSchema);
+const Project = mongoose.models.Project || mongoose.model<Project>('Project', projectSchema);
 
 export default Project; 

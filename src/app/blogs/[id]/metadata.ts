@@ -11,7 +11,7 @@ interface BlogPostPageProps {
 
 export async function generateBlogMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   await connectToDatabase();
-  const blog = await Blog.findOne({ slug: params.id });
+  const blog = await Blog.findOne({ slug: params.id }).lean();
 
   if (!blog) {
     return {
@@ -26,8 +26,8 @@ export async function generateBlogMetadata({ params }: BlogPostPageProps): Promi
     image: blog.coverImage,
     url: `/blogs/${blog.slug}`,
     type: 'article',
-    publishedTime: blog.createdAt,
-    modifiedTime: blog.updatedAt,
+    publishedTime: new Date(blog.createdAt).toISOString(),
+    modifiedTime: new Date(blog.updatedAt).toISOString(),
     author: blog.author.name,
     tags: blog.tags,
   });

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Message, { MessageStatus } from '@/models/Message';
+import Message from '@/models/Message';
+import { MessageStatus } from '@/types/message';
 
 export async function PUT(
   request: Request,

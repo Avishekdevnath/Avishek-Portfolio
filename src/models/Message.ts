@@ -1,39 +1,13 @@
 import mongoose, { Model } from 'mongoose';
+import { MessageCategory, MessageStatus, IMessage as IMessageType, IReply } from '@/types/message';
 
-export enum MessageStatus {
-  UNREAD = 'unread',
-  READ = 'read',
-  REPLIED = 'replied',
-  ARCHIVED = 'archived'
-}
+// Re-export types for convenience (but components should import from @/types/message)
+export type { IReply } from '@/types/message';
+export { MessageCategory, MessageStatus } from '@/types/message';
 
-export enum MessageCategory {
-  JOB = 'Job Opportunity',
-  PROJECT = 'Project Collaboration',
-  GENERAL = 'General Inquiry'
-}
-
-// Interface for a reply
-export interface IReply {
-  message: string;
-  sentAt: Date;
-  sentBy: 'user' | 'admin';
-}
-
-// Define interface for Message document
-export interface IMessage extends mongoose.Document {
-  name: string;
-  email: string;
-  subject: MessageCategory;
-  message: string;
-  status: MessageStatus;
-  ipAddress?: string;
-  userAgent?: string;
-  readAt?: Date | null;
-  repliedAt?: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  replies: IReply[];
+// Define interface for Message document extending mongoose.Document and IMessageType
+export interface IMessage extends mongoose.Document, Omit<IMessageType, '_id'> {
+  _id: mongoose.Types.ObjectId;
   markAsRead: () => Promise<IMessage>;
   markAsReplied: () => Promise<IMessage>;
   archive: () => Promise<IMessage>;
@@ -41,7 +15,7 @@ export interface IMessage extends mongoose.Document {
 }
 
 // Define interface for Message model
-interface IMessageModel extends Model<IMessage> {
+export interface IMessageModel extends Model<IMessage> {
   getStats: () => Promise<{
     total: number;
     unread: number;
@@ -117,52 +91,43 @@ const messageSchema = new mongoose.Schema({
   },
   replies: [replySchema]
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      ret._id = ret._id.toString();
+      return ret;
+    }
+  }
 });
 
-// Index for efficient querying
-messageSchema.index({ status: 1, createdAt: -1 });
-messageSchema.index({ email: 1, createdAt: -1 });
-
-// Method to mark message as read
-messageSchema.methods.markAsRead = async function() {
-  if (this.status === MessageStatus.UNREAD) {
-    this.status = MessageStatus.READ;
-    this.readAt = new Date();
-    await this.save();
-  }
-  return this;
+// Add methods to the schema
+messageSchema.methods.markAsRead = async function(): Promise<IMessage> {
+  this.status = MessageStatus.READ;
+  this.readAt = new Date();
+  return await this.save();
 };
 
-// Method to mark message as replied
-messageSchema.methods.markAsReplied = async function() {
+messageSchema.methods.markAsReplied = async function(): Promise<IMessage> {
   this.status = MessageStatus.REPLIED;
   this.repliedAt = new Date();
-  await this.save();
-  return this;
+  return await this.save();
 };
 
-// Method to archive message
-messageSchema.methods.archive = async function() {
+messageSchema.methods.archive = async function(): Promise<IMessage> {
   this.status = MessageStatus.ARCHIVED;
-  await this.save();
-  return this;
+  return await this.save();
 };
 
-// Method to add a reply
-messageSchema.methods.addReply = async function(replyMessage: string) {
+messageSchema.methods.addReply = async function(replyMessage: string): Promise<IMessage> {
   this.replies.push({
     message: replyMessage,
     sentAt: new Date(),
     sentBy: 'admin'
   });
-  this.status = MessageStatus.REPLIED;
-  this.repliedAt = new Date();
-  await this.save();
-  return this;
+  return await this.save();
 };
 
-// Static method to get message statistics
+// Add static methods to the schema
 messageSchema.statics.getStats = async function() {
   const stats = await this.aggregate([
     {
@@ -196,15 +161,7 @@ messageSchema.statics.getStats = async function() {
   };
 };
 
-// Safe model initialization
-let Message: IMessageModel;
+// Create and export the model
+const Message = (mongoose.models.Message || mongoose.model<IMessage>('Message', messageSchema)) as IMessageModel;
 
-try {
-  // Try to get existing model
-  Message = mongoose.model<IMessage, IMessageModel>('Message');
-} catch {
-  // Model doesn't exist, create it
-  Message = mongoose.model<IMessage, IMessageModel>('Message', messageSchema);
-}
-
-export default Message; 
+export default Message;

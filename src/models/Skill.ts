@@ -2,10 +2,12 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ISkill extends Document {
   name: string;
-  level: string;
   category: string;
-  type: 'programming' | 'software' | 'language';
-  subCategory?: string;
+  proficiency: number;
+  icon?: string;
+  iconSet?: string;
+  description?: string;
+  featured: boolean;
   order: number;
   createdAt: Date;
   updatedAt: Date;
@@ -18,43 +20,41 @@ const skillSchema = new Schema<ISkill>(
       required: [true, 'Skill name is required'],
       trim: true,
     },
-    level: {
-      type: String,
-      required: [true, 'Skill level is required'],
-      enum: {
-        values: ['Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert', 'Proficient', 'Native', 'Explored'],
-        message: 'Invalid skill level',
-      },
-    },
     category: {
       type: String,
       required: [true, 'Skill category is required'],
       enum: {
         values: [
-          'Core Languages',
-          'Front End',
-          'Back End',
-          'Frameworks',
-          'Tools',
-          'Graphic Design',
-          'Video Editing',
-          'Office',
-          'Language',
+          'Frontend Development',
+          'Backend Development',
+          'AI & Machine Learning',
+          'Graphics & Design',
+          'Office & Productivity'
         ],
         message: 'Invalid skill category',
       },
     },
-    type: {
-      type: String,
-      required: [true, 'Skill type is required'],
-      enum: {
-        values: ['programming', 'software', 'language'],
-        message: 'Invalid skill type',
-      },
+    proficiency: {
+      type: Number,
+      required: [true, 'Skill proficiency is required'],
+      min: [0, 'Proficiency must be at least 0'],
+      max: [5, 'Proficiency cannot exceed 5'],
     },
-    subCategory: {
+    icon: {
       type: String,
       trim: true,
+    },
+    iconSet: {
+      type: String,
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    featured: {
+      type: Boolean,
+      default: false,
     },
     order: {
       type: Number,
@@ -67,7 +67,8 @@ const skillSchema = new Schema<ISkill>(
 );
 
 // Add indexes
-skillSchema.index({ category: 1, type: 1 });
+skillSchema.index({ category: 1 });
 skillSchema.index({ order: 1 });
+skillSchema.index({ featured: 1 });
 
 export default mongoose.models.Skill || mongoose.model<ISkill>('Skill', skillSchema); 

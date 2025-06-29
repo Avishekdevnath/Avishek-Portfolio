@@ -65,7 +65,17 @@ export async function PUT(
     }
 
     // Validate category
-    const validCategories = ['Frontend', 'Backend', 'Database', 'DevOps', 'Tools', 'Other'];
+    const validCategories = [
+      'Core Languages',
+      'Front End',
+      'Back End',
+      'Frameworks',
+      'Tools',
+      'Graphic Design',
+      'Video Editing',
+      'Office & Productivity',
+      'Language'
+    ];
     if (!validCategories.includes(body.category)) {
       return sendError(`Invalid category. Must be one of: ${validCategories.join(', ')}`, 400);
     }

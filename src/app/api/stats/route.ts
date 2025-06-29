@@ -3,173 +3,176 @@ import connectDB from '@/lib/mongodb';
 import Stats from '@/models/Stats';
 import Project from '@/models/Project';
 import Skill from '@/models/Skill';
-import { connectToDatabase } from '@/lib/mongodb';
 import BlogStats from '@/models/BlogStats';
 import Blog from '@/models/Blog';
 
-// GET /api/stats - Get all stats including computed values
+interface BlogStatsItem {
+  title: string;
+  views: number;
+}
+
+interface AggregatedBlogStats {
+  totalViews: number;
+  uniqueVisitors: number;
+  totalLikes: number;
+  totalShares: number;
+  avgTimeSpent: number;
+  blogs: BlogStatsItem[];
+}
+
+// GET /api/stats - Get portfolio stats for homepage
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const range = searchParams.get('range') || '7d';
+    await connectDB();
 
-    await connectToDatabase();
-
-    // Calculate date range
-    const endDate = new Date();
-    const startDate = new Date();
-    switch (range) {
-      case '30d':
-        startDate.setDate(endDate.getDate() - 30);
-        break;
-      case '90d':
-        startDate.setDate(endDate.getDate() - 90);
-        break;
-      default: // 7d
-        startDate.setDate(endDate.getDate() - 7);
+    // Get or create default stats
+    let stats = await Stats.findOne();
+    
+    if (!stats) {
+      // Create default stats if none exist
+      stats = await Stats.create({
+        programmingLanguages: {
+          value: 15,
+          description: "Languages & Frameworks"
+        },
+        projectsCompleted: {
+          value: 50,
+          description: "Successful Projects"
+        },
+        studentsCount: {
+          value: 100,
+          description: "Students Mentored"
+        },
+        workExperience: {
+          value: 5,
+          description: "Years of Experience"
+        },
+        customStats: [],
+        tagline: "Passionate developer creating innovative solutions and mentoring the next generation of programmers."
+      });
     }
 
-    // Aggregate blog stats
-    const blogStats = await BlogStats.aggregate([
-      {
-        $match: {
-          'views.timestamp': { $gte: startDate, $lte: endDate }
-        }
-      },
-      {
-        $lookup: {
-          from: 'blogs',
-          localField: 'blog',
-          foreignField: '_id',
-          as: 'blogDetails'
-        }
-      },
-      {
-        $unwind: '$blogDetails'
-      },
-      {
-        $group: {
-          _id: null,
-          totalViews: { $sum: { $size: '$views' } },
-          uniqueVisitors: { 
-            $addToSet: '$views.ip'
-          },
-          totalLikes: { $sum: { $size: '$likes' } },
-          totalShares: { $sum: { $size: '$shares' } },
-          avgTimeSpent: { 
-            $avg: '$readingProgress.timeSpent'
-          },
-          blogs: {
-            $push: {
-              title: '$blogDetails.title',
-              views: { $size: '$views' }
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          totalViews: 1,
-          uniqueVisitors: { $size: '$uniqueVisitors' },
-          totalLikes: 1,
-          totalShares: 1,
-          avgTimeSpent: { $round: ['$avgTimeSpent', 1] },
-          blogs: 1
-        }
-      }
-    ]);
+    // Calculate dynamic stats from database (with fallbacks)
+    let projectCount = 0;
+    let skillCount = 0;
+    
+    try {
+      [projectCount, skillCount] = await Promise.all([
+        Project.countDocuments({}).catch(() => 0),
+        Skill.countDocuments({}).catch(() => 0)
+      ]);
+    } catch (countError) {
+      console.warn('Error counting documents, using defaults:', countError);
+    }
 
-    // Get daily stats
-    const dailyStats = await BlogStats.aggregate([
-      {
-        $match: {
-          'dailyStats.date': { $gte: startDate, $lte: endDate }
-        }
+    // Update stats with real data
+    const responseData = {
+      programmingLanguages: {
+        value: skillCount || stats.programmingLanguages?.value || 15,
+        description: stats.programmingLanguages?.description || "Languages & Frameworks"
       },
-      {
-        $unwind: '$dailyStats'
+      projectsCompleted: {
+        value: projectCount || stats.projectsCompleted?.value || 50,
+        description: stats.projectsCompleted?.description || "Successful Projects"
       },
-      {
-        $group: {
-          _id: '$dailyStats.date',
-          views: { $sum: '$dailyStats.views' },
-          visitors: { $sum: '$dailyStats.uniqueVisitors' },
-          likes: { $sum: '$dailyStats.likes' }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          date: { $dateToString: { format: '%Y-%m-%d', date: '$_id' } },
-          views: 1,
-          visitors: 1,
-          likes: 1
-        }
-      },
-      {
-        $sort: { date: 1 }
-      }
-    ]);
-
-    // Get geographic distribution (mock data for now)
-    const geoStats = [
-      { country: 'United States', views: 1200 },
-      { country: 'India', views: 800 },
-      { country: 'United Kingdom', views: 600 },
-      { country: 'Germany', views: 400 },
-      { country: 'Canada', views: 300 }
-    ];
-
-    const stats = blogStats[0] || {
-      totalViews: 0,
-      uniqueVisitors: 0,
-      totalLikes: 0,
-      totalShares: 0,
-      avgTimeSpent: 0,
-      blogs: []
+      studentsCount: stats.studentsCount || { value: 100, description: "Students Mentored" },
+      workExperience: stats.workExperience || { value: 5, description: "Years of Experience" },
+      customStats: stats.customStats || [],
+      tagline: stats.tagline || "Passionate developer creating innovative solutions"
     };
 
     return NextResponse.json({
-      ...stats,
-      topBlogs: stats.blogs.sort((a, b) => b.views - a.views).slice(0, 5),
-      viewsByCountry: geoStats,
-      dailyStats
+      success: true,
+      data: responseData
     });
 
   } catch (error) {
-    console.error('Error fetching analytics:', error);
+    console.error('Error fetching portfolio stats:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch analytics data' },
+      { 
+        success: false,
+        error: 'Failed to fetch portfolio stats' 
+      },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/stats - Update stats
+// PUT /api/stats - Update editable stats fields
 export async function PUT(request: NextRequest) {
   try {
     await connectDB();
 
     const body = await request.json();
+    
+    // Validate required fields
+    if (!body.studentsCount || !body.workExperience) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
     let stats = await Stats.findOne();
 
     if (!stats) {
-      stats = await Stats.create(body);
+      // Create new stats document with all fields
+      stats = await Stats.create({
+        programmingLanguages: {
+          value: 15,
+          description: "Languages & Frameworks"
+        },
+        projectsCompleted: {
+          value: 50,
+          description: "Successful Projects"
+        },
+        studentsCount: body.studentsCount,
+        workExperience: body.workExperience,
+        customStats: body.customStats || [],
+        tagline: body.tagline || "Passionate about creating impactful solutions"
+      });
     } else {
-      // Update only editable fields
+      // Update only editable fields (preserve dynamic fields)
       stats.studentsCount = body.studentsCount;
       stats.workExperience = body.workExperience;
-      stats.customStats = body.customStats;
-      stats.tagline = body.tagline;
+      stats.customStats = body.customStats || [];
+      stats.tagline = body.tagline || stats.tagline;
       await stats.save();
     }
 
-    return NextResponse.json({ success: true, data: stats });
+    // Return updated stats in the same format as GET
+    const [projectCount, skillCount] = await Promise.all([
+      Project.countDocuments({}).catch(() => 0),
+      Skill.countDocuments({}).catch(() => 0)
+    ]);
+
+    const responseData = {
+      programmingLanguages: {
+        value: skillCount || stats.programmingLanguages?.value || 15,
+        description: stats.programmingLanguages?.description || "Languages & Frameworks"
+      },
+      projectsCompleted: {
+        value: projectCount || stats.projectsCompleted?.value || 50,
+        description: stats.projectsCompleted?.description || "Successful Projects"
+      },
+      studentsCount: stats.studentsCount,
+      workExperience: stats.workExperience,
+      customStats: stats.customStats || [],
+      tagline: stats.tagline
+    };
+
+    return NextResponse.json({ 
+      success: true, 
+      data: responseData,
+      message: 'Stats updated successfully'
+    });
   } catch (error) {
-    console.error('Error in stats PUT:', error);
+    console.error('Error updating stats:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update stats' },
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to update stats' 
+      },
       { status: 500 }
     );
   }

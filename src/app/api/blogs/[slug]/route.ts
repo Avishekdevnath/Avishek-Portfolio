@@ -1,11 +1,10 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
-import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 
 // GET /api/blogs/[slug] - Get a single blog
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
   try {
@@ -13,12 +12,22 @@ export async function GET(
     
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
-      return sendError('Blog post not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Blog not found'
+      });
     }
 
-    return sendSuccess(blog);
+    return NextResponse.json({
+      success: true,
+      data: blog
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error fetching blog:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch blog'
+    });
   }
 }
 
@@ -30,37 +39,43 @@ export async function PUT(
   try {
     await connectToDatabase();
     
-    const body = await request.json();
-    
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
-      return sendError('Blog post not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Blog not found'
+      });
     }
 
+    const data = await request.json();
+    
     // If status is being changed to published, set publishedAt
-    if (body.status === 'published' && blog.status === 'draft') {
-      body.publishedAt = new Date();
+    if (data.status === 'published' && blog.status !== 'published') {
+      data.publishedAt = new Date();
     }
 
-    // Update blog
-    const updatedBlog = await Blog.findByIdAndUpdate(
-      blog._id,
-      { ...body, updatedAt: new Date() },
-      { new: true, runValidators: true }
+    const updatedBlog = await Blog.findOneAndUpdate(
+      { slug: params.slug },
+      { $set: data },
+      { new: true }
     );
 
-    return sendSuccess(updatedBlog, 'Blog post updated successfully');
+    return NextResponse.json({
+      success: true,
+      data: updatedBlog
+    });
   } catch (error) {
-    if (error.code === 11000 && error.keyPattern?.slug) {
-      return sendError('A blog post with this title already exists', 400);
-    }
-    return handleApiError(error);
+    console.error('Error updating blog:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update blog'
+    });
   }
 }
 
 // DELETE /api/blogs/[slug] - Delete a blog
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
   try {
@@ -68,18 +83,28 @@ export async function DELETE(
     
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
-      return sendError('Blog post not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Blog not found'
+      });
     }
 
-    await Blog.findByIdAndDelete(blog._id);
+    await Blog.deleteOne({ slug: params.slug });
 
-    return sendSuccess(null, 'Blog post deleted successfully');
+    return NextResponse.json({
+      success: true,
+      message: 'Blog deleted successfully'
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error deleting blog:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete blog'
+    });
   }
 }
 
-// PATCH /api/blogs/[slug]/like - Like/unlike a blog
+// PATCH /api/blogs/[slug] - Handle blog actions (like, unlike, etc.)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { slug: string } }
@@ -89,25 +114,42 @@ export async function PATCH(
     
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
-      return sendError('Blog post not found', 404);
+      return NextResponse.json({
+        success: false,
+        error: 'Blog not found'
+      });
     }
 
     const { action } = await request.json();
-    
-    if (action !== 'like' && action !== 'unlike') {
-      return sendError('Invalid action. Must be "like" or "unlike"', 400);
+
+    switch (action) {
+      case 'like':
+        blog.likes = (blog.likes || 0) + 1;
+        break;
+      case 'unlike':
+        blog.likes = Math.max((blog.likes || 0) - 1, 0);
+        break;
+      case 'view':
+        blog.views = (blog.views || 0) + 1;
+        break;
+      default:
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid action'
+        });
     }
 
-    const update = action === 'like' ? { $inc: { likes: 1 } } : { $inc: { likes: -1 } };
-    
-    const updatedBlog = await Blog.findByIdAndUpdate(
-      blog._id,
-      update,
-      { new: true }
-    );
+    await blog.save();
 
-    return sendSuccess(updatedBlog, `Blog post ${action}d successfully`);
+    return NextResponse.json({
+      success: true,
+      data: blog
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Error handling blog action:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to handle blog action'
+    });
   }
 } 

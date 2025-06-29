@@ -1,4 +1,26 @@
-import mongoose from 'mongoose';
+import mongoose, { Document } from 'mongoose';
+
+// Define interfaces
+interface IAuthor {
+  name?: string;
+  email?: string;
+}
+
+export interface IComment extends Document {
+  blogId?: mongoose.Types.ObjectId;
+  name?: string;
+  email?: string;
+  content: string;
+  blog?: mongoose.Types.ObjectId;
+  author?: IAuthor;
+  status: 'pending' | 'approved' | 'spam';
+  parentComment?: mongoose.Types.ObjectId | null;
+  replies: mongoose.Types.ObjectId[];
+  likes: number;
+  isEdited: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Clear existing model to avoid conflicts
 if (mongoose.models.Comment) {
@@ -61,7 +83,7 @@ const commentSchema = new mongoose.Schema({
 });
 
 // Pre-save middleware to handle migration
-commentSchema.pre('save', function(this: any) {
+commentSchema.pre('save', function(this: IComment) {
   // If using new schema but missing required fields, try to get from legacy fields
   if (!this.blogId && this.blog) {
     this.blogId = this.blog;
@@ -88,6 +110,6 @@ commentSchema.index({ blog: 1, createdAt: -1 }); // Legacy index
 commentSchema.index({ status: 1 });
 commentSchema.index({ parentComment: 1 });
 
-const Comment = mongoose.model('Comment', commentSchema);
+const Comment = mongoose.model<IComment>('Comment', commentSchema);
 
 export default Comment; 

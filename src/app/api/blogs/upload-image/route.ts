@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to upload image');
     }
 
-    // Return the image URL for ReactQuill
+    // Return the image URL for the rich text editor
     return NextResponse.json({
       success: true,
       url: result.url,

@@ -58,9 +58,11 @@ interface IBlog extends Document {
   metaDescription?: string;
   canonicalUrl?: string;
   noIndex: boolean;
-  structuredData?: any;
+  structuredData?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
+  likes: number;
+  views: number;
   addView: () => Promise<void>;
   toggleLike: (userEmail: string) => Promise<boolean>;
   updateCommentCount: (oldStatus?: string, newStatus?: string) => Promise<void>;
@@ -156,6 +158,14 @@ const blogSchema = new mongoose.Schema({
         linkedin: { type: Number, default: 0 }
       }
     }
+  },
+  likes: {
+    type: Number,
+    default: 0
+  },
+  views: {
+    type: Number,
+    default: 0
   },
   metaTitle: { type: String },
   metaDescription: { type: String },

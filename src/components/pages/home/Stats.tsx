@@ -24,6 +24,7 @@ interface StatsResponse {
     }>;
     tagline: string;
   };
+  error?: string;
 }
 
 interface StatCardProps {

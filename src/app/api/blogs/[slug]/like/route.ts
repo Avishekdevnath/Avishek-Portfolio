@@ -5,6 +5,11 @@ import Blog from '@/models/Blog';
 import BlogStats from '@/models/BlogStats';
 import { createBlogNotification } from '@/lib/notifications';
 
+interface Like {
+  ip: string;
+  timestamp: Date;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { slug: string } }
@@ -31,7 +36,7 @@ export async function POST(
     }
 
     // Check if this IP has already liked
-    const hasLiked = blogStats.likes.some(like => like.ip === ip);
+    const hasLiked = blogStats.likes.some((like: Like) => like.ip === ip);
     if (hasLiked) {
       return NextResponse.json(
         { error: 'Already liked this post' },

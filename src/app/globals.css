@@ -43,27 +43,6 @@
   }
 }
 
-/* Quill Editor Styles */
-.quill {
-  @apply bg-white rounded-lg border border-gray-300 overflow-hidden;
-}
-
-.ql-toolbar {
-  @apply border-b border-gray-300 bg-gray-50;
-}
-
-.ql-container {
-  @apply min-h-[200px];
-}
-
-.ql-editor {
-  @apply min-h-[200px] text-base;
-}
-
-.ql-editor.ql-blank::before {
-  @apply text-gray-400 not-italic;
-}
-
 /* Loading and Animation States */
 .animate-pulse {
   @apply bg-gray-200;

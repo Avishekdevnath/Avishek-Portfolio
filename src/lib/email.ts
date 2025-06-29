@@ -40,6 +40,21 @@ export async function sendEmailNotification(options: EmailOptions) {
   }
 }
 
+export function parseIncomingEmailReply(emailData: any) {
+  try {
+    return {
+      messageId: emailData.messageId,
+      from: emailData.from,
+      subject: emailData.subject,
+      message: emailData.text || emailData.html,
+      date: new Date(),
+    };
+  } catch (error) {
+    console.error('Error parsing email reply:', error);
+    throw error;
+  }
+}
+
 export async function sendContactFormEmail(data: {
   name: string;
   email: string;
@@ -109,4 +124,53 @@ export async function sendNotificationEmail(data: {
     text,
     html
   });
+}
+
+export async function sendReply(data: {
+  to: string;
+  name: string;
+  subject: string;
+  originalMessage: string;
+  replyMessage: string;
+}) {
+  try {
+    const mailOptions = {
+      from: `"${process.env.EMAIL_FROM_NAME || 'Portfolio Contact'}" <${process.env.EMAIL_USER}>`,
+      to: data.to,
+      subject: `Re: ${data.subject}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <p>Hi ${data.name},</p>
+          
+          <p>${data.replyMessage.replace(/\n/g, '<br>')}</p>
+          
+          <div style="margin: 20px 0; padding: 20px; border-left: 4px solid #ddd; color: #666;">
+            <p><strong>Original Message:</strong></p>
+            ${data.originalMessage.replace(/\n/g, '<br>')}
+          </div>
+          
+          <p>Best regards,<br>
+          ${process.env.EMAIL_FROM_NAME || 'Portfolio Contact'}</p>
+        </div>
+      `,
+      text: `
+Hi ${data.name},
+
+${data.replyMessage}
+
+Original Message:
+${data.originalMessage}
+
+Best regards,
+${process.env.EMAIL_FROM_NAME || 'Portfolio Contact'}
+      `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Reply sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('Error sending reply:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }

@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FiGithub, FiGlobe, FiStar, FiEdit3, FiTrash2 } from 'react-icons/fi';
+import { FaGithub, FaGitlab, FaBitbucket, FaGlobe, FaEye, FaEyeSlash, FaStar, FaRegStar, FaPencilAlt, FaTrash, FaExternalLinkAlt } from 'react-icons/fa';
+import { Project } from '@/types/dashboard';
 
 interface Technology {
   name: string;
@@ -22,20 +23,7 @@ interface DemoURL {
 }
 
 interface ProjectCardProps {
-  project: {
-    _id: string;
-    title: string;
-    shortDescription: string;
-    description: string;
-    image: string;
-    technologies: Technology[];
-    repositories: Repository[];
-    demoUrls: DemoURL[];
-    category: string;
-    completionDate: string;
-    featured: boolean;
-    status: 'draft' | 'published';
-  };
+  project: Project;
   isAdmin?: boolean;
   onDelete?: (id: string) => void;
   onFeatureToggle?: (id: string) => void;
@@ -46,6 +34,21 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'short'
 });
+
+// Function to format date safely
+const formatDate = (date: string | Date): string => {
+  try {
+    // If it's already a Date object
+    if (date instanceof Date) {
+      return dateFormatter.format(date);
+    }
+    // If it's a string, try to create a Date object
+    return dateFormatter.format(new Date(date));
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
+};
 
 // Function to strip HTML tags and get plain text for preview
 const stripHtml = (html: string) => {
@@ -60,7 +63,14 @@ const truncateText = (text: string, maxLength: number = 120) => {
   return text.substr(0, maxLength).trim() + '...';
 };
 
-export default function ProjectCard({ project, isAdmin, onDelete, onFeatureToggle, onStatusToggle }: ProjectCardProps) {
+export default function ProjectCard({
+  project,
+  isAdmin = false,
+  onDelete,
+  onFeatureToggle,
+  onStatusToggle
+}: ProjectCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const {
     _id,
     title,
@@ -79,6 +89,19 @@ export default function ProjectCard({ project, isAdmin, onDelete, onFeatureToggl
   const mainRepository = repositories[0];
   const mainDemo = demoUrls[0];
 
+  const getRepositoryIcon = (type: string) => {
+    switch (type) {
+      case 'github':
+        return <FaGithub />;
+      case 'gitlab':
+        return <FaGitlab />;
+      case 'bitbucket':
+        return <FaBitbucket />;
+      default:
+        return <FaGlobe />;
+    }
+  };
+
   // Get preview text from rich description or fallback to shortDescription
   const getPreviewText = () => {
     if (description && description.trim() !== '') {
@@ -91,148 +114,154 @@ export default function ProjectCard({ project, isAdmin, onDelete, onFeatureToggl
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-lg bg-white shadow-lg transition-all hover:shadow-xl h-full flex flex-col">
+    <div 
+      className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:shadow-2xl h-full flex flex-col border border-gray-100"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Status Badge */}
       {status === 'draft' && (
-        <div className="absolute right-2 top-2 z-10 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
+        <div className="absolute right-3 top-3 z-10 rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-800 backdrop-blur-sm">
           Draft
         </div>
       )}
 
       {/* Featured Badge */}
       {featured && (
-        <div className="absolute left-2 top-2 z-10 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+        <div className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-sm">
           Featured
         </div>
       )}
 
-      {/* Project Image */}
-      <div className="relative h-48 w-full overflow-hidden flex-shrink-0">
+      {/* Project Image with Overlay */}
+      <div className="relative h-52 w-full overflow-hidden flex-shrink-0">
         <Image
           src={image || '/placeholder-project.svg'}
           alt={title}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-70" />
+        
+        {/* Category Badge */}
+        <div className="absolute bottom-3 left-3 z-10">
+          <span className="rounded-full bg-black/30 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
+            {category}
+          </span>
+        </div>
+
+        {/* Date Badge */}
+        <div className="absolute bottom-3 right-3 z-10">
+          <span className="rounded-full bg-black/30 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
+            {formatDate(completionDate)}
+          </span>
+        </div>
+        
         {/* Admin Actions */}
         {isAdmin && (
-          <div className="absolute right-2 top-2 z-20 flex gap-2">
+          <div className="absolute right-3 top-3 z-20 flex gap-2">
             <Link
               href={`/dashboard/projects/edit/${_id}`}
-              className="rounded-full bg-white p-2 text-gray-600 shadow-md transition-colors hover:bg-blue-500 hover:text-white"
+              className="rounded-full bg-white/90 p-2 text-gray-700 shadow-md transition-all hover:bg-blue-500 hover:text-white"
             >
-              <FiEdit3 className="h-4 w-4" />
+              <FaPencilAlt className="h-4 w-4" />
             </Link>
             <button
               onClick={() => onDelete?.(_id)}
-              className="rounded-full bg-white p-2 text-gray-600 shadow-md transition-colors hover:bg-red-500 hover:text-white"
+              className="rounded-full bg-white/90 p-2 text-gray-700 shadow-md transition-all hover:bg-red-500 hover:text-white"
             >
-              <FiTrash2 className="h-4 w-4" />
+              <FaTrash className="h-4 w-4" />
             </button>
             <button
               onClick={() => onFeatureToggle?.(_id)}
-              className={`rounded-full bg-white p-2 shadow-md transition-colors ${
+              className={`rounded-full bg-white/90 p-2 shadow-md transition-all ${
                 featured
                   ? 'text-yellow-500 hover:bg-yellow-500'
-                  : 'text-gray-600 hover:bg-yellow-500'
+                  : 'text-gray-700 hover:bg-yellow-500'
               } hover:text-white`}
             >
-              <FiStar className="h-4 w-4" />
+              <FaStar className="h-4 w-4" />
             </button>
             <button
               onClick={() => onStatusToggle?.(_id)}
-              className={`rounded-full bg-white p-2 shadow-md transition-colors ${
+              className={`rounded-full bg-white/90 p-2 shadow-md transition-all ${
                 status === 'published'
                   ? 'text-green-500 hover:bg-green-500'
-                  : 'text-gray-400 hover:bg-green-500'
+                  : 'text-gray-500 hover:bg-green-500'
               } hover:text-white`}
               title={`Click to ${status === 'published' ? 'unpublish' : 'publish'}`}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                className="h-4 w-4"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
+              {status === 'published' ? <FaEye className="h-4 w-4" /> : <FaEyeSlash className="h-4 w-4" />}
             </button>
           </div>
         )}
       </div>
 
       {/* Project Info - Flex container for equal distribution */}
-      <div className="p-4 flex flex-col flex-grow">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-gray-900 line-clamp-2">{title}</h3>
-          <span className="text-sm text-gray-500 ml-2 flex-shrink-0">
-            {dateFormatter.format(new Date(completionDate))}
-          </span>
-        </div>
+      <div className="p-5 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+          {title}
+        </h3>
 
         {/* Description with consistent height */}
-        <div className="mb-4 flex-grow">
+        <div className="mb-5 flex-grow">
           <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
             {getPreviewText()}
           </p>
         </div>
 
         {/* Technologies - Fixed height container */}
-        <div className="mb-4 min-h-[2.5rem]">
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-5">
+          <div className="flex flex-wrap gap-1.5">
             {technologies.slice(0, 4).map((tech, index) => (
               <span
                 key={index}
-                className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700"
+                className="rounded-full bg-gray-50 border border-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
               >
                 {tech.name}
               </span>
             ))}
             {technologies.length > 4 && (
-              <span className="rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-600">
-                +{technologies.length - 4} more
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                +{technologies.length - 4}
               </span>
             )}
           </div>
         </div>
 
-        {/* Links - Always at bottom */}
-        <div className="flex items-center gap-4 mt-auto">
+        {/* Links */}
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
           {mainRepository && (
             <a
               href={mainRepository.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
             >
-              <FiGithub className="h-4 w-4" />
-              <span>Repository</span>
+              {getRepositoryIcon(mainRepository.type)}
+              <span className="text-sm font-medium">Code</span>
             </a>
           )}
-          
           {mainDemo && (
             <a
               href={mainDemo.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors group"
             >
-              <FiGlobe className="h-4 w-4" />
-              <span>Live Demo</span>
+              <span className="text-sm font-medium">Live Demo</span>
+              <FaExternalLinkAlt className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
           )}
-
+          
           <Link
             href={`/projects/${_id}`}
-            className="ml-auto text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
           >
-            View Details →
+            View Details
           </Link>
         </div>
       </div>

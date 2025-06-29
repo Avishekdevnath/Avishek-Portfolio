@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import BlogForm from '@/components/dashboard/BlogForm';
 
 interface Blog {
@@ -33,9 +33,14 @@ interface Blog {
 
 export default function EditBlogPost() {
   const params = useParams();
+  const router = useRouter();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const handleClose = () => {
+    router.push('/dashboard/posts');
+  };
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -139,8 +144,10 @@ export default function EditBlogPost() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6">
       <BlogForm
+        key={`edit-blog-form-${blog._id}`}
         mode="edit"
         initialData={blog}
+        onClose={handleClose}
       />
     </div>
   );

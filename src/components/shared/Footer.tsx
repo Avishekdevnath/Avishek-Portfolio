@@ -2,119 +2,94 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
-import { footerConfig } from '@/config/footer';
+import { useSettings } from '@/hooks/useSettings';
+import SocialLinks from './SocialLinks';
 
 export default function Footer() {
+  const { settings, loading } = useSettings();
   const currentYear = new Date().getFullYear();
-  const { about, navigationLinks, quickLinks, socialLinks, contactInfo, legal } = footerConfig;
 
-  return (
-    <footer className="bg-white border-t">
-      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* About Section */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">About Me</h3>
-            <p className="text-gray-600 mb-4">{about.description}</p>
-            <div className="flex space-x-4">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-blue-600 transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
+  const footerLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/about', label: 'About' },
+    { href: '/projects', label: 'Projects' },
+    { href: '/blogs', label: 'Blog' },
+    { href: '/contact', label: 'Contact' },
+  ];
+
+  if (loading) {
+    return (
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="animate-pulse space-y-8">
+            <div className="h-8 bg-gray-700 rounded w-48 mx-auto"></div>
+            <div className="h-4 bg-gray-700 rounded w-64 mx-auto"></div>
+            <div className="flex justify-center space-x-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-10 w-10 bg-gray-700 rounded-lg"></div>
               ))}
             </div>
           </div>
+        </div>
+      </footer>
+    );
+  }
 
-          {/* Navigation Links */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Navigation</h3>
-            <ul className="space-y-2">
-              {navigationLinks.map((link) => (
-                <li key={link.label}>
-                  <Link 
-                    href={link.href}
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+  return (
+    <footer className="bg-gray-900 text-white py-12">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+          {/* Brand and Description */}
+          <div className="text-center md:text-left">
+            <Link href="/" className="text-2xl font-bold text-white hover:text-orange-400 transition-colors">
+              {settings?.websiteSettings?.title || 'Portfolio'}
+            </Link>
+            <p className="mt-2 text-gray-400">
+              {settings?.websiteSettings?.metaDescription || 'Full Stack Developer'}
+            </p>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.label}>
-                  <Link 
-                    href={link.href}
-                    className="text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact</h3>
-            <ul className="space-y-2">
-              <li>
-                <a 
-                  href={`mailto:${contactInfo.email}`}
-                  className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
-                >
-                  <FiMail className="w-5 h-5 mr-2" />
-                  <span>{contactInfo.email}</span>
-                </a>
-              </li>
-              <li>
-                <a 
-                  href={`tel:${contactInfo.phone}`}
-                  className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
-                >
-                  <FiPhone className="w-5 h-5 mr-2" />
-                  <span>{contactInfo.phone}</span>
-                </a>
-              </li>
-              <li className="flex items-center text-gray-600">
-                <FiMapPin className="w-5 h-5 mr-2" />
-                <span>{contactInfo.location}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-gray-200">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 text-sm">
-              © {currentYear} {legal.name}. All rights reserved.
-            </p>
-            <div className="mt-4 md:mt-0 flex space-x-6">
-              {legal.links.map((link) => (
-                <Link 
-                  key={link.label}
-                  href={link.href} 
-                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <nav className="flex flex-wrap justify-center gap-4">
+              {footerLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-gray-400 hover:text-orange-400 transition-colors"
                 >
                   {link.label}
                 </Link>
               ))}
+            </nav>
+          </div>
+
+          {/* Social Links */}
+          <div className="text-center md:text-right">
+            <h3 className="text-lg font-semibold mb-4">Connect With Me</h3>
+            <div className="flex justify-center md:justify-end">
+              <SocialLinks iconClassName="w-6 h-6" />
             </div>
           </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+          <p>
+            © {currentYear} {settings?.websiteSettings?.title || 'Portfolio'}. All rights reserved.
+          </p>
+          {settings?.contactInfo?.email && (
+            <p className="mt-2">
+              Contact me at{' '}
+              <a
+                href={`mailto:${settings.contactInfo.email}`}
+                className="text-orange-400 hover:text-orange-300 transition-colors"
+              >
+                {settings.contactInfo.email}
+              </a>
+            </p>
+          )}
         </div>
       </div>
     </footer>

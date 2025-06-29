@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from 'mongoose';
+import { Schema, model, models, Document, Model } from 'mongoose';
 
 export interface INotification extends Document {
   type: 'message' | 'comment' | 'like' | 'system' | 'update' | 'warning';
@@ -14,6 +14,17 @@ export interface INotification extends Document {
   readAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  markAsRead(): Promise<INotification>;
+  markAsUnread(): Promise<INotification>;
+}
+
+export interface INotificationModel extends Model<INotification> {
+  createNotification(data: Partial<INotification>): Promise<INotification>;
+  markAsRead(id: string): Promise<INotification | null>;
+  markAsUnread(id: string): Promise<INotification | null>;
+  markAllAsRead(userId?: string): Promise<any>;
+  getUnreadCount(userId?: string): Promise<number>;
+  deleteOldNotifications(daysOld?: number): Promise<any>;
 }
 
 const notificationSchema = new Schema<INotification>({
@@ -198,6 +209,6 @@ notificationSchema.methods.markAsUnread = function() {
   return this.save();
 };
 
-const Notification = models.Notification || model<INotification>('Notification', notificationSchema);
+const Notification = (models.Notification || model<INotification, INotificationModel>('Notification', notificationSchema)) as INotificationModel;
 
 export default Notification; 

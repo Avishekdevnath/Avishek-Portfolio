@@ -2,14 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Project, ITechnology, IRepository, IDemoURL } from '@/types/dashboard';
+import { Project, Technology, Repository, DemoURL } from '@/types/dashboard';
 import { Trash2, Plus } from 'lucide-react';
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
-
-// Import rich text editor dynamically
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
+import DraftEditor from '@/components/shared/DraftEditor';
 
 // Define enum options
 const REPOSITORY_TYPES = ['github', 'gitlab', 'bitbucket', 'other'] as const;
@@ -31,6 +27,8 @@ const STATUS_OPTIONS = ['draft', 'published'] as const;
 interface EditProjectFormProps {
   projectId: string;
 }
+
+type ProjectStatus = 'draft' | 'published';
 
 export default function EditProjectForm({ projectId }: EditProjectFormProps) {
   const router = useRouter();
@@ -195,15 +193,10 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         image: data.data.url,
         imagePublicId: data.data.public_id,
       }));
-
-      // Keep the preview as the uploaded image URL
-      setPreviewImage(data.data.url);
     } catch (err) {
-      console.error('Upload error:', err);
+      console.error('Error uploading image:', err);
       setError(err instanceof Error ? err.message : 'Failed to upload image');
       setPreviewImage(formData.image || '/placeholder-project.svg');
-      // Clear the file input
-      e.target.value = '';
     } finally {
       setImageUploading(false);
     }
@@ -212,7 +205,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
   const addTechnology = () => {
     setFormData(prev => ({
       ...prev,
-      technologies: [...prev.technologies, { name: '' }]
+      technologies: [...prev.technologies, { name: '', icon: '' }]
     }));
   };
 
@@ -223,11 +216,11 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
     }));
   };
 
-  const updateTechnology = (index: number, value: string) => {
+  const updateTechnology = (index: number, field: keyof Technology, value: string) => {
     setFormData(prev => ({
       ...prev,
       technologies: prev.technologies.map((tech, i) => 
-        i === index ? { ...tech, name: value } : tech
+        i === index ? { ...tech, [field]: value } : tech
       )
     }));
   };
@@ -246,7 +239,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
     }));
   };
 
-  const updateRepository = (index: number, field: keyof IRepository, value: string) => {
+  const updateRepository = (index: number, field: keyof Repository, value: string) => {
     setFormData(prev => ({
       ...prev,
       repositories: prev.repositories.map((repo, i) => 
@@ -258,7 +251,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
   const addDemoUrl = () => {
     setFormData(prev => ({
       ...prev,
-      demoUrls: [...prev.demoUrls, { name: '', url: '' }]
+      demoUrls: [...prev.demoUrls, { name: '', url: '', type: 'live' }]
     }));
   };
 
@@ -269,7 +262,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
     }));
   };
 
-  const updateDemoUrl = (index: number, field: keyof IDemoURL, value: string) => {
+  const updateDemoUrl = (index: number, field: keyof DemoURL, value: string) => {
     setFormData(prev => ({
       ...prev,
       demoUrls: prev.demoUrls.map((demo, i) => 
@@ -280,20 +273,22 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-600">Loading project...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        {error}
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg">
-          {error}
-        </div>
-      )}
-
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -303,35 +298,22 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
           type="text"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          placeholder="Enter project title"
           required
         />
       </div>
 
-      {/* Description - Rich Text Editor */}
+      {/* Description */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Description
         </label>
-        <ReactQuill
+        <DraftEditor
           value={formData.description}
           onChange={(value) => setFormData({ ...formData, description: value })}
-          className="bg-white"
-          theme="snow"
-          modules={{
-            toolbar: [
-              [{ 'header': [1, 2, 3, false] }],
-              ['bold', 'italic', 'underline', 'strike'],
-              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-              ['blockquote', 'code-block'],
-              ['link'],
-              ['clean']
-            ],
-          }}
-          formats={[
-            'header', 'bold', 'italic', 'underline', 'strike',
-            'list', 'bullet', 'blockquote', 'code-block', 'link'
-          ]}
+          className="min-h-[200px]"
+          placeholder="Describe your project in detail..."
         />
       </div>
 
@@ -343,50 +325,11 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         <textarea
           value={formData.shortDescription}
           onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
-          rows={2}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          rows={3}
+          placeholder="Enter a brief description of your project"
+          required
         />
-      </div>
-
-      {/* Image Upload */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Project Image
-        </label>
-        <div className="flex items-start gap-4">
-          {/* Preview */}
-          <div className="relative w-40 h-40 bg-gray-100 rounded-lg overflow-hidden">
-            {previewImage ? (
-              <Image
-                src={previewImage}
-                alt="Project preview"
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-400">
-                No image
-              </div>
-            )}
-            {imageUploading && (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-              </div>
-            )}
-          </div>
-          {/* Upload Input */}
-          <div className="flex-1">
-            <input
-              type="file"
-              onChange={handleImageChange}
-              accept="image/jpeg,image/png,image/webp"
-              className="w-full"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              Recommended size: 1200x800px. Max size: 5MB.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Category */}
@@ -397,16 +340,208 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         <select
           value={formData.category}
           onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
           required
         >
-          <option value="">Select a category</option>
           {CATEGORIES.map((category) => (
             <option key={category} value={category}>
               {category}
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Technologies */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Technologies
+        </label>
+        {formData.technologies.map((tech, index) => (
+          <div key={index} className="flex gap-4 mb-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={tech.name}
+                onChange={(e) => updateTechnology(index, 'name', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Technology name"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <input
+                type="text"
+                value={tech.icon || ''}
+                onChange={(e) => updateTechnology(index, 'icon', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Icon URL (optional)"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => removeTechnology(index)}
+              className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addTechnology}
+          className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
+        >
+          <Plus size={20} />
+          Add Technology
+        </button>
+      </div>
+
+      {/* Repositories */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Repositories
+        </label>
+        {formData.repositories.map((repo, index) => (
+          <div key={index} className="flex gap-4 mb-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={repo.name}
+                onChange={(e) => updateRepository(index, 'name', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Repository name"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <input
+                type="url"
+                value={repo.url}
+                onChange={(e) => updateRepository(index, 'url', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Repository URL"
+                required
+              />
+            </div>
+            <div>
+              <select
+                value={repo.type}
+                onChange={(e) => updateRepository(index, 'type', e.target.value as any)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                required
+              >
+                {REPOSITORY_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => removeRepository(index)}
+              className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addRepository}
+          className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
+        >
+          <Plus size={20} />
+          Add Repository
+        </button>
+      </div>
+
+      {/* Demo URLs */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Demo URLs
+        </label>
+        {formData.demoUrls.map((demo, index) => (
+          <div key={index} className="flex gap-4 mb-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={demo.name}
+                onChange={(e) => updateDemoUrl(index, 'name', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Demo name"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <input
+                type="url"
+                value={demo.url}
+                onChange={(e) => updateDemoUrl(index, 'url', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Demo URL"
+                required
+              />
+            </div>
+            <div>
+              <select
+                value={demo.type}
+                onChange={(e) => updateDemoUrl(index, 'type', e.target.value as any)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                required
+              >
+                {DEMO_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => removeDemoUrl(index)}
+              className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addDemoUrl}
+          className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
+        >
+          <Plus size={20} />
+          Add Demo URL
+        </button>
+      </div>
+
+      {/* Completion Date */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Completion Date
+        </label>
+        <input
+          type="date"
+          value={formData.completionDate}
+          onChange={(e) => setFormData({ ...formData, completionDate: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          required
+        />
+      </div>
+
+      {/* Featured */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="featured"
+          checked={formData.featured}
+          onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+        />
+        <label htmlFor="featured" className="text-sm font-medium text-gray-700">
+          Featured Project
+        </label>
       </div>
 
       {/* Status */}
@@ -416,8 +551,8 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         </label>
         <select
           value={formData.status}
-          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectStatus })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
           required
         >
           {STATUS_OPTIONS.map((status) => (
@@ -428,179 +563,14 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         </select>
       </div>
 
-      {/* Featured */}
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="featured"
-          checked={formData.featured}
-          onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-        />
-        <label htmlFor="featured" className="text-sm font-medium text-gray-700">
-          Featured Project
-        </label>
-      </div>
-
-      {/* Technologies */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Technologies
-          </label>
-          <button
-            type="button"
-            onClick={addTechnology}
-            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-          >
-            <Plus size={16} />
-            Add Technology
-          </button>
-        </div>
-        <div className="space-y-2">
-          {formData.technologies.map((tech, index) => (
-            <div key={index} className="flex gap-2">
-              <input
-                type="text"
-                value={tech.name}
-                onChange={(e) => updateTechnology(index, e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., React, Node.js, etc."
-              />
-              <button
-                type="button"
-                onClick={() => removeTechnology(index)}
-                className="p-2 text-red-600 hover:text-red-700"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Repositories */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Repositories
-          </label>
-          <button
-            type="button"
-            onClick={addRepository}
-            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-          >
-            <Plus size={16} />
-            Add Repository
-          </button>
-        </div>
-        <div className="space-y-4">
-          {formData.repositories.map((repo, index) => (
-            <div key={index} className="flex gap-2">
-              <select
-                value={repo.type}
-                onChange={(e) => updateRepository(index, 'type', e.target.value)}
-                className="w-40 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select type</option>
-                {REPOSITORY_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="url"
-                value={repo.url}
-                onChange={(e) => updateRepository(index, 'url', e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Repository URL"
-              />
-              <input
-                type="text"
-                value={repo.name || ''}
-                onChange={(e) => updateRepository(index, 'name', e.target.value)}
-                className="w-40 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Label (optional)"
-              />
-              <button
-                type="button"
-                onClick={() => removeRepository(index)}
-                className="p-2 text-red-600 hover:text-red-700"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Demo URLs */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Demo URLs
-          </label>
-          <button
-            type="button"
-            onClick={addDemoUrl}
-            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-          >
-            <Plus size={16} />
-            Add Demo URL
-          </button>
-        </div>
-        <div className="space-y-4">
-          {formData.demoUrls.map((demo, index) => (
-            <div key={index} className="flex gap-2">
-              <select
-                value={demo.name}
-                onChange={(e) => updateDemoUrl(index, 'name', e.target.value)}
-                className="w-40 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select type</option>
-                {DEMO_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="url"
-                value={demo.url}
-                onChange={(e) => updateDemoUrl(index, 'url', e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Demo URL"
-              />
-              <button
-                type="button"
-                onClick={() => removeDemoUrl(index)}
-                className="p-2 text-red-600 hover:text-red-700"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Submit Button */}
-      <div className="flex justify-end gap-4">
-        <button
-          type="button"
-          onClick={() => router.push('/dashboard/projects')}
-          className="px-4 py-2 text-gray-700 hover:text-gray-900"
-        >
-          Cancel
-        </button>
+      <div className="flex justify-end">
         <button
           type="submit"
-          disabled={saving || imageUploading}
-          className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
-            (saving || imageUploading) ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          disabled={saving}
+          className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
         >
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? 'Saving...' : 'Save Project'}
         </button>
       </div>
     </form>

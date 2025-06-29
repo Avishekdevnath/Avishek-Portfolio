@@ -1,4 +1,4 @@
-import { sendContactNotification, sendAutoReply } from '../lib/email';
+import { sendContactFormEmail, sendNotificationEmail } from '../lib/email';
 
 async function testEmailFunctionality() {
   console.log('Testing email functionality...\n');
@@ -12,31 +12,29 @@ async function testEmailFunctionality() {
   };
 
   try {
-    // Test contact notification
-    console.log('1. Testing contact notification...');
-    const notificationResult = await sendContactNotification(testData);
+    // Test contact form email
+    console.log('1. Testing contact form email...');
+    const contactFormResult = await sendContactFormEmail(testData);
     
-    if (notificationResult.success) {
-      console.log('✅ Contact notification sent successfully');
-      console.log(`   Message ID: ${notificationResult.messageId}`);
+    if (contactFormResult) {
+      console.log('✅ Contact form email sent successfully');
+      console.log(`   Message ID: ${contactFormResult.messageId}`);
     } else {
-      console.log('❌ Contact notification failed');
-      console.log(`   Error: ${notificationResult.error}`);
+      console.log('❌ Contact form email failed');
     }
 
-    console.log('\n2. Testing auto-reply...');
-    const autoReplyResult = await sendAutoReply({
-      name: testData.name,
-      email: testData.email,
-      subject: testData.subject
+    console.log('\n2. Testing notification email...');
+    const notificationResult = await sendNotificationEmail({
+      subject: 'Test Notification',
+      message: 'This is a test notification email.',
+      type: 'info'
     });
 
-    if (autoReplyResult.success) {
-      console.log('✅ Auto-reply sent successfully');
-      console.log(`   Message ID: ${autoReplyResult.messageId}`);
+    if (notificationResult) {
+      console.log('✅ Notification email sent successfully');
+      console.log(`   Message ID: ${notificationResult.messageId}`);
     } else {
-      console.log('❌ Auto-reply failed');
-      console.log(`   Error: ${autoReplyResult.error}`);
+      console.log('❌ Notification email failed');
     }
 
   } catch (error) {

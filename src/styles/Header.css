@@ -1,10 +1,49 @@
-.nav-style{
-    background-color: #FCF8F8;
-    /* border: 1px solid black; */
-   
+/* Header styles */
+.header-nav {
+  background-color: rgba(252, 248, 248, 0.95);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.hire-style{
-    background-color: #FFEADE;
-    /* border: 1px solid black; */
+.header-nav:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.hire-button {
+  background-color: #FFEADE;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hire-button:hover {
+  background-color: #FFE0CC;
+  transform: translateY(-1px);
+}
+
+.hire-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.hire-button:hover::after {
+  left: 100%;
+}
+
+@media (max-width: 1024px) {
+  .header-nav {
+    background-color: rgba(252, 248, 248, 0.98);
+  }
 }

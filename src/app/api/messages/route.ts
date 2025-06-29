@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import connectDB from '@/lib/mongodb';
-import Message, { MessageCategory, MessageStatus } from '@/models/Message';
-import { sendContactNotification, sendAutoReply, sendAdminNotification } from '@/lib/email';
+import Message, { IMessage } from '@/models/Message';
+import { MessageCategory, MessageStatus } from '@/types/message';
+import { sendContactFormEmail } from '@/lib/email';
 import { createMessageNotification } from '@/lib/notifications';
-import { sendEmailNotification, sendContactFormEmail } from '@/lib/email';
+import { Document, Types, Model } from 'mongoose';
+
+interface IMessageModel extends Model<IMessage> {
+  getStats: () => Promise<{
+    total: number;
+    unread: number;
+    replied: number;
+    archived: number;
+  }>;
+}
 
 // Simple rate limiting using a Map
 const rateLimiter = new Map<string, { count: number; timestamp: number }>();
@@ -44,6 +54,11 @@ const checkRateLimit = (ip: string): boolean => {
   return true;
 };
 
+// Define query interface for message filtering
+interface MessageQuery {
+  status?: MessageStatus;
+}
+
 // GET /api/messages - Get all messages (for dashboard)
 export async function GET(request: NextRequest) {
   try {
@@ -55,7 +70,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'all';
 
     // Build query
-    const query: any = {};
+    const query: MessageQuery = {};
     if (status === 'unread') {
       query.status = MessageStatus.UNREAD;
     } else if (status === 'read') {
@@ -74,10 +89,14 @@ export async function GET(request: NextRequest) {
       .limit(limit);
 
     // Get total count and stats
-    const [total, stats] = await Promise.all([
-      Message.countDocuments(query),
-      Message.getStats()
-    ]);
+    const total = await Message.countDocuments(query);
+    const stats = {
+      total: await Message.countDocuments(),
+      unread: await Message.countDocuments({ status: MessageStatus.UNREAD }),
+      read: await Message.countDocuments({ status: MessageStatus.READ }),
+      replied: await Message.countDocuments({ status: MessageStatus.REPLIED }),
+      archived: await Message.countDocuments({ status: MessageStatus.ARCHIVED }),
+    };
 
     return NextResponse.json({
       success: true,
@@ -142,7 +161,7 @@ export async function POST(request: NextRequest) {
     await createMessageNotification({
       sender: name,
       subject: messageCategory,
-      id: newMessage._id.toString(),
+      id: (newMessage as { _id: { toString(): string } })._id.toString(),
       metadata: {
         senderEmail: email,
         messagePreview: message.substring(0, 100)

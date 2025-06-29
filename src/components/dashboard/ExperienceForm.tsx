@@ -1,21 +1,127 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaSave, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
-import dynamic from 'next/dynamic';
-
-// Import rich text editor dynamically
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
-import './quill.css';
+import DraftEditor from '../shared/DraftEditor';
+import {
+  ExperienceType,
+  ExperienceFormData,
+  IWorkExperience,
+  IEducation,
+  EmploymentType,
+  ExperienceStatus,
+  ExperienceApiResponse
+} from '@/types/experience';
 
 interface ExperienceFormProps {
-  initialData?: any;
-  type: 'work' | 'education';
+  initialData?: Partial<ExperienceFormData>;
+  type: ExperienceType;
   mode: 'create' | 'edit';
-  onClose?: () => void;
+  onClose: () => void;
 }
+
+type ArrayFieldKey = keyof Pick<ExperienceFormData, 
+  'technologies' | 
+  'achievements' | 
+  'responsibilities' | 
+  'activities' | 
+  'honors' | 
+  'coursework'
+>;
+
+type FormDataState = Partial<ExperienceFormData> & {
+  [K in ArrayFieldKey]?: string[];
+};
+
+type ArrayInputProps = {
+  field: ArrayFieldKey;
+  label: string;
+  placeholder: string;
+  values: string[];
+  onAdd: (field: ArrayFieldKey, value: string) => void;
+  onRemove: (field: ArrayFieldKey, index: number) => void;
+};
+
+const ArrayInput: React.FC<ArrayInputProps> = ({
+  field,
+  label,
+  placeholder,
+  values,
+  onAdd,
+  onRemove
+}) => {
+  const [inputValue, setInputValue] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleAddValue = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (inputValue.trim()) {
+      onAdd(field, inputValue.trim());
+      setInputValue('');
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        onAdd(field, inputValue.trim());
+        setInputValue('');
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <div className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          placeholder={placeholder}
+        />
+        <button
+          type="button"
+          onClick={handleAddValue}
+          className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          <FaPlus />
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2 mt-2">
+        {values.map((item, index) => (
+          <span
+            key={`${field}-${index}-${item}`}
+            className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm group"
+          >
+            {item}
+            <button
+              type="button"
+              onClick={() => onRemove(field, index)}
+              className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <FaTimes className="text-xs" />
+            </button>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default function ExperienceForm({ initialData, type, mode, onClose }: ExperienceFormProps) {
   const router = useRouter();
@@ -23,40 +129,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
-    // Common fields
-    title: initialData?.title || '',
-    organization: initialData?.organization || '',
-    location: initialData?.location || '',
-    startDate: initialData?.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : '',
-    endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : '',
-    isCurrent: initialData?.isCurrent || false,
-    description: initialData?.description || '',
-    order: initialData?.order || 0,
-    featured: initialData?.featured || false,
-    status: initialData?.status || 'published',
-    
-    // Work-specific fields (handle both old and new structure)
-    jobTitle: initialData?.jobTitle || initialData?.position || '',
-    level: initialData?.level || '',
-    company: initialData?.company || '',
-    employmentType: initialData?.employmentType || 'full-time',
-    technologies: initialData?.technologies || [],
-    achievements: initialData?.achievements || [],
-    responsibilities: initialData?.responsibilities || [],
-    website: initialData?.website || '',
-    companySize: initialData?.companySize || '',
-    
-    // Education-specific fields
-    degree: initialData?.degree || '',
-    institution: initialData?.institution || '',
-    fieldOfStudy: initialData?.fieldOfStudy || '',
-    gpa: initialData?.gpa || '',
-    maxGpa: initialData?.maxGpa || '',
-    activities: initialData?.activities || [],
-    honors: initialData?.honors || [],
-    coursework: initialData?.coursework || [],
-  });
+  const [formData, setFormData] = useState<FormDataState>(initialData || {});
 
   // Auto-sync organization and title fields
   useEffect(() => {
@@ -66,199 +139,149 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
         : formData.jobTitle;
       setFormData(prev => ({ 
         ...prev, 
-        organization: prev.company,
+        organization: prev.company || '',
         title: newTitle || prev.title
       }));
     } else {
       setFormData(prev => ({ 
         ...prev, 
-        organization: prev.institution,
+        organization: prev.institution || '',
         title: prev.degree || prev.title
       }));
     }
   }, [formData.company, formData.institution, formData.jobTitle, formData.level, formData.degree, type]);
 
   const handleDescriptionChange = (value: string) => {
-    setFormData(prev => ({ ...prev, description: value }));
-  };
+    try {
+      // If empty, set to empty string
+      if (!value.trim()) {
+        setFormData(prev => ({ ...prev, description: '' }));
+        return;
+      }
 
-  const handleArrayFieldAdd = (field: string, value: string) => {
-    if (value.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        [field]: [...(prev[field] as string[]), value.trim()]
-      }));
+      // Try to parse as Draft.js content
+      const content = JSON.parse(value);
+      if (content.blocks && Array.isArray(content.blocks)) {
+        // Valid Draft.js content
+        setFormData(prev => ({ ...prev, description: value }));
+      } else {
+        // Invalid Draft.js content, store as plain text
+        setFormData(prev => ({ ...prev, description: value }));
+      }
+    } catch (error) {
+      // If parsing fails, store as plain text
+      console.warn('Failed to parse description content:', error);
+      setFormData(prev => ({ ...prev, description: value }));
     }
   };
 
-  const handleArrayFieldRemove = (field: string, index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: (prev[field] as string[]).filter((_, i) => i !== index)
-    }));
+  const handleArrayFieldAdd = (field: ArrayFieldKey, value: string) => {
+    if (!value.trim()) return;
+
+    setFormData(prev => {
+      const currentArray = prev[field] as string[] || [];
+      return {
+        ...prev,
+        [field]: [...currentArray, value.trim()]
+      };
+    });
   };
 
-  const ArrayFieldInput = ({ field, label, placeholder }: { field: string; label: string; placeholder: string }) => {
-    const [inputValue, setInputValue] = useState('');
-    
-    return (
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
-        <div className="flex gap-2 mb-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleArrayFieldAdd(field, inputValue);
-                setInputValue('');
-              }
-            }}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            placeholder={placeholder}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              handleArrayFieldAdd(field, inputValue);
-              setInputValue('');
-            }}
-            className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            <FaPlus />
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {(formData[field] as string[]).map((item, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-            >
-              {item}
-              <button
-                type="button"
-                onClick={() => handleArrayFieldRemove(field, index)}
-                className="text-red-500 hover:text-red-700"
-              >
-                <FaTimes className="text-xs" />
-              </button>
-            </span>
-          ))}
-        </div>
-      </div>
-    );
+  const handleArrayFieldRemove = (field: ArrayFieldKey, index: number) => {
+    setFormData(prev => {
+      const currentArray = prev[field] as string[] || [];
+      return {
+        ...prev,
+        [field]: currentArray.filter((_, i) => i !== index)
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError(null);
 
     try {
-      console.log('=== EXPERIENCE FORM SUBMIT DEBUG ===');
-      console.log('Form mode:', mode);
-      console.log('Experience type:', type);
-      console.log('Form data:', JSON.stringify(formData, null, 2));
+      // Ensure arrays are properly initialized
+      const arrayFields: ArrayFieldKey[] = ['technologies', 'achievements', 'responsibilities', 'activities', 'honors', 'coursework'];
+      const initializedArrays = arrayFields.reduce((acc, field) => ({
+        ...acc,
+        [field]: formData[field] || []
+      }), {});
 
-      // Prepare data for submission
-      const submitData = { ...formData };
-      
-      // Convert empty strings to null for optional fields
-      Object.keys(submitData).forEach(key => {
-        if (submitData[key] === '') {
-          submitData[key] = null;
-        }
-      });
+      const submitData = {
+        ...formData,
+        ...initializedArrays,
+        type,
+        // Convert empty strings to null
+        ...Object.fromEntries(
+          Object.entries(formData).map(([key, value]) => [
+            key,
+            value === '' ? null : (Array.isArray(value) ? value : value)
+          ])
+        ),
+        // Convert string dates to ISO strings
+        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
+        endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
+        // Convert string numbers to actual numbers
+        gpa: formData.gpa ? parseFloat(formData.gpa as string) : null,
+        maxGpa: formData.maxGpa ? parseFloat(formData.maxGpa as string) : null,
+      };
 
       // For work experience, ensure we have both old and new structure
       if (type === 'work') {
-        console.log('Processing work experience data...');
-        
-        // If jobTitle is missing but we have title, use title as jobTitle
         if (!submitData.jobTitle && submitData.title) {
           submitData.jobTitle = submitData.title;
-          console.log('Set jobTitle from title:', submitData.jobTitle);
         }
-
-        // Ensure organization matches company
         if (submitData.company && !submitData.organization) {
           submitData.organization = submitData.company;
-          console.log('Set organization from company:', submitData.organization);
         }
-
-        // Generate title from level + jobTitle if needed
         if (!submitData.title && submitData.jobTitle) {
           submitData.title = submitData.level 
             ? `${submitData.level} ${submitData.jobTitle}` 
             : submitData.jobTitle;
-          console.log('Generated title:', submitData.title);
         }
       }
 
       // For education experience
       if (type === 'education') {
-        console.log('Processing education data...');
-        
-        // If title is missing but we have degree, use degree as title
         if (!submitData.title && submitData.degree) {
           submitData.title = submitData.degree;
-          console.log('Set title from degree:', submitData.title);
         }
-
-        // Ensure organization matches institution
         if (submitData.institution && !submitData.organization) {
           submitData.organization = submitData.institution;
-          console.log('Set organization from institution:', submitData.organization);
         }
       }
 
-      console.log('Final submit data:', JSON.stringify(submitData, null, 2));
+      const endpoint = mode === 'create'
+        ? `/api/experience/${type}`
+        : `/api/experience/${type}/${initialData?._id}`;
 
-      const url = mode === 'edit' 
-        ? `/api/experience/${type}/${initialData?._id}`
-        : `/api/experience/${type}`;
-      
-      const method = mode === 'edit' ? 'PUT' : 'POST';
-      console.log('API request:', { url, method });
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(endpoint, {
+        method: mode === 'create' ? 'POST' : 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(submitData),
       });
 
-      console.log('API response status:', response.status);
-      console.log('API response ok:', response.ok);
-
-      const responseText = await response.text();
-      console.log('API response text:', responseText);
-
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Failed to parse response as JSON:', parseError);
-        throw new Error(`Invalid response: ${responseText}`);
-      }
-
-      console.log('API response data:', JSON.stringify(result, null, 2));
+      const result: ExperienceApiResponse = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || `HTTP ${response.status}: Request failed`);
+        throw new Error(result.error || 'Failed to save experience');
       }
 
-      if (!result.success) {
-        throw new Error(result.error || 'Operation failed');
-      }
-
-      console.log('Experience saved successfully:', result.data);
-      onClose();
-    } catch (error) {
-      console.error('=== EXPERIENCE FORM SUBMIT ERROR ===');
-      console.error('Error details:', error);
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      setSuccess('Experience saved successfully');
+      router.refresh();
+      
+      // Close form after success
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (err) {
+      console.error('Error saving experience:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save experience');
     } finally {
       setLoading(false);
     }
@@ -366,7 +389,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
                     </label>
                     <select
                       value={formData.employmentType}
-                      onChange={(e) => setFormData(prev => ({ ...prev, employmentType: e.target.value }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, employmentType: e.target.value as EmploymentType }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       required
                     >
@@ -427,7 +450,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
                       <input
                         type="number"
                         step="0.01"
-                        value={formData.gpa}
+                        value={formData.gpa || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, gpa: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         placeholder="3.8"
@@ -440,7 +463,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
                       <input
                         type="number"
                         step="0.01"
-                        value={formData.maxGpa}
+                        value={formData.maxGpa || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, maxGpa: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         placeholder="4.0"
@@ -472,7 +495,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
                 </label>
                 <input
                   type="date"
-                  value={formData.startDate}
+                  value={formData.startDate instanceof Date ? formData.startDate.toISOString().split('T')[0] : formData.startDate || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   required
@@ -484,7 +507,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
                 </label>
                 <input
                   type="date"
-                  value={formData.endDate}
+                  value={formData.endDate instanceof Date ? formData.endDate.toISOString().split('T')[0] : formData.endDate || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   disabled={formData.isCurrent}
@@ -512,45 +535,57 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
+                Description
               </label>
-              <ReactQuill
-                value={formData.description}
+              <DraftEditor
+                value={formData.description || ''}
                 onChange={handleDescriptionChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                placeholder={type === 'work' 
-                  ? 'Describe your role, responsibilities, and achievements...'
-                  : 'Describe your studies, projects, and academic achievements...'
+                className="min-h-[200px]"
+                placeholder={
+                  type === 'work'
+                    ? 'Describe your role, responsibilities, and achievements...'
+                    : 'Describe your studies, projects, and academic achievements...'
                 }
-                required
               />
             </div>
 
             {/* Type-specific array fields */}
             {type === 'work' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ArrayFieldInput 
-                  field="technologies" 
-                  label="Technologies" 
-                  placeholder="React, Node.js, Python..." 
+                <ArrayInput 
+                  field="technologies"
+                  label="Technologies"
+                  placeholder="React, Node.js, Python..."
+                  values={formData.technologies || []}
+                  onAdd={handleArrayFieldAdd}
+                  onRemove={handleArrayFieldRemove}
                 />
-                <ArrayFieldInput 
-                  field="achievements" 
-                  label="Key Achievements" 
-                  placeholder="Increased performance by 40%..." 
+                <ArrayInput 
+                  field="achievements"
+                  label="Key Achievements"
+                  placeholder="Increased performance by 40%..."
+                  values={formData.achievements || []}
+                  onAdd={handleArrayFieldAdd}
+                  onRemove={handleArrayFieldRemove}
                 />
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <ArrayFieldInput 
-                  field="honors" 
-                  label="Honors & Awards" 
-                  placeholder="Dean's List, Summa Cum Laude..." 
+                <ArrayInput 
+                  field="honors"
+                  label="Honors & Awards"
+                  placeholder="Dean's List, Summa Cum Laude..."
+                  values={formData.honors || []}
+                  onAdd={handleArrayFieldAdd}
+                  onRemove={handleArrayFieldRemove}
                 />
-                <ArrayFieldInput 
-                  field="activities" 
-                  label="Activities" 
-                  placeholder="Programming Club, Research Assistant..." 
+                <ArrayInput 
+                  field="activities"
+                  label="Activities"
+                  placeholder="Student Council, Research Assistant..."
+                  values={formData.activities || []}
+                  onAdd={handleArrayFieldAdd}
+                  onRemove={handleArrayFieldRemove}
                 />
               </div>
             )}
@@ -602,7 +637,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
                 </label>
                 <select
                   value={formData.status}
-                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as ExperienceStatus }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="published">Published</option>

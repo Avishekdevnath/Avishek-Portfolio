@@ -1,10 +1,16 @@
 import { Star, Archive, Trash2, Clock, Reply, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { IMessage, MessageStatus } from '@/models/Message';
+import { IMessage } from '@/models/Message';
+import { MessageStatus } from '@/types/message';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import mongoose from 'mongoose';
+
+interface MessageWithId extends Omit<IMessage, '_id'> {
+  _id: string;
+}
 
 interface MessageRowProps {
-  message: IMessage;
+  message: MessageWithId;
   onStatusChange: (messageId: string, status: MessageStatus) => Promise<void>;
   onDelete: (messageId: string) => Promise<void>;
 }

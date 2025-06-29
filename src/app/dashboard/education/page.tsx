@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   GraduationCap, 
   Calendar, 
@@ -21,36 +21,39 @@ import {
   Users,
   FileText
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import DraftViewer from '@/components/shared/DraftViewer';
 
-interface Education {
-  _id: string;
-  type: 'education';
-  title: string;
-  degree: string;
-  institution: string;
-  organization: string;
-  location: string;
+// Import the IEducation interface from the model
+import type { IEducation, DraftContent } from '@/types/experience';
+
+// Create a type that makes _id optional and converts Date to string
+type Education = Omit<IEducation, '_id' | 'startDate' | 'endDate'> & {
+  _id?: string;
   startDate: string;
   endDate?: string;
-  isCurrent: boolean;
-  description: string;
-  featured: boolean;
-  order: number;
-  status: 'draft' | 'published';
-  fieldOfStudy: string;
-  gpa?: number;
-  maxGpa?: number;
-  activities?: string[];
-  honors?: string[];
-  coursework?: string[];
-  thesis?: {
-    title?: string;
-    description?: string;
-    supervisor?: string;
-  };
+};
+
+// Create a type for form state that makes _id optional
+type FormEducation = Omit<Education, '_id'> & { _id?: string };
+
+interface FormState {
+  show: boolean;
+  mode: 'create' | 'edit';
+  data?: FormEducation;
 }
 
 import EducationForm from '@/components/dashboard/EducationForm';
+
+// Helper function to safely render description
+const renderDescription = (description: string | DraftContent): JSX.Element => {
+  if (typeof description === 'string') {
+    return <span>{description}</span>;
+  }
+  // If it's a DraftContent object, use DraftViewer
+  return <DraftViewer content={description} />;
+};
 
 // Education Details Modal Component
 function EducationDetailsModal({ 
@@ -60,8 +63,9 @@ function EducationDetailsModal({
   education: Education; 
   onClose: () => void; 
 }) {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', { 
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('en-US', { 
       month: 'long', 
       day: 'numeric',
       year: 'numeric' 
@@ -200,7 +204,9 @@ function EducationDetailsModal({
               <FileText size={20} />
               Description
             </h3>
-            <p className="text-gray-700 leading-relaxed">{education.description}</p>
+            <div className="text-gray-700 leading-relaxed">
+              <DraftViewer content={education.description} />
+            </div>
           </div>
 
           {/* Honors & Awards */}
@@ -273,7 +279,9 @@ function EducationDetailsModal({
                 {education.thesis.description && (
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Description</p>
-                    <p className="text-gray-700">{education.thesis.description}</p>
+                    <div className="text-gray-700">
+                      <DraftViewer content={education.thesis.description} />
+                    </div>
                   </div>
                 )}
                 {education.thesis.supervisor && (
@@ -373,7 +381,9 @@ function EducationCard({
                 </div>
               )}
             </div>
-            <p className="text-gray-600 text-sm line-clamp-2">{education.description}</p>
+            <div className="text-gray-600 text-sm line-clamp-2">
+              <DraftViewer content={education.description} />
+            </div>
             
             {/* GPA Display */}
             {education.gpa && education.maxGpa && (
@@ -400,7 +410,7 @@ function EducationCard({
                     </span>
                   ))}
                   {education.honors.length > 2 && (
-                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
                       +{education.honors.length - 2} more
                     </span>
                   )}
@@ -410,27 +420,27 @@ function EducationCard({
           </div>
         </div>
         
-        <div className="flex gap-2 ml-4">
-          <button 
+        <div className="flex gap-2">
+          <button
             onClick={() => onView(education)}
-            className="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
             title="View Details"
           >
-            <Eye size={16} />
+            <Eye size={18} />
           </button>
-          <button 
+          <button
             onClick={() => onEdit(education)}
-            className="p-2 text-purple-500 hover:bg-purple-50 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
             title="Edit"
           >
-            <Pencil size={16} />
+            <Pencil size={18} />
           </button>
-          <button 
-            onClick={() => onDelete(education._id)}
-            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          <button
+            onClick={() => onDelete(education._id!)}
+            className="p-2 text-red-500 hover:text-red-700 transition-colors"
             title="Delete"
           >
-            <Trash2 size={16} />
+            <Trash2 size={18} />
           </button>
         </div>
       </div>
@@ -439,15 +449,18 @@ function EducationCard({
 }
 
 export default function EducationPage() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [educationEntries, setEducationEntries] = useState<Education[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [viewingEducation, setViewingEducation] = useState<Education | null>(null);
   const [showForm, setShowForm] = useState<{
     show: boolean;
     mode: 'create' | 'edit';
-    data?: Education;
-  }>({ show: false, mode: 'create' });
-  const [viewingEducation, setViewingEducation] = useState<Education | null>(null);
+    data?: Omit<Education, '_id'> & { _id?: string };
+  }>({
+    show: false,
+    mode: 'create'
+  });
 
   const fetchEducation = async () => {
     try {
@@ -503,10 +516,12 @@ export default function EducationPage() {
   };
 
   const handleEdit = (education: Education) => {
+    // Convert Education to EducationData by making _id optional
+    const { _id, ...rest } = education;
     setShowForm({
       show: true,
       mode: 'edit',
-      data: education
+      data: { _id, ...rest }
     });
   };
 
@@ -515,7 +530,7 @@ export default function EducationPage() {
   };
 
   const handleCloseForm = () => {
-    setShowForm({ show: false, mode: 'create' });
+    setShowForm({ show: false, mode: 'create', data: undefined });
     fetchEducation();
   };
 

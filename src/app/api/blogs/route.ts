@@ -3,6 +3,26 @@ import { connectToDatabase } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
 import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 
+interface MongoError {
+  code: number;
+  keyPattern?: {
+    slug?: boolean;
+  };
+}
+
+// Define query interface
+interface BlogQuery {
+  status: string;
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    excerpt?: { $regex: string; $options: string };
+    content?: { $regex: string; $options: string };
+  }>;
+  category?: string;
+  tags?: string;
+  featured?: boolean;
+}
+
 // Function to generate slug from title
 function generateSlug(title: string): string {
   return title
@@ -30,7 +50,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     
     // Build query
-    const query: any = { status };
+    const query: BlogQuery = { status };
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -52,8 +72,9 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
     
     // Build sort object
-    const sort: any = {};
-    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    const sort: Record<string, 1 | -1> = {
+      [sortBy]: sortOrder === 'asc' ? 1 : -1
+    };
 
     const [blogs, total] = await Promise.all([
       Blog.find(query)
@@ -158,11 +179,12 @@ export async function POST(request: NextRequest) {
     
     return sendSuccess(blog, 'Blog post created successfully');
   } catch (error) {
-    console.error('=== BLOG API ERROR ===');
-    console.error('Error details:', error);
+    console.error('Error creating blog:', error);
     console.error('Error type:', typeof error);
     console.error('Error constructor:', error?.constructor?.name);
-    if (error.code === 11000 && error.keyPattern?.slug) {
+    
+    const mongoError = error as MongoError;
+    if (mongoError.code === 11000 && mongoError.keyPattern?.slug) {
       return sendError('A blog post with this title already exists', 400);
     }
     return handleApiError(error);
