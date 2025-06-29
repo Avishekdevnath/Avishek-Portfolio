@@ -8,16 +8,13 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    domains: ['res.cloudinary.com'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
-        pathname: '/**',
       },
     ],
-  },
-  experimental: {
-    serverActions: true,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {

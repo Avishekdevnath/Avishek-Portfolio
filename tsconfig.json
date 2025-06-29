@@ -1,28 +1,34 @@
 {
   "compilerOptions": {
-    "target": "ES2017", // Good, but consider "esnext" for the latest features
-    "lib": ["dom", "dom.iterable", "esnext"], // Correct for Next.js
-    "allowJs": true, // Good, allows JavaScript files if needed
-    "skipLibCheck": true, // Good, speeds up compilation by skipping type checking of declaration files
-    "strict": true, // Good, enforces strict type checking
-    "noEmit": true, // Correct, Next.js handles emission
-    "esModuleInterop": true, // Good, ensures compatibility with CommonJS modules
-    "module": "esnext", // Correct for Next.js
-    "moduleResolution": "bundler", // Good, aligns with modern bundlers like Next.js
-    "resolveJsonModule": true, // Good, allows importing JSON files
-    "isolatedModules": true, // Correct, required for Next.js to work with tools like Babel
-    "jsx": "preserve", // Correct, preserves JSX for Next.js to transform
-    "incremental": true, // Good, speeds up subsequent builds
+    "target": "esnext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "plugins": [
       {
-        "name": "next" // Correct, enables Next.js-specific TypeScript plugin
+        "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./src/*"] // Good, enables alias for cleaner imports
+      "@/*": ["./src/*"]
     },
-    "forceConsistentCasingInFileNames": true // Recommended addition for cross-platform compatibility
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"], // Correct
-  "exclude": ["node_modules"] // Correct
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

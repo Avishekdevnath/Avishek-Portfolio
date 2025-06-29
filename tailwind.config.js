@@ -68,11 +68,31 @@ module.exports = {
         blink: {
           '0%, 100%': { opacity: 0.2 },
           '50%': { opacity: 1 }
+        },
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 }
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(10px)', opacity: 0 },
+          '100%': { transform: 'translateY(0)', opacity: 1 }
+        },
+        pulse: {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.5 }
+        },
+        bounce: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' }
         }
       },
       animation: {
         loading: 'loading 2s ease-in-out infinite',
         blink: 'blink 1s ease-in-out infinite',
+        fadeIn: 'fadeIn 0.5s ease-out',
+        slideUp: 'slideUp 0.5s ease-out',
+        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        bounce: 'bounce 1s ease-in-out infinite'
       }
     },
   },
@@ -95,5 +115,9 @@ module.exports = {
     'text-green-600',
     'prose',
     'prose-lg',
+    'animate-fadeIn',
+    'animate-slideUp',
+    'animate-pulse',
+    'animate-bounce'
   ]
 } 
