@@ -7,11 +7,6 @@ interface LikeButtonProps {
   initialLikes: number;
 }
 
-// Simple function to generate a random device ID
-function generateDeviceId() {
-  return `device_${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
-}
-
 export default function LikeButton({ slug, initialLikes }: LikeButtonProps) {
   const [likes, setLikes] = useState(initialLikes);
   const [hasLiked, setHasLiked] = useState(false);
@@ -20,7 +15,7 @@ export default function LikeButton({ slug, initialLikes }: LikeButtonProps) {
 
   useEffect(() => {
     // Check if user has liked this post before
-    const deviceId = localStorage.getItem('deviceId') || generateDeviceId();
+    const deviceId = localStorage.getItem('deviceId') || 'defaultDeviceId';
     localStorage.setItem('deviceId', deviceId);
     
     const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
@@ -28,62 +23,44 @@ export default function LikeButton({ slug, initialLikes }: LikeButtonProps) {
   }, [slug]);
 
   const handleLike = async () => {
+    if (hasLiked) return; // Prevent multiple likes per device
+
     try {
       setIsLoading(true);
       setError(null);
-      const deviceId = localStorage.getItem('deviceId')!;
-      
-      // Optimistically update the UI
-      const newLikeCount = hasLiked ? likes - 1 : likes + 1;
-      setLikes(newLikeCount);
-      setHasLiked(!hasLiked);
 
-      // Update localStorage optimistically
-      const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
-      if (!hasLiked) {
-        likedPosts[slug] = true;
-      } else {
-        delete likedPosts[slug];
-      }
-      localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
-      
+      // Optimistically update UI
+      setLikes((prev) => prev + 1);
+      setHasLiked(true);
+
       const response = await fetch(`/api/blogs/${slug}/like`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ deviceId }),
       });
 
       if (!response.ok) {
-        // Revert optimistic updates if the request fails
-        setLikes(likes);
-        setHasLiked(hasLiked);
+        // Revert optimistic update
+        setLikes((prev) => prev - 1);
+        setHasLiked(false);
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update like');
+        // If already liked (409) set state anyway
+        if (response.status === 409) {
+          setHasLiked(true);
+        }
+        throw new Error(errorData.error || 'Failed to like');
       }
 
       const data = await response.json();
+      if (data.likesCount !== undefined) {
+        setLikes(data.likesCount);
+      }
 
-      // Update with actual server data
-      if (data.success) {
-        setLikes(data.data.likes);
-        setHasLiked(data.data.hasLiked);
-      } else {
-        throw new Error(data.error || 'Failed to update like');
-      }
-    } catch (error) {
-      console.error('Error updating like:', error);
-      setError(error instanceof Error ? error.message : 'Failed to update like');
-      
-      // Revert localStorage on error
+      // Persist liked state locally (device-level)
       const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '{}');
-      if (hasLiked) {
-        likedPosts[slug] = true;
-      } else {
-        delete likedPosts[slug];
-      }
+      likedPosts[slug] = true;
       localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
+    } catch (error) {
+      console.error('Error liking post:', error);
+      setError(error instanceof Error ? error.message : 'Failed to like');
     } finally {
       setIsLoading(false);
     }
@@ -93,10 +70,10 @@ export default function LikeButton({ slug, initialLikes }: LikeButtonProps) {
     <div className="flex items-center">
       <button
         onClick={handleLike}
-        disabled={isLoading}
+        disabled={isLoading || hasLiked}
         className={`flex items-center space-x-2 px-4 py-2 rounded-full font-medium transition-all duration-200 hover:scale-105 ${
           hasLiked
-            ? 'bg-red-100 text-red-600 hover:bg-red-200'
+            ? 'bg-red-100 text-red-600 cursor-not-allowed'
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-red-500'
         } ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
       >

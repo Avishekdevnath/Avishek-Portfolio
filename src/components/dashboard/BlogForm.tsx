@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaSave, FaImage, FaTimes, FaEye, FaCode, FaPalette, FaPlus, FaUser, FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
-import DraftEditor from '../shared/DraftEditor';
+import dynamic from 'next/dynamic';
 
 interface BlogFormProps {
   initialData?: {
@@ -46,6 +46,7 @@ interface BlogFormProps {
 }
 
 const categories = ['General', 'Technology', 'Programming', 'Web Development', 'Career'];
+const RichTextEditor = dynamic(() => import('@/components/shared/RichTextEditor'), { ssr: false });
 
 export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         website: initialData?.author?.social?.website || '',
       }
     },
-    status: initialData?.status || 'draft',
+    status: initialData?.status || 'published',
     featured: initialData?.featured || false,
     publishedAt: initialData?.publishedAt || '',
     metaTitle: initialData?.metaTitle || '',
@@ -134,16 +135,11 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
   // Calculate reading time
   useEffect(() => {
     if (formData.content) {
-      try {
-        const content = typeof formData.content === 'string' ? JSON.parse(formData.content) : formData.content;
-        const text = content.blocks.map((block: any) => block.text).join(' ');
-        const wordsPerMinute = 200;
-        const wordCount = text.split(/\s+/).length;
-        const readTime = Math.ceil(wordCount / wordsPerMinute);
-        setFormData(prev => ({ ...prev, readTime }));
-      } catch (error) {
-        console.warn('Failed to calculate reading time:', error);
-      }
+      const text = formData.content as string;
+      const wordsPerMinute = 200;
+      const wordCount = text.trim().split(/\s+/).length;
+      const readTime = Math.ceil(wordCount / wordsPerMinute);
+      setFormData(prev => ({ ...prev, readTime }));
     }
   }, [formData.content]);
 
@@ -154,41 +150,28 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
     }
   }, [formData.status]);
 
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = async (file: File): Promise<string> => {
     try {
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Image size must be less than 5MB');
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      if (!isImage && !isVideo) {
+        throw new Error('Unsupported file type');
       }
-
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      const maxSize = isImage ? 5 * 1024 * 1024 : 100 * 1024 * 1024;
+      if (file.size > maxSize) {
+        throw new Error(`File size must be less than ${isImage ? '5MB' : '100MB'}`);
       }
-
-      // Create form data for upload
-      const uploadData = new FormData();
-      uploadData.append('image', file);
-
-      // Upload image
-      const response = await fetch('/api/blogs/upload-image', {
-        method: 'POST',
-        body: uploadData
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        // Return the image URL to be inserted in the editor
-        return data.url;
-      } else {
-        throw new Error(data.error || 'Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Image upload error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to upload image');
-      return null;
+      const form = new FormData();
+      form.append(isImage ? 'image' : 'video', file);
+      const endpoint = isImage ? '/api/blogs/upload-image' : '/api/blogs/upload-video';
+      const res = await fetch(endpoint, { method: 'POST', body: form });
+      const data = await res.json();
+      if (data.success) return data.url as string;
+      throw new Error(data.error || 'Failed to upload');
+    } catch (err) {
+      console.error('Media upload error', err);
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+      throw err; // Re-throw the error instead of returning null
     }
   };
 
@@ -199,12 +182,9 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
     try {
       setLoading(true);
       const imageUrl = await handleImageUpload(file);
-      
-      if (imageUrl) {
-        setImagePreview(imageUrl);
-        setFormData(prev => ({ ...prev, coverImage: imageUrl }));
-        toast.success('Cover image uploaded successfully');
-      }
+      setImagePreview(imageUrl);
+      setFormData(prev => ({ ...prev, coverImage: imageUrl }));
+      toast.success('Cover image uploaded successfully');
     } catch (error) {
       console.error('Cover image upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
@@ -235,12 +215,9 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
       try {
         setLoading(true);
         const imageUrl = await handleImageUpload(file);
-        
-        if (imageUrl) {
-          setImagePreview(imageUrl);
-          setFormData(prev => ({ ...prev, coverImage: imageUrl }));
-          toast.success('Cover image uploaded successfully');
-        }
+        setImagePreview(imageUrl);
+        setFormData(prev => ({ ...prev, coverImage: imageUrl }));
+        toast.success('Cover image uploaded successfully');
       } catch (error) {
         console.error('Cover image upload error:', error);
         toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
@@ -273,27 +250,10 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
   };
 
   const validateContent = (content: string): { isValid: boolean; error?: string } => {
-    try {
-      const parsedContent = JSON.parse(content);
-      
-      // Check if content has blocks
-      if (!Array.isArray(parsedContent.blocks) || parsedContent.blocks.length === 0) {
-        return { isValid: false, error: 'Content must not be empty' };
-      }
-
-      // Check if content has actual text
-      const hasText = parsedContent.blocks.some((block: any) => 
-        block.text && block.text.trim().length > 0
-      );
-
-      if (!hasText) {
-        return { isValid: false, error: 'Content must contain some text' };
-      }
-
-      return { isValid: true };
-    } catch (error) {
-      return { isValid: false, error: 'Invalid content format' };
+    if (!content || !content.trim()) {
+      return { isValid: false, error: 'Content must not be empty' };
     }
+    return { isValid: true };
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -582,13 +542,10 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Content <span className="text-red-500">*</span>
         </label>
-        <DraftEditor
+        <RichTextEditor
           value={formData.content}
-          onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
-          className={`min-h-[400px] ${
-            !formData.content ? 'border-red-300' : ''
-          }`}
-          placeholder="Write your blog post content here..."
+          onChange={(html: string) => setFormData(prev => ({ ...prev, content: html }))}
+          minHeight="300px"
         />
         {!formData.content && (
           <p className="mt-1 text-sm text-red-500">Content is required</p>

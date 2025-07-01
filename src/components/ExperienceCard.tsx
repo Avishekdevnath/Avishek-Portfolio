@@ -15,7 +15,6 @@ import {
   FaCode
 } from 'react-icons/fa';
 import { IWorkExperience, IEducation } from '@/types/experience';
-import DraftViewer from './shared/DraftViewer';
 
 interface ExperienceCardProps {
   experience: IWorkExperience | IEducation;
@@ -142,7 +141,7 @@ export default function ExperienceCard({
         {/* Description */}
         {variant !== 'compact' && (
           <div className="mt-4 text-gray-700 prose-sm">
-            <DraftViewer content={workExp.description} className="prose-sm" />
+            <div className="prose-sm">{typeof workExp.description === 'string' ? workExp.description : JSON.stringify(workExp.description)}</div>
           </div>
         )}
 
@@ -265,7 +264,7 @@ export default function ExperienceCard({
           {/* Description */}
           {variant !== 'compact' && (
             <div className="mt-4 text-gray-700">
-              <DraftViewer content={educationExp.description} className="prose-sm" />
+              <div className="prose-sm">{typeof educationExp.description === 'string' ? educationExp.description : JSON.stringify(educationExp.description)}</div>
             </div>
           )}
 
@@ -283,7 +282,7 @@ export default function ExperienceCard({
               {typeof educationExp.thesis.description === 'string' ? (
                 <p className="text-gray-600 mt-2">{educationExp.thesis.description}</p>
               ) : (
-                <DraftViewer content={educationExp.thesis.description} className="prose-sm mt-2" />
+                <div className="prose-sm mt-2">{typeof educationExp.thesis.description === 'string' ? educationExp.thesis.description : JSON.stringify(educationExp.thesis.description)}</div>
               )}
             </div>
           )}

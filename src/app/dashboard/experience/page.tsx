@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { PlusCircle, Pencil, Trash2, Building2, Calendar, MapPin, Star, Briefcase, Users, TrendingUp, Award, Eye, X, User, Globe, DollarSign, Clock, Code, Target, CheckCircle } from 'lucide-react';
 import ExperienceForm from '@/components/dashboard/ExperienceForm';
-import DraftViewer from '@/components/shared/DraftViewer';
 import { IWorkExperience, ExperienceApiResponse, ExperienceListApiResponse } from '@/types/experience';
 
 // Work Experience Details Modal Component
@@ -184,10 +183,7 @@ function WorkExperienceDetailsModal({
               <Briefcase size={20} />
               Job Description
             </h3>
-            <DraftViewer 
-              content={experience.description || ''} 
-              className="text-gray-700 leading-relaxed"
-            />
+            <div>{typeof experience.description === 'string' ? experience.description : JSON.stringify(experience.description)}</div>
           </div>
 
           {/* Technologies */}
@@ -369,10 +365,7 @@ function WorkExperienceCard({
               )}
             </div>
             <div className="mt-3">
-              <DraftViewer 
-                content={experience.description || ''} 
-                className="text-gray-600 text-sm line-clamp-2"
-              />
+              <div>{typeof experience.description === 'string' ? experience.description : JSON.stringify(experience.description)}</div>
             </div>
             
             {/* Technologies */}

@@ -17,12 +17,31 @@ export async function GET(_request: NextRequest, { params }: { params: { slug: s
       });
     }
 
-    const comments = await Comment.find({ blogId: blog._id })
-      .sort({ createdAt: -1 });
+    const comments = await Comment.find({ blogId: blog._id, parentComment: null })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Fetch replies separately
+    const replies = await Comment.find({ blogId: blog._id, parentComment: { $ne: null } })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    // Map replies to their parent
+    const replyMap: Record<string, any[]> = {};
+    replies.forEach((r) => {
+      const parentId = r.parentComment?.toString() || '';
+      if (!replyMap[parentId]) replyMap[parentId] = [];
+      replyMap[parentId].push(r);
+    });
+
+    const nested = comments.map((c) => ({
+      ...c,
+      replies: replyMap[c._id.toString()] || [],
+    }));
 
     return NextResponse.json({
       success: true,
-      data: comments
+      data: { comments: nested }
     });
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -82,7 +101,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      data: comment
+      data: { comment }
     }, { status: 201 });
 
   } catch (error) {

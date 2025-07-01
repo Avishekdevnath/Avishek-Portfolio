@@ -7,6 +7,7 @@ interface Comment {
   name: string;
   content: string;
   createdAt: string;
+  replies?: Comment[];
 }
 
 interface CommentSectionProps {
@@ -32,7 +33,16 @@ export default function CommentSection({ slug }: CommentSectionProps) {
       }
       const data = await response.json();
       if (data.success) {
-        setComments(data.data.comments || []);
+        const raw = data.data.comments || [];
+        const mapRecursive = (c: any): Comment => ({
+          id: c._id,
+          name: c.name,
+          content: c.content,
+          createdAt: c.createdAt,
+          replies: (c.replies || []).map((r: any) => mapRecursive(r)),
+        });
+        const mapped = raw.map(mapRecursive);
+        setComments(mapped);
       } else {
         throw new Error(data.error || 'Failed to load comments');
       }
@@ -173,19 +183,35 @@ export default function CommentSection({ slug }: CommentSectionProps) {
       ) : (
         <div className="space-y-4">
           {comments.map((comment) => (
-            <div key={comment.id} className="bg-gray-50 rounded-lg p-4 mb-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <h4 className="font-medium text-gray-900">{comment.name}</h4>
-                    <span className="text-sm text-gray-500">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
-                </div>
-              </div>
+            <div key={comment.id} className="space-y-4">
+              <CommentCard comment={comment} />
             </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Small component for comment + its replies recursively
+function CommentCard({ comment }: { comment: Comment }) {
+  return (
+    <div className="bg-gray-50 rounded-lg p-4">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center space-x-2 mb-2">
+            <h4 className="font-medium text-gray-900">{comment.name}</h4>
+            <span className="text-sm text-gray-500">
+              {new Date(comment.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+          <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+        </div>
+      </div>
+      {comment.replies && comment.replies.length > 0 && (
+        <div className="mt-4 pl-6 border-l-2 border-gray-200 space-y-4">
+          {comment.replies.map((r) => (
+            <CommentCard key={r.id} comment={r} />
           ))}
         </div>
       )}

@@ -7,7 +7,6 @@ import { toast } from 'react-hot-toast';
 import { FiUpload, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
 import { uploadImage } from '@/lib/cloudinary';
 import { FaSave, FaTimes } from 'react-icons/fa';
-import DraftEditor from '../shared/DraftEditor';
 
 const CATEGORIES = [
   'Web Development',
@@ -174,6 +173,32 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
     }
   }, [formData.image]);
 
+  // Media upload for Quill editor (images & videos)
+  const handleEditorMediaUpload = async (file: File): Promise<string> => {
+    try {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      if (!isImage && !isVideo) throw new Error('Unsupported file type');
+
+      const maxSize = isImage ? 5 * 1024 * 1024 : 100 * 1024 * 1024;
+      if (file.size > maxSize) {
+        throw new Error(`File size must be less than ${isImage ? '5MB' : '100MB'}`);
+      }
+
+      const form = new FormData();
+      form.append(isImage ? 'image' : 'video', file);
+      const endpoint = isImage ? '/api/blogs/upload-image' : '/api/blogs/upload-video';
+      const res = await fetch(endpoint, { method: 'POST', body: form });
+      const data = await res.json();
+      if (data.success) return data.url as string;
+      throw new Error(data.error || 'Failed to upload');
+    } catch (err) {
+      console.error('Media upload error', err);
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+      throw err; // Re-throw the error instead of returning null
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,11 +338,13 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
           Full Description *
         </label>
-        <DraftEditor
+        <textarea
+          id="description"
           value={formData.description}
-          onChange={(value) => handleChange('description', value)}
+          onChange={e => handleChange('description', e.target.value)}
           placeholder="Enter detailed project description"
-          className="min-h-[300px]"
+          className="min-h-[150px] w-full border rounded-md p-2"
+          required
         />
       </div>
 

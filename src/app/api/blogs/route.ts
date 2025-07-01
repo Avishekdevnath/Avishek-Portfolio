@@ -43,14 +43,27 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
-    const tag = searchParams.get('tag') || '';
-    const status = searchParams.get('status') || 'published';
+    const statusParam = searchParams.get('status');
+
+    // Determine status filter: default to 'published' when param is missing. If 'all' or empty, no filter.
+    let status: string | null = null;
+    if (statusParam && statusParam !== 'all') {
+      status = statusParam; // explicit draft/published
+    }
+
     const featured = searchParams.get('featured') || '';
+
+    // Gather all tag query params
+    const tagsArray = searchParams.getAll('tag');
+    
     const sortBy = searchParams.get('sortBy') || 'publishedAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     
     // Build query
-    const query: BlogQuery = { status };
+    const query: Partial<BlogQuery> = {};
+    if (status) {
+      query.status = status;
+    }
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -61,8 +74,11 @@ export async function GET(request: NextRequest) {
     if (category) {
       query.category = category;
     }
-    if (tag) {
-      query.tags = tag;
+    if (tagsArray.length === 1) {
+      query.tags = tagsArray[0];
+    }
+    if (tagsArray.length > 1) {
+      query.tags = { $in: tagsArray } as unknown as any; // mongoose will interpret
     }
     if (featured) {
       query.featured = featured === 'true';
@@ -101,15 +117,19 @@ export async function GET(request: NextRequest) {
 
     // Get unique categories and tags
     const [categories, tags] = await Promise.all([
-      Blog.distinct('category'),
-      Blog.distinct('tags'),
+      Blog.distinct('category', query),
+      Blog.distinct('tags', query),
     ]);
+
+    // Remove null/empty values from distinct results
+    const cleanCategories = categories.filter(Boolean);
+    const cleanTags = tags.filter(Boolean);
 
     return sendSuccess({
       blogs: blogsWithStats,
       metadata: {
-        categories,
-        tags,
+        categories: cleanCategories,
+        tags: cleanTags,
       },
       pagination: {
         total,

@@ -2,14 +2,15 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { connectToDatabase } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
+import BlogStats from '@/models/BlogStats';
 import CommentSection from '@/components/CommentSection';
 import LikeButton from '@/components/LikeButton';
 import ViewCounter from '@/components/ViewCounter';
 import Header from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
 import ShareButtons from '@/components/ShareButtons';
-import DraftViewer from '@/components/shared/DraftViewer';
 import { FaClock, FaEye, FaComment, FaHeart, FaShare, FaTwitter, FaLinkedin, FaGithub, FaGlobe } from 'react-icons/fa';
+import RichTextViewer from '@/components/shared/RichTextViewer';
 
 interface BlogPostPageProps {
   params: {
@@ -61,11 +62,15 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   await connectToDatabase();
-  const blog = await Blog.findOne({ slug: params.id });
+  const blog: any = await Blog.findOne({ slug: params.id });
 
   if (!blog) {
     notFound();
   }
+
+  // Fetch likes count from BlogStats collection
+  const blogStatsDoc = await BlogStats.findOne({ blog: blog._id });
+  const likesTotal = blogStatsDoc ? blogStatsDoc.likes.length : blog.stats?.likes?.total || 0;
 
   // Create share data for the blog post
   const shareData = {
@@ -115,11 +120,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Hero Section with Cover Image */}
         {blog.coverImage && (
           <div className="relative h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10"></div>
+            <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.3)_50%,transparent_90%)]"></div>
             <img
               src={blog.coverImage}
               alt={blog.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transform scale-105 transition-transform duration-500"
             />
             <div className="absolute bottom-0 left-0 right-0 z-20 p-8 text-white">
               <div className="max-w-4xl mx-auto">
@@ -187,36 +192,57 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           )}
 
           {/* Reading Time and Stats */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-gray-600">
-            <div className="flex items-center gap-2">
-              <FaClock className="w-4 h-4" />
-              <span>{blog.readTime || Math.ceil(blog.content.split(/\s+/).length / 200)} min read</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaEye className="w-4 h-4" />
-              <span>{blog.stats.views.total} views ({blog.stats.views.unique} unique)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaComment className="w-4 h-4" />
-              <span>{blog.stats.comments.total} comments</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaHeart className="w-4 h-4" />
-              <span>{blog.stats.likes.total} likes</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaShare className="w-4 h-4" />
-              <span>{blog.stats.shares.total} shares</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-8">
+            {[
+              {
+                icon: FaClock,
+                value: `${blog.readTime || Math.ceil(blog.content.split(/\\s+/).length / 200)} min`,
+                label: 'read',
+                bg: 'from-purple-500 to-indigo-500'
+              },
+              {
+                icon: FaEye,
+                value: blog.stats.views.total.toLocaleString(),
+                label: blog.stats.views.unique ? `${blog.stats.views.unique.toLocaleString()} unique` : 'views',
+                bg: 'from-blue-500 to-cyan-500'
+              },
+              {
+                icon: FaComment,
+                value: blog.stats.comments.total.toLocaleString(),
+                label: 'comments',
+                bg: 'from-emerald-500 to-teal-500'
+              },
+              {
+                icon: FaHeart,
+                value: likesTotal.toLocaleString(),
+                label: 'likes',
+                bg: 'from-rose-500 to-pink-500'
+              },
+              {
+                icon: FaShare,
+                value: blog.stats.shares.total.toLocaleString(),
+                label: 'shares',
+                bg: 'from-yellow-500 to-amber-500'
+              },
+            ].map(({ icon: Icon, value, label, bg }, idx) => (
+              <div
+                key={idx}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-white bg-gradient-to-r ${bg} shadow`}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="font-semibold">{value}</span>
+                <span className="text-xs opacity-80 capitalize">{label}</span>
+              </div>
+            ))}
           </div>
 
           {/* Tags */}
           {blog.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-3 mb-8 justify-center">
-              {blog.tags.map((tag) => (
+            <div className="flex flex-wrap gap-3 mb-12 justify-center">
+              {blog.tags.map((tag: string) => (
                 <span
                   key={tag}
-                  className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-700 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                  className="px-4 py-2 bg-white/70 backdrop-blur-md border border-gray-200 hover:border-blue-400 text-gray-600 hover:text-blue-700 rounded-full text-sm font-medium transition-all duration-200 shadow hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
                 >
                   #{tag}
                 </span>
@@ -225,53 +251,22 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           )}
 
           {/* Article Content */}
-          <article className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/60 p-8 md:p-12 mb-10 hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/30 rounded-3xl pointer-events-none"></div>
+          <article className="bg-white/90 backdrop-blur-md rounded-3xl shadow-lg border border-white/50 p-8 md:p-12 mb-12 transition-shadow duration-300 hover:shadow-xl">
             <div className="relative z-10">
-              <DraftViewer 
-                content={blog.content}
-                className="prose prose-xl max-w-none 
-                  prose-headings:text-gray-900 prose-headings:font-bold prose-headings:tracking-tight prose-headings:scroll-mt-16
-                  prose-h1:text-4xl prose-h1:mb-6 prose-h1:mt-8 prose-h1:leading-tight prose-h1:border-b prose-h1:border-gray-200 prose-h1:pb-4
-                  prose-h2:text-3xl prose-h2:mb-4 prose-h2:mt-8 prose-h2:leading-tight prose-h2:text-blue-800
-                  prose-h3:text-2xl prose-h3:mb-3 prose-h3:mt-6 prose-h3:leading-tight prose-h3:text-blue-700
-                  prose-h4:text-xl prose-h4:mb-2 prose-h4:mt-4 prose-h4:leading-tight prose-h4:text-blue-600
-                  prose-h5:text-lg prose-h5:mb-2 prose-h5:mt-4 prose-h5:font-semibold prose-h5:text-blue-600
-                  prose-h6:text-base prose-h6:mb-2 prose-h6:mt-4 prose-h6:font-semibold prose-h6:text-gray-700
-                  prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
-                  prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-a:font-medium prose-a:transition-colors
-                  prose-strong:text-gray-900 prose-strong:font-bold
-                  prose-em:text-gray-800 prose-em:italic
-                  prose-mark:bg-yellow-200 prose-mark:px-1 prose-mark:rounded
-                  prose-del:line-through prose-del:text-gray-500
-                  prose-ins:underline prose-ins:text-green-700 prose-ins:decoration-green-500
-                  prose-img:rounded-2xl prose-img:shadow-xl prose-img:border prose-img:border-gray-200 prose-img:my-8
-                  prose-figure:my-8
-                  prose-figcaption:text-gray-600 prose-figcaption:text-center prose-figcaption:mt-2 prose-figcaption:italic
-                  prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-blue-50 prose-blockquote:to-purple-50 prose-blockquote:p-6 prose-blockquote:rounded-r-xl prose-blockquote:shadow-sm prose-blockquote:my-6 prose-blockquote:italic prose-blockquote:text-gray-700
-                  prose-ul:my-4 prose-ul:space-y-2
-                  prose-ol:my-4 prose-ol:space-y-2
-                  prose-li:text-gray-700 prose-li:leading-relaxed
-                  prose-li:marker:text-blue-500
-                  prose-table:my-8 prose-table:border-collapse prose-table:border prose-table:border-gray-300 prose-table:rounded-lg prose-table:overflow-hidden prose-table:shadow-sm
-                  prose-thead:bg-gray-50
-                  prose-th:border prose-th:border-gray-300 prose-th:p-3 prose-th:text-left prose-th:font-semibold prose-th:text-gray-900
-                  prose-td:border prose-td:border-gray-300 prose-td:p-3 prose-td:text-gray-700
-                  prose-tr:hover:bg-gray-50 prose-tr:transition-colors
-                  prose-hr:my-8 prose-hr:border-t-2 prose-hr:border-gray-200 prose-hr:rounded
-                  prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:shadow-lg prose-pre:p-6 prose-pre:overflow-x-auto prose-pre:my-6
-                  prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded-md prose-code:text-sm prose-code:font-mono prose-code:text-gray-800 prose-code:before:content-none prose-code:after:content-none
-                  prose-pre:prose-code:bg-transparent prose-pre:prose-code:p-0 prose-pre:prose-code:text-gray-100
-                  prose-kbd:bg-gray-800 prose-kbd:text-white prose-kbd:px-2 prose-kbd:py-1 prose-kbd:rounded prose-kbd:text-xs prose-kbd:font-mono prose-kbd:shadow
-                  prose-sup:text-xs prose-sup:text-blue-600
-                  prose-sub:text-xs prose-sub:text-blue-600
-                  prose-small:text-sm prose-small:text-gray-600
-                  prose-video:rounded-xl prose-video:shadow-lg prose-video:my-8
-                  prose-iframe:rounded-xl prose-iframe:shadow-lg prose-iframe:my-8 prose-iframe:w-full
-                  prose-details:my-4 prose-details:border prose-details:border-gray-200 prose-details:rounded-lg prose-details:p-4
-                  prose-summary:font-semibold prose-summary:cursor-pointer prose-summary:text-blue-700 prose-summary:hover:text-blue-800
-                  prose-abbr:border-b prose-abbr:border-dotted prose-abbr:border-gray-400 prose-abbr:cursor-help"
+              <RichTextViewer 
+                html={blog.content} 
+                className="prose prose-lg max-w-none 
+                  prose-headings:text-gray-900 prose-headings:font-bold
+                  prose-headings:scroll-mt-24
+                  prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+                  prose-p:text-gray-700 prose-p:leading-relaxed prose-p:my-4
+                  prose-p:text-gray-700 prose-p:leading-relaxed
+                  prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                  prose-img:rounded-lg prose-img:shadow-md prose-img:my-6 prose-img:mx-auto
+                  prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:p-4
+                  prose-ul:my-4 prose-ol:my-4
+                  prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded-md
+                  prose-pre:bg-gray-800 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg"
               />
             </div>
           </article>
@@ -283,7 +278,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <ViewCounter 
                   slug={params.id} 
                   initialViews={blog.stats?.views?.total || 0} 
-                  uniqueViews={blog.stats?.views?.unique || 0}
                 />
                 <div className="flex items-center space-x-2 hover:text-purple-600 transition-colors duration-200">
                   <FaComment className="h-5 w-5" />
@@ -293,9 +287,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex items-center space-x-4">
                 <LikeButton 
                   slug={params.id} 
-                  initialLikes={blog.stats?.likes?.total || 0} 
+                  initialLikes={likesTotal} 
                 />
-                <ShareButtons shareData={shareData} shareCounts={blog.stats?.shares} />
+                <ShareButtons shareData={shareData} slug={params.id} />
               </div>
             </div>
           </div>
@@ -372,8 +366,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Comments Section */}
           <CommentSection 
-            blogId={blog._id.toString()} 
-            initialComments={blog.stats?.comments || { total: 0, approved: 0, pending: 0, spam: 0 }}
+            slug={params.id} 
           />
         </div>
 

@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, X, Plus, Trash2 } from 'lucide-react';
-import DraftEditor from '../shared/DraftEditor';
-import { DraftContent } from '@/types/experience';
+import { toast } from 'react-hot-toast';
 
 interface ThesisData {
   title?: string;
-  description?: string | DraftContent;
+  description?: string;
   supervisor?: string;
 }
 
@@ -22,7 +21,7 @@ interface EducationData {
   startDate: string;
   endDate?: string;
   isCurrent: boolean;
-  description: string | DraftContent;
+  description: string;
   featured: boolean;
   order: number;
   status: 'draft' | 'published';
@@ -37,7 +36,7 @@ interface EducationData {
 
 interface FormData extends Omit<EducationData, 'thesis' | 'type'> {
   thesisTitle: string;
-  thesisDescription: string | DraftContent;
+  thesisDescription: string;
   thesisSupervisor: string;
 }
 
@@ -141,7 +140,7 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
   const [error, setError] = useState('');
 
   // Convert DraftContent to string if needed
-  const getInitialDescription = (desc: string | DraftContent | undefined): string | DraftContent => {
+  const getInitialDescription = (desc: string | undefined): string => {
     if (!desc) return EMPTY_CONTENT;
     if (typeof desc === 'string') {
       try {
@@ -271,6 +270,28 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
       setError(error instanceof Error ? error.message : 'Failed to save education');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Media upload handler for Quill editor
+  const handleEditorMediaUpload = async (file: File): Promise<string> => {
+    try {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      if (!isImage && !isVideo) throw new Error('Unsupported file type');
+      const maxSize = isImage ? 5 * 1024 * 1024 : 100 * 1024 * 1024;
+      if (file.size > maxSize) throw new Error(`File size must be less than ${isImage ? '5MB' : '100MB'}`);
+      const form = new FormData();
+      form.append(isImage ? 'image' : 'video', file);
+      const endpoint = isImage ? '/api/blogs/upload-image' : '/api/blogs/upload-video';
+      const res = await fetch(endpoint, { method: 'POST', body: form });
+      const data = await res.json();
+      if (data.success) return data.url as string;
+      throw new Error(data.error || 'Failed to upload');
+    } catch (err) {
+      console.error('Media upload error', err);
+      toast.error(err instanceof Error ? err.message : 'Upload failed');
+      throw err; // Re-throw the error instead of returning null
     }
   };
 
@@ -498,11 +519,12 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Description
         </label>
-        <DraftEditor
-          value={formData.description}
-          onChange={handleDescriptionChange}
-          placeholder="Write about your education experience..."
-          className="min-h-[200px]"
+        <textarea
+          value={formData.description || ''}
+          onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          className="min-h-[100px] w-full border rounded-md p-2"
+          placeholder="Describe your education..."
+          required
         />
       </div>
 
@@ -547,11 +569,11 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Thesis Description
               </label>
-              <DraftEditor
-                value={formData.thesisDescription}
-                onChange={handleThesisDescriptionChange}
-                placeholder="Write about your thesis..."
-                className="min-h-[150px]"
+              <textarea
+                value={formData.thesisDescription || ''}
+                onChange={e => setFormData(prev => ({ ...prev, thesisDescription: e.target.value }))}
+                className="min-h-[100px] w-full border rounded-md p-2"
+                placeholder="Describe your thesis..."
               />
             </div>
             <input

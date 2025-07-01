@@ -33,9 +33,11 @@ export default function BlogDashboard() {
       const queryParams = new URLSearchParams({
         page: currentPage.toString(),
         limit: '10',
-        status: statusFilter === 'all' ? '' : statusFilter,
         search: searchTerm
       });
+      if (statusFilter !== 'all') {
+        queryParams.set('status', statusFilter);
+      }
 
       const response = await fetch(`/api/blogs?${queryParams}`);
       const data = await response.json();

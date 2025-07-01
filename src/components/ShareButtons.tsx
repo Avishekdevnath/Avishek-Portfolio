@@ -14,11 +14,27 @@ interface ShareData {
 
 interface ShareButtonsProps {
   shareData: ShareData;
+  slug: string;
 }
 
-export default function ShareButtons({ shareData }: ShareButtonsProps) {
+export default function ShareButtons({ shareData, slug }: ShareButtonsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Increment share count in backend
+  const incrementShare = async (platform: string) => {
+    try {
+      await fetch(`/api/blogs/${slug}/share`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ platform }),
+      });
+    } catch (err) {
+      console.error('Failed to record share:', err);
+    }
+  };
 
   // Native Web Share API support
   const handleNativeShare = async () => {
@@ -29,6 +45,7 @@ export default function ShareButtons({ shareData }: ShareButtonsProps) {
           text: shareData.description,
           url: shareData.url,
         });
+        incrementShare('native');
       } catch (error) {
         console.log('Error sharing:', error);
       }
@@ -186,6 +203,7 @@ export default function ShareButtons({ shareData }: ShareButtonsProps) {
                     } else {
                       openShareWindow(button.url);
                     }
+                    incrementShare(button.name.toLowerCase());
                   }}
                   className={`flex flex-col items-center p-3 rounded-lg transition-all duration-200 transform hover:scale-105 ${button.color} ${button.textColor}`}
                   title={`Share on ${button.name}`}

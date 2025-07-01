@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import DraftViewer from '@/components/shared/DraftViewer';
 
 // Import the IEducation interface from the model
 import type { IEducation, DraftContent } from '@/types/experience';
@@ -49,10 +48,10 @@ import EducationForm from '@/components/dashboard/EducationForm';
 // Helper function to safely render description
 const renderDescription = (description: string | DraftContent): JSX.Element => {
   if (typeof description === 'string') {
-    return <span>{description}</span>;
+    return <div>{description}</div>;
   }
   // If it's a DraftContent object, use DraftViewer
-  return <DraftViewer content={description} />;
+  return <div>{typeof description === 'string' ? description : JSON.stringify(description)}</div>;
 };
 
 // Education Details Modal Component
@@ -205,7 +204,7 @@ function EducationDetailsModal({
               Description
             </h3>
             <div className="text-gray-700 leading-relaxed">
-              <DraftViewer content={education.description} />
+              {renderDescription(education.description)}
             </div>
           </div>
 
@@ -280,7 +279,7 @@ function EducationDetailsModal({
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Description</p>
                     <div className="text-gray-700">
-                      <DraftViewer content={education.thesis.description} />
+                      {renderDescription(education.thesis.description)}
                     </div>
                   </div>
                 )}
@@ -382,7 +381,7 @@ function EducationCard({
               )}
             </div>
             <div className="text-gray-600 text-sm line-clamp-2">
-              <DraftViewer content={education.description} />
+              {renderDescription(education.description)}
             </div>
             
             {/* GPA Display */}

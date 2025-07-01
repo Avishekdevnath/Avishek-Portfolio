@@ -49,6 +49,30 @@ export async function PUT(
 
     const data = await request.json();
     
+    // If title is being changed and slug not provided, regenerate unique slug
+    if (data.title && !data.slug) {
+      const baseSlug = data.title
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      let newSlug = baseSlug;
+      let counter = 0;
+      // Ensure uniqueness
+      while (await Blog.findOne({ slug: newSlug, _id: { $ne: blog._id } })) {
+        counter++;
+        newSlug = `${baseSlug}-${counter}`;
+      }
+      data.slug = newSlug;
+    }
+
+    // Re-calculate readTime when content updated
+    if (data.content) {
+      const wordCount = (data.content as string).split(/\s+/).length;
+      data.readTime = Math.ceil(wordCount / 200);
+    }
+
     // If status is being changed to published, set publishedAt
     if (data.status === 'published' && blog.status !== 'published') {
       data.publishedAt = new Date();
@@ -125,12 +149,15 @@ export async function PATCH(
     switch (action) {
       case 'like':
         blog.likes = (blog.likes || 0) + 1;
+        blog.stats.likes.total = (blog.stats?.likes?.total || 0) + 1;
         break;
       case 'unlike':
         blog.likes = Math.max((blog.likes || 0) - 1, 0);
+        blog.stats.likes.total = Math.max((blog.stats?.likes?.total || 0) - 1, 0);
         break;
       case 'view':
         blog.views = (blog.views || 0) + 1;
+        blog.stats.views.total = (blog.stats?.views?.total || 0) + 1;
         break;
       default:
         return NextResponse.json({

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { FaSave, FaImage, FaTimes, FaEye, FaCode, FaPalette, FaPlus, FaUser } from 'react-icons/fa';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
-import DraftEditor from '../shared/DraftEditor';
 
 interface BlogFormProps {
   initialData?: {
@@ -84,41 +83,38 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
     }
   }, [formData.title, mode]);
 
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = async (file: File): Promise<string> => {
     try {
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Image size must be less than 5MB');
+      // Determine media type
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+
+      if (!isImage && !isVideo) {
+        throw new Error('Unsupported file type');
       }
 
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      // Size validation (images 5MB, videos 100MB)
+      const maxSize = isImage ? 5 * 1024 * 1024 : 100 * 1024 * 1024;
+      if (file.size > maxSize) {
+        throw new Error(`File size must be less than ${isImage ? '5MB' : '100MB'}`);
       }
 
-      // Create form data for upload
       const uploadData = new FormData();
-      uploadData.append('image', file);
+      uploadData.append(isImage ? 'image' : 'video', file);
 
-      // Upload image
-      const response = await fetch('/api/blogs/upload-image', {
-        method: 'POST',
-        body: uploadData
-      });
+      const endpoint = isImage ? '/api/blogs/upload-image' : '/api/blogs/upload-video';
 
+      const response = await fetch(endpoint, { method: 'POST', body: uploadData });
       const data = await response.json();
-      
+
       if (data.success) {
-        // Return the image URL to be inserted in the editor
-        return data.url;
-      } else {
-        throw new Error(data.error || 'Failed to upload image');
+        return data.url as string;
       }
+      throw new Error(data.error || 'Failed to upload file');
     } catch (error) {
-      console.error('Image upload error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to upload image');
-      return null;
+      console.error('Media upload error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload media');
+      throw error; // Re-throw the error instead of returning null
     }
   };
 
@@ -129,12 +125,9 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
     try {
       setLoading(true);
       const imageUrl = await handleImageUpload(file);
-      
-      if (imageUrl) {
-        setImagePreview(imageUrl);
-        setFormData(prev => ({ ...prev, coverImage: imageUrl }));
-        toast.success('Cover image uploaded successfully');
-      }
+      setImagePreview(imageUrl);
+      setFormData(prev => ({ ...prev, coverImage: imageUrl }));
+      toast.success('Cover image uploaded successfully');
     } catch (error) {
       console.error('Cover image upload error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
@@ -224,11 +217,13 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Content
         </label>
-        <DraftEditor
+        <textarea
           value={formData.content}
-          onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
-          className="min-h-[400px]"
+          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          rows={3}
           placeholder="Write your blog post content here..."
+          required
         />
       </div>
 

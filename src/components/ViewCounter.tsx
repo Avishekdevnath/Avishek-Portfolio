@@ -14,15 +14,6 @@ export default function ViewCounter({ slug, initialViews }: ViewCounterProps) {
   useEffect(() => {
     const incrementViews = async () => {
       try {
-        // Check if this device has already viewed this post
-        const viewedPosts = JSON.parse(localStorage.getItem('viewedPosts') || '{}');
-        const postKey = `blog_${slug}`;
-        
-        // If already viewed by this device, don't increment
-        if (viewedPosts[postKey]) {
-          return;
-        }
-
         setIsLoading(true);
         const response = await fetch(`/api/blogs/${slug}/views`, {
           method: 'POST',
@@ -35,13 +26,6 @@ export default function ViewCounter({ slug, initialViews }: ViewCounterProps) {
         const data = await response.json();
         if (data.success) {
           setViews(data.data.views);
-          
-          // Mark this post as viewed by this device
-          viewedPosts[postKey] = {
-            viewedAt: new Date().toISOString(),
-            timestamp: Date.now()
-          };
-          localStorage.setItem('viewedPosts', JSON.stringify(viewedPosts));
         }
       } catch (error) {
         console.error('Error incrementing views:', error);
@@ -55,7 +39,7 @@ export default function ViewCounter({ slug, initialViews }: ViewCounterProps) {
   }, [slug]);
 
   return (
-    <div className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-200 group cursor-pointer">
+    <div className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-200 group">
       <div className="relative">
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
