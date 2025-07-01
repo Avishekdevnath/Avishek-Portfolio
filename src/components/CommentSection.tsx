@@ -100,9 +100,11 @@ export default function CommentSection({ slug }: CommentSectionProps) {
     }
   };
 
+  const totalCount = comments.reduce((acc, c) => acc + 1 + (c.replies ? c.replies.length : 0), 0);
+
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-bold">Comments ({comments.length})</h2>
+      <h2 className="text-2xl font-bold">Comments ({totalCount})</h2>
       
       {/* Error Message */}
       {error && (

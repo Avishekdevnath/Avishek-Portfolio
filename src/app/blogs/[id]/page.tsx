@@ -11,6 +11,7 @@ import Footer from '@/components/shared/Footer';
 import ShareButtons from '@/components/ShareButtons';
 import { FaClock, FaEye, FaComment, FaHeart, FaShare, FaTwitter, FaLinkedin, FaGithub, FaGlobe } from 'react-icons/fa';
 import RichTextViewer from '@/components/shared/RichTextViewer';
+import Comment from '@/models/Comment';
 
 interface BlogPostPageProps {
   params: {
@@ -71,6 +72,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Fetch likes count from BlogStats collection
   const blogStatsDoc = await BlogStats.findOne({ blog: blog._id });
   const likesTotal = blogStatsDoc ? blogStatsDoc.likes.length : blog.stats?.likes?.total || 0;
+
+  // Fetch comments count from Comment collection
+  const commentsCount = await Comment.countDocuments({ blogId: blog._id });
 
   // Create share data for the blog post
   const shareData = {
@@ -196,32 +200,32 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {[
               {
                 icon: FaClock,
-                value: `${blog.readTime || Math.ceil(blog.content.split(/\\s+/).length / 200)} min`,
-                label: 'read',
+                value: `${blog.readTime || Math.ceil(blog.content.split(/\\s+/).length / 200)} min read`,
+                label: '',
                 bg: 'from-purple-500 to-indigo-500'
               },
               {
                 icon: FaEye,
-                value: blog.stats.views.total.toLocaleString(),
-                label: blog.stats.views.unique ? `${blog.stats.views.unique.toLocaleString()} unique` : 'views',
+                value: `${blog.stats.views.total.toLocaleString()} views`,
+                label: blog.stats.views.unique ? `${blog.stats.views.unique.toLocaleString()} unique` : '',
                 bg: 'from-blue-500 to-cyan-500'
               },
               {
                 icon: FaComment,
-                value: blog.stats.comments.total.toLocaleString(),
-                label: 'comments',
+                value: `${commentsCount.toLocaleString()} comments`,
+                label: '',
                 bg: 'from-emerald-500 to-teal-500'
               },
               {
                 icon: FaHeart,
-                value: likesTotal.toLocaleString(),
-                label: 'likes',
+                value: `${likesTotal.toLocaleString()} likes`,
+                label: '',
                 bg: 'from-rose-500 to-pink-500'
               },
               {
                 icon: FaShare,
-                value: blog.stats.shares.total.toLocaleString(),
-                label: 'shares',
+                value: `${blog.stats.shares.total.toLocaleString()} shares`,
+                label: '',
                 bg: 'from-yellow-500 to-amber-500'
               },
             ].map(({ icon: Icon, value, label, bg }, idx) => (
@@ -230,8 +234,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-full text-white bg-gradient-to-r ${bg} shadow`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="font-semibold">{value}</span>
-                <span className="text-xs opacity-80 capitalize">{label}</span>
+                <span className="font-semibold whitespace-nowrap">{value}{label && ` • ${label}`}</span>
               </div>
             ))}
           </div>
