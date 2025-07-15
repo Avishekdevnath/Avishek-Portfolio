@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import ProjectCard from './ProjectCard';
 import { Project, Technology, Repository, DemoURL } from '@/types/dashboard';
+import ConfirmModal from './shared/ConfirmModal';
 
 // Define enum options from the model
 const CATEGORIES = [
@@ -47,6 +48,8 @@ export default function ProjectGrid({
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'order'>('order');
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const [activeTechFilter, setActiveTechFilter] = useState<string>('');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
   // Get unique technologies from all projects
   const allTechnologies = Array.from(
@@ -94,18 +97,20 @@ export default function ProjectGrid({
     setActiveTechFilter('');
   };
 
-  const handleDelete = async (projectId: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+  const handleDeleteRequest = (projectId: string) => {
+    setProjectToDelete(projectId);
+    setDeleteModalOpen(true);
+  };
 
+  const handleDelete = async () => {
+    if (!projectToDelete) return;
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const response = await fetch(`/api/projects/${projectToDelete}`, {
         method: 'DELETE'
       });
-
       const data = await response.json();
       if (!data.success) throw new Error(data.error || 'Failed to delete project');
-
       toast.success('Project deleted successfully');
       onProjectsChange?.();
       router.refresh();
@@ -114,6 +119,8 @@ export default function ProjectGrid({
       toast.error(error instanceof Error ? error.message : 'Failed to delete project');
     } finally {
       setIsLoading(false);
+      setDeleteModalOpen(false);
+      setProjectToDelete(null);
     }
   };
 
@@ -375,7 +382,7 @@ export default function ProjectGrid({
               <ProjectCard
                 project={project}
                 isAdmin={isAdmin}
-                onDelete={handleDelete}
+                onDelete={() => handleDeleteRequest(project._id)}
                 onFeatureToggle={handleFeatureToggle}
                 onStatusToggle={handleStatusToggle}
               />
@@ -403,6 +410,18 @@ export default function ProjectGrid({
           )}
         </div>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        open={deleteModalOpen}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDelete}
+        onCancel={() => { setDeleteModalOpen(false); setProjectToDelete(null); }}
+        loading={isLoading}
+      />
     </div>
   );
 } 

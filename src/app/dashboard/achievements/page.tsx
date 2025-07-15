@@ -5,16 +5,16 @@ import Loader from '@/components/shared/Loader';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import { Eye } from 'lucide-react';
 
-interface Tool {
+interface Achievement {
   _id: string;
-  name: string;
+  title: string;
   description?: string;
-  link?: string;
+  date?: string;
   icon?: string;
 }
 
-function ToolViewModal({ open, tool, onClose }: { open: boolean; tool?: Tool; onClose: () => void }) {
-  if (!open || !tool) return null;
+function AchievementViewModal({ open, achievement, onClose }: { open: boolean; achievement?: Achievement; onClose: () => void }) {
+  if (!open || !achievement) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8 relative animate-fadeIn">
@@ -26,55 +26,47 @@ function ToolViewModal({ open, tool, onClose }: { open: boolean; tool?: Tool; on
           ×
         </button>
         <div className="flex flex-col items-center gap-3 mb-4">
-          {tool.icon && <span className="text-5xl">{tool.icon}</span>}
-          <h2 className="text-2xl font-bold text-gray-900 text-center">{tool.name}</h2>
+          {achievement.icon && <span className="text-5xl">{achievement.icon}</span>}
+          <h2 className="text-2xl font-bold text-gray-900 text-center">{achievement.title}</h2>
+          {achievement.date && <div className="text-xs text-gray-400">{new Date(achievement.date).toLocaleDateString()}</div>}
         </div>
-        {tool.link && (
-          <a
-            href={tool.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-blue-600 hover:underline text-center mb-2 break-all"
-          >
-            {tool.link}
-          </a>
-        )}
-        {tool.description && <div className="text-gray-700 text-base mb-2 whitespace-pre-line text-center">{tool.description}</div>}
+        {achievement.description && <div className="text-gray-700 text-base mb-2 whitespace-pre-line text-center">{achievement.description}</div>}
       </div>
     </div>
   );
 }
 
-export default function ToolsPage() {
-  const [tools, setTools] = useState<Tool[]>([]);
+export default function AchievementsPage() {
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', link: '', icon: '' });
+  const [form, setForm] = useState({ title: '', description: '', date: '', icon: '' });
   const [submitting, setSubmitting] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [viewTool, setViewTool] = useState<Tool | null>(null);
+  const [viewAchievement, setViewAchievement] = useState<Achievement | null>(null);
   const [search, setSearch] = useState('');
+  const [year, setYear] = useState('');
 
-  const fetchTools = async () => {
+  const fetchAchievements = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/tools');
+      const res = await fetch('/api/achievements');
       const data = await res.json();
-      if (data.success) setTools(data.data);
-      else setError(data.error || 'Failed to fetch tools');
+      if (data.success) setAchievements(data.data);
+      else setError(data.error || 'Failed to fetch achievements');
     } catch (err) {
-      setError('Failed to fetch tools');
+      setError('Failed to fetch achievements');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTools();
+    fetchAchievements();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -85,7 +77,7 @@ export default function ToolsPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const url = editId ? `/api/tools/${editId}` : '/api/tools';
+      const url = editId ? `/api/achievements/${editId}` : '/api/achievements';
       const method = editId ? 'PATCH' : 'POST';
       const res = await fetch(url, {
         method,
@@ -94,28 +86,28 @@ export default function ToolsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setForm({ name: '', description: '', link: '', icon: '' });
+        setForm({ title: '', description: '', date: '', icon: '' });
         setShowForm(false);
         setEditId(null);
-        fetchTools();
+        fetchAchievements();
       } else {
-        setError(data.error || 'Failed to save tool');
+        setError(data.error || 'Failed to save achievement');
       }
     } catch (err) {
-      setError('Failed to save tool');
+      setError('Failed to save achievement');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleEdit = (tool: Tool) => {
+  const handleEdit = (ach: Achievement) => {
     setForm({
-      name: tool.name || '',
-      description: tool.description || '',
-      link: tool.link || '',
-      icon: tool.icon || '',
+      title: ach.title || '',
+      description: ach.description || '',
+      date: ach.date ? ach.date.slice(0, 10) : '',
+      icon: ach.icon || '',
     });
-    setEditId(tool._id);
+    setEditId(ach._id);
     setShowForm(true);
   };
 
@@ -123,77 +115,102 @@ export default function ToolsPage() {
     if (!deleteId) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/tools/${deleteId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/achievements/${deleteId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setDeleteId(null);
-        fetchTools();
+        fetchAchievements();
       } else {
-        setError(data.error || 'Failed to delete tool');
+        setError(data.error || 'Failed to delete achievement');
       }
     } catch (err) {
-      setError('Failed to delete tool');
+      setError('Failed to delete achievement');
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  // Filtered tools
-  const filtered = useMemo(() => {
-    return tools.filter(t =>
-      t.name.toLowerCase().includes(search.toLowerCase()) ||
-      (t.description && t.description.toLowerCase().includes(search.toLowerCase()))
+  // Get all years from achievements
+  const years = useMemo(() => {
+    const y = Array.from(
+      new Set(
+        achievements
+          .map(a => a.date && a.date.length >= 4 ? new Date(a.date).getFullYear().toString() : null)
+          .filter(Boolean)
+      )
     );
-  }, [tools, search]);
+    return y.sort((a, b) => Number(b) - Number(a));
+  }, [achievements]);
+
+  // Filtered achievements
+  const filtered = useMemo(() => {
+    return achievements.filter(a => {
+      const matchesSearch =
+        a.title.toLowerCase().includes(search.toLowerCase()) ||
+        (a.description && a.description.toLowerCase().includes(search.toLowerCase()));
+      const matchesYear = !year || (a.date && new Date(a.date).getFullYear().toString() === year);
+      return matchesSearch && matchesYear;
+    });
+  }, [achievements, search, year]);
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Tools</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Achievements</h1>
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow self-start"
           onClick={() => {
             setShowForm((v) => !v);
             setEditId(null);
-            setForm({ name: '', description: '', link: '', icon: '' });
+            setForm({ title: '', description: '', date: '', icon: '' });
           }}
         >
-          {showForm ? 'Cancel' : 'Add Tool'}
+          {showForm ? 'Cancel' : 'Add Achievement'}
         </button>
       </div>
 
-      {/* Search */}
+      {/* Search and Filter */}
       <div className="flex flex-col md:flex-row gap-3 mb-6">
         <input
           type="text"
-          placeholder="Search tools..."
+          placeholder="Search achievements..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full md:w-1/2 border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
         />
+        <select
+          value={year}
+          onChange={e => setYear(e.target.value)}
+          className="w-full md:w-40 border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">All Years</option>
+          {years.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
       </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 mb-8 space-y-4 border border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Name</label>
+              <label className="block text-sm font-medium mb-1">Title</label>
               <input
-                name="name"
-                value={form.name}
+                name="title"
+                value={form.title}
                 onChange={handleInputChange}
                 required
                 className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Link</label>
+              <label className="block text-sm font-medium mb-1">Date</label>
               <input
-                name="link"
-                value={form.link}
+                name="date"
+                type="date"
+                value={form.date}
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                placeholder="https://..."
               />
             </div>
           </div>
@@ -213,7 +230,6 @@ export default function ToolsPage() {
               value={form.icon}
               onChange={handleInputChange}
               className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              placeholder="Leave blank for AI suggestion"
             />
           </div>
           <button
@@ -221,65 +237,54 @@ export default function ToolsPage() {
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow"
             disabled={submitting}
           >
-            {submitting ? <Loader size={20} /> : editId ? 'Update Tool' : 'Add Tool'}
+            {submitting ? <Loader size={20} /> : editId ? 'Update Achievement' : 'Add Achievement'}
           </button>
         </form>
       )}
 
       {loading ? (
-        <Loader text="Loading tools..." />
+        <Loader text="Loading achievements..." />
       ) : error ? (
         <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-8">{error}</div>
       ) : filtered.length === 0 ? (
-        <div className="text-gray-500 text-center">No tools found.</div>
+        <div className="text-gray-500 text-center">No achievements found.</div>
       ) : (
         <div className="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-100">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Icon</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Link</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
                 <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map((tool) => (
-                <tr key={tool._id} className="hover:bg-blue-50 transition-colors">
-                  <td className="px-4 py-3 text-2xl text-center align-middle">{tool.icon}</td>
-                  <td className="px-4 py-3 font-medium text-gray-900 align-middle max-w-xs truncate">{tool.name}</td>
-                  <td className="px-4 py-3 text-gray-700 align-middle max-w-md truncate">{tool.description}</td>
-                  <td className="px-4 py-3 align-middle max-w-xs truncate">
-                    {tool.link ? (
-                      <a
-                        href={tool.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        {tool.link}
-                      </a>
-                    ) : ''}
-                  </td>
+              {filtered.map((ach) => (
+                <tr key={ach._id} className="hover:bg-blue-50 transition-colors">
+                  <td className="px-4 py-3 text-2xl text-center align-middle">{ach.icon}</td>
+                  <td className="px-4 py-3 font-medium text-gray-900 align-middle max-w-xs truncate">{ach.title}</td>
+                  <td className="px-4 py-3 text-gray-700 align-middle max-w-md truncate">{ach.description}</td>
+                  <td className="px-4 py-3 text-xs text-gray-500 align-middle">{ach.date ? new Date(ach.date).toLocaleDateString() : ''}</td>
                   <td className="px-4 py-3 text-center align-middle">
                     <div className="flex justify-center gap-2">
                       <button
                         className="p-2 text-blue-500 hover:bg-blue-100 rounded-full transition-colors"
                         title="View Details"
-                        onClick={() => setViewTool(tool)}
+                        onClick={() => setViewAchievement(ach)}
                       >
                         <Eye size={18} />
                       </button>
                       <button
                         className="px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"
-                        onClick={() => handleEdit(tool)}
+                        onClick={() => handleEdit(ach)}
                       >
                         Edit
                       </button>
                       <button
                         className="px-3 py-1 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200"
-                        onClick={() => setDeleteId(tool._id)}
+                        onClick={() => setDeleteId(ach._id)}
                       >
                         Delete
                       </button>
@@ -292,16 +297,16 @@ export default function ToolsPage() {
         </div>
       )}
 
-      <ToolViewModal
-        open={!!viewTool}
-        tool={viewTool || undefined}
-        onClose={() => setViewTool(null)}
+      <AchievementViewModal
+        open={!!viewAchievement}
+        achievement={viewAchievement || undefined}
+        onClose={() => setViewAchievement(null)}
       />
 
       <ConfirmModal
         open={!!deleteId}
-        title="Delete Tool"
-        description="Are you sure you want to delete this tool? This action cannot be undone."
+        title="Delete Achievement"
+        description="Are you sure you want to delete this achievement? This action cannot be undone."
         confirmText="Delete"
         cancelText="Cancel"
         onConfirm={handleDelete}

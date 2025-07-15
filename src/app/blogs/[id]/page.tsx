@@ -12,6 +12,7 @@ import ShareButtons from '@/components/ShareButtons';
 import { FaClock, FaEye, FaComment, FaHeart, FaShare, FaTwitter, FaLinkedin, FaGithub, FaGlobe } from 'react-icons/fa';
 import RichTextViewer from '@/components/shared/RichTextViewer';
 import Comment from '@/models/Comment';
+import BlogExportButtons from '@/components/BlogExportButtons';
 
 interface BlogPostPageProps {
   params: {
@@ -296,6 +297,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
             </div>
           </div>
+
+          {/* Export Options */}
+          <BlogExportButtons slug={params.id} title={blog.title} />
 
           {/* Author Info */}
           {blog.author && (

@@ -1,11 +1,5 @@
-import LoadingScreen from '@/components/shared/LoadingScreen';
+import LoadingPage from '@/components/shared/LoadingPage';
 
-export default function MessagesLoading() {
-  return (
-    <LoadingScreen 
-      type="messages"
-      message="Loading your messages..."
-      className="min-h-[80vh]"
-    />
-  );
+export default function Loading() {
+  return <LoadingPage />;
 }

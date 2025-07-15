@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { PlusCircle, Eye, CheckCircle2, Clock, Star, BarChart2 } from 'lucide-react';
 import ProjectGrid from '@/components/ProjectGrid';
 import { Project } from '@/types/dashboard';
-import LoadingScreen from '@/components/shared/LoadingScreen';
+import LoadingPage from '@/components/shared/LoadingPage';
 
 interface StatsCardProps {
   title: string;
@@ -151,7 +151,7 @@ export default function ProjectsPage() {
 
   return (
     <>
-      {loading && <LoadingScreen type="projects" />}
+      {loading && <LoadingPage text="Loading Projects..." />}
       
       <div className="p-8 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">

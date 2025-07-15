@@ -9,14 +9,5 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isDashboard = pathname?.startsWith('/dashboard');
-
-  return (
-    <>
-      {/* {!isDashboard && <Header />} */}
-      <main>{children}</main>
-      {/* {!isDashboard && <Footer />} */}
-    </>
-  );
+  return <>{children}</>;
 } 
