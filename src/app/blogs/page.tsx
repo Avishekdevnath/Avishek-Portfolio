@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
-import LoadingScreen from "@/components/shared/LoadingScreen";
+import Loader from '@/components/shared/Loader';
 
 interface Blog {
   _id: string;
@@ -246,10 +246,9 @@ export default function Blogs() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
         <Header />
-        <LoadingScreen 
-          type="blogs"
-          className="mt-16"
-        />
+        <div className="flex justify-center items-center min-h-[300px]">
+          <Loader text="Loading articles..." />
+        </div>
       </div>
     );
   }
@@ -535,10 +534,7 @@ export default function Blogs() {
                 {/* Blog Grid/List */}
                 {loading ? (
                   <div className="flex items-center justify-center py-20">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
-                      <p className="text-gray-600">Loading articles...</p>
-                    </div>
+                    <Loader text="Loading articles..." />
                   </div>
                 ) : blogs.length === 0 ? (
                   <div className="text-center py-20">
