@@ -5,7 +5,7 @@ import ProjectGrid from '@/components/ProjectGrid';
 import Header from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
 import { Project } from '@/types/dashboard';
-import LoadingScreen from '@/components/shared/LoadingScreen';
+import Loader from '@/components/shared/Loader';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -44,7 +44,7 @@ export default function ProjectsPage() {
   };
 
   if (loading) {
-    return <LoadingScreen type="projects" />;
+    return <Loader text="Loading projects..." />;
   }
 
   if (error) {
