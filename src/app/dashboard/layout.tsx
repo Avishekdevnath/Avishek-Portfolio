@@ -18,6 +18,7 @@ import {
   Wrench
 } from 'lucide-react';
 import Sidebar, { NavItem, NavCategory } from '@/components/dashboard/Sidebar';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -88,6 +89,13 @@ const sidebarItems: NavItem[] = [
     category: 'Engagement'
   },
   { 
+    icon: Mail, 
+    label: 'Hiring Inquiries', 
+    href: '/dashboard/hiring-inquiries',
+    description: 'Job opportunities and hiring requests',
+    category: 'Engagement'
+  },
+  { 
     icon: Bell, 
     label: 'Notifications', 
     href: '/dashboard/notifications',
@@ -132,9 +140,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="dashboard-layout">
+      <DashboardHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} isOpen={isSidebarOpen} />
+      
       <Suspense fallback={<SidebarSkeleton />}>
         <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} items={sidebarItems} />
       </Suspense>
+
+      {/* Mobile overlay when sidebar is open */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-10 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       <main className={`dashboard-main ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
         <div className="content-wrapper">
@@ -152,7 +171,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         .dashboard-main {
           margin-left: 280px;
-          min-height: 100vh;
+          margin-top: 64px;
+          min-height: calc(100vh - 64px);
           padding: 24px;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -164,6 +184,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         .content-wrapper {
           max-width: 1200px;
           margin: 0 auto;
+        }
+
+        /* Tablet: avoid sidebar overlay by giving main space for collapsed rail */
+        @media (max-width: 1024px) {
+          .dashboard-main {
+            margin-left: 72px;
+            padding: 16px;
+          }
+
+          .dashboard-main.sidebar-collapsed {
+            margin-left: 0;
+          }
         }
 
         @media (max-width: 1536px) {
@@ -181,6 +213,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         @media (max-width: 768px) {
           .dashboard-main {
             margin-left: 0;
+            margin-top: 64px;
             padding: 12px;
           }
           

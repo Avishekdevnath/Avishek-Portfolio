@@ -40,6 +40,7 @@ interface BlogFormProps {
     canonicalUrl?: string;
     noIndex?: boolean;
     structuredData?: Record<string, unknown>;
+    lineSpacing?: string;
   };
   mode: 'create' | 'edit';
   onClose: () => void;
@@ -90,22 +91,51 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
     canonicalUrl: initialData?.canonicalUrl || '',
     noIndex: initialData?.noIndex || false,
     structuredData: initialData?.structuredData || {},
+    lineSpacing: initialData?.lineSpacing || '10',
   });
 
-  // Fetch settings when component mounts
+  // Fetch settings when component mounts and hydrate author defaults from DB
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const response = await fetch('/api/settings');
         const data = await response.json();
-        if (data.success && data.data.fullName) {
-          setAuthorName(data.data.fullName);
+        if (data?.success && data?.data) {
+          const s = data.data as any;
+          const fullName = s.fullName || '';
+          const email = s.contactInfo?.email || '';
+          const bio = s.bio || '';
+          const avatar = s.profileImage || '';
+
+          if (fullName) setAuthorName(fullName);
+
+          // Only auto-fill from settings when creating a new post
+          setFormData(prev => {
+            if (initialData) return prev; // editing - don't override
+            return {
+              ...prev,
+              author: {
+                ...prev.author,
+                name: prev.author.name || fullName || 'Portfolio Admin',
+                email: prev.author.email || email,
+                bio: prev.author.bio || bio,
+                avatar: prev.author.avatar || avatar,
+                social: {
+                  twitter: prev.author.social?.twitter || (s.socialLinks?.find((l: any) => l.platform === 'twitter')?.url || ''),
+                  linkedin: prev.author.social?.linkedin || (s.socialLinks?.find((l: any) => l.platform === 'linkedin')?.url || ''),
+                  github: prev.author.social?.github || (s.socialLinks?.find((l: any) => l.platform === 'github')?.url || ''),
+                  website: prev.author.social?.website || (s.socialLinks?.find((l: any) => l.platform === 'website')?.url || ''),
+                }
+              }
+            };
+          });
         }
       } catch (error) {
         console.error('Failed to fetch settings:', error);
       }
     };
     fetchSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update author name when settings are fetched
@@ -287,7 +317,8 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
     }
 
     try {
-      const endpoint = mode === 'create' ? '/api/blogs' : `/api/blogs/${initialData?._id}`;
+      const editSlug = initialData?.slug || initialData?._id;
+      const endpoint = mode === 'create' ? '/api/blogs' : `/api/blogs/${encodeURIComponent(String(editSlug || ''))}`;
       const method = mode === 'create' ? 'POST' : 'PUT';
 
       // Generate structured data if not provided
@@ -545,6 +576,8 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         <RichTextEditor
           value={formData.content}
           onChange={(html: string) => setFormData(prev => ({ ...prev, content: html }))}
+          lineSpacing={formData.lineSpacing}
+          onLineSpacingChange={(lineSpacing: string) => setFormData(prev => ({ ...prev, lineSpacing }))}
           minHeight="300px"
         />
         {!formData.content && (

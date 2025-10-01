@@ -28,6 +28,7 @@ interface Project {
     completionDate: string;
     createdAt: string;
     updatedAt: string;
+    additionalImages?: string[]; // Added for additional images
 }
 
 interface ProjectsResponse {
@@ -98,10 +99,23 @@ export default function Projects() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-600 animate-pulse">Loading projects...</p>
+            <div className="py-20 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
+                <div className="text-center mb-10">
+                    <div className="h-6 w-40 bg-gray-200 rounded mx-auto mb-2 animate-pulse" />
+                    <div className="h-8 w-56 bg-gray-200 rounded mx-auto mb-3 animate-pulse" />
+                    <div className="h-4 w-80 bg-gray-200 rounded mx-auto animate-pulse" />
+                </div>
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {Array.from({ length: 6 }).map((_, idx) => (
+                        <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden">
+                            <div className="aspect-video bg-gray-200 animate-pulse" />
+                            <div className="p-5 space-y-3">
+                                <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse" />
+                                <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+                                <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
@@ -116,28 +130,29 @@ export default function Projects() {
     }
 
     return (
-        <div className="py-20 px-4 bg-gray-50">
-            {/* Header Section */}
-            <div className="text-center mb-12">
-                <h4 className="text-blue-600 font-medium mb-2">My Recent Work</h4>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Featured Projects</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
-                    Explore a selection of my recent projects showcasing my technical skills and creative problem-solving abilities.
-                </p>
-            </div>
-
-            {/* Projects Section */}
+        <div className="py-20 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
             <div className="max-w-7xl mx-auto">
+                {/* Header Section */}
+                <div className="text-center mb-12">
+                    <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">My Recent Work</h4>
+                    <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">Featured Projects</h2>
+                    <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                        Explore a selection of my recent projects showcasing my technical skills and creative problem-solving abilities.
+                    </p>
+                </div>
+
+                {/* Projects Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr">
                     {projects.length > 0 ? (
                         projects.slice(0, 6).map((project) => (
                             <div
                                 key={project._id}
-                                className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:shadow-2xl h-full flex flex-col border border-gray-100 animate-fadeIn"
+                                className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-gray-50 to-white border border-gray-300 shadow-inner transition-all duration-300 hover:shadow-lg h-full flex flex-col animate-fadeIn"
+                                style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}
                             >
                                 {/* Featured Badge */}
                                 {project.featured && (
-                                    <div className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-sm">
+                                    <div className="absolute left-3 top-3 z-10 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-blue-500">
                                         Featured
                                     </div>
                                 )}
@@ -157,40 +172,52 @@ export default function Projects() {
                                     
                                     {/* Category Badge */}
                                     <div className="absolute bottom-3 left-3 z-10">
-                                        <span className="rounded-full bg-black/30 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
+                                        <span className="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-gray-800 border border-gray-200">
                                             {project.category}
                                         </span>
                                     </div>
+                                    
+                                    {/* Additional Images Indicator */}
+                                    {project.additionalImages && project.additionalImages.length > 0 && (
+                                        <div className="absolute bottom-3 right-3 z-10">
+                                            <span className="rounded-full bg-white/90 backdrop-blur-sm px-2 py-1 text-xs font-medium text-gray-800 flex items-center gap-1">
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                                </svg>
+                                                {project.additionalImages.length}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Project Info */}
                                 <div className="p-5 flex flex-col flex-grow">
                                     <Link href={`/projects/${project._id}`} className="group-hover:text-blue-600 transition-colors">
-                                        <h3 className="text-xl font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+                                        <h3 className="text-h5 weight-semibold text-gray-900 line-clamp-2 mb-1.5 group-hover:text-blue-600 transition-colors">
                                             {project.title}
                                         </h3>
                                     </Link>
 
                                     {/* Description */}
                                     <div className="mb-5 flex-grow">
-                                        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                                        <p className="text-gray-600 text-body-sm leading-relaxed line-clamp-3">
                                             {project.shortDescription}
                                         </p>
                                     </div>
 
                                     {/* Technologies */}
                                     <div className="mb-5">
-                                        <div className="flex flex-wrap gap-1.5">
+                                        <div className="flex flex-wrap gap-2">
                                             {project.technologies.slice(0, 3).map((tech, index) => (
                                                 <span
                                                     key={index}
-                                                    className="rounded-full bg-gray-50 border border-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                                                    className="rounded-full bg-white border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 shadow-sm"
                                                 >
                                                     {tech.name}
                                                 </span>
                                             ))}
                                             {project.technologies.length > 3 && (
-                                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                                                <span className="rounded-full bg-gray-100 border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700">
                                                     +{project.technologies.length - 3}
                                                 </span>
                                             )}
@@ -198,7 +225,7 @@ export default function Projects() {
                                     </div>
 
                                     {/* Links */}
-                                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+                                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto text-sm">
                                         {project.repositories.length > 0 && (
                                             <a
                                                 href={project.repositories[0].url}
@@ -207,7 +234,7 @@ export default function Projects() {
                                                 className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
                                             >
                                                 {getRepositoryIcon(project.repositories[0].type)}
-                                                <span className="text-sm font-medium">Code</span>
+                                                <span className="text-button font-medium">Code</span>
                                             </a>
                                         )}
                                         
@@ -218,14 +245,14 @@ export default function Projects() {
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors group"
                                             >
-                                                <span className="text-sm font-medium">Live Demo</span>
+                                                <span className="text-button font-medium">Live Demo</span>
                                                 <FaExternalLinkAlt className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                                             </a>
                                         )}
                                         
                                         <Link
                                             href={`/projects/${project._id}`}
-                                            className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                                            className="text-button font-medium text-blue-600 hover:text-blue-700 transition-colors"
                                         >
                                             View Details
                                         </Link>
@@ -252,10 +279,10 @@ export default function Projects() {
                     <div className="mt-12 text-center">
                         <Link 
                             href="/projects" 
-                            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all transform hover:scale-105 hover:shadow-lg"
+                            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg border border-blue-500"
                         >
                             View All Projects
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </Link>

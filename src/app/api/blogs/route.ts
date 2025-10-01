@@ -192,6 +192,12 @@ export async function POST(request: NextRequest) {
     body.readTime = Math.ceil(wordCount / 200);
     console.log('Calculated read time:', body.readTime);
 
+    // Sanitize lineSpacing to allowed UI options
+    const allowedLineSpacings = ['08', '10', '115', '125', '15', '20'];
+    if (body.lineSpacing && !allowedLineSpacings.includes(body.lineSpacing)) {
+      body.lineSpacing = '10';
+    }
+
     // Create new blog
     console.log('Creating blog with data:', JSON.stringify(body, null, 2));
     const blog = await Blog.create(body);

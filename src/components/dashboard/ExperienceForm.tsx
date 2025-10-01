@@ -131,6 +131,27 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
 
   const [formData, setFormData] = useState<FormDataState>(initialData || {});
 
+  // Normalize incoming ISO date strings to yyyy-mm-dd for date inputs
+  useEffect(() => {
+    const toInputDate = (value: unknown): string => {
+      if (!value) return '';
+      if (value instanceof Date) return value.toISOString().split('T')[0];
+      if (typeof value === 'string') {
+        // Handle ISO like 2022-02-01T00:00:00.000Z or already yyyy-mm-dd
+        if (value.includes('T')) return value.split('T')[0];
+        return value;
+      }
+      return '';
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      startDate: toInputDate(initialData?.startDate ?? prev.startDate),
+      endDate: toInputDate(initialData?.endDate ?? prev.endDate),
+    }));
+    // Run only when initialData changes
+  }, [initialData]);
+
   // Auto-sync organization and title fields
   useEffect(() => {
     if (type === 'work') {

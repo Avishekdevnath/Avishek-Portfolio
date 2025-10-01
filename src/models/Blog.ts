@@ -59,6 +59,7 @@ interface IBlog extends Document {
   canonicalUrl?: string;
   noIndex: boolean;
   structuredData?: Record<string, unknown>;
+  lineSpacing?: string;
   createdAt: Date;
   updatedAt: Date;
   likes: number;
@@ -172,6 +173,8 @@ const blogSchema = new mongoose.Schema({
   canonicalUrl: { type: String },
   noIndex: { type: Boolean, default: false },
   structuredData: { type: mongoose.Schema.Types.Mixed },
+  // Restrict to UI-supported options
+  lineSpacing: { type: String, enum: ['08', '10', '115', '125', '15', '20'], default: '10' },
 }, {
   timestamps: true,
 });

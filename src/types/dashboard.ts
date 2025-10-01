@@ -56,6 +56,13 @@ export interface DemoURL {
   type: 'live' | 'staging' | 'demo' | 'documentation';
 }
 
+export interface ProjectImage {
+  url: string;
+  publicId: string;
+  caption?: string;
+  altText?: string;
+}
+
 export interface Project {
   _id: string;
   title: string;
@@ -67,6 +74,7 @@ export interface Project {
   demoUrls: DemoURL[];
   image: string;
   imagePublicId: string;
+  additionalImages?: ProjectImage[];
   completionDate: string | Date;
   featured: boolean;
   status: 'draft' | 'published';

@@ -132,10 +132,19 @@ export async function deleteImage(publicId: string) {
       throw new Error('No public ID provided');
     }
 
-    const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'auto',
+    // Try deleting as image first (most common case)
+    let result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: 'image',
       invalidate: true
     });
+
+    // If not found as image, try as raw
+    if (result.result === 'not found') {
+      result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: 'raw',
+        invalidate: true
+      });
+    }
 
     return result;
   } catch (error) {

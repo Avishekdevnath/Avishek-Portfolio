@@ -17,6 +17,13 @@ export interface DemoURL {
   type: 'live' | 'staging' | 'demo' | 'documentation';
 }
 
+export interface ProjectImage {
+  url: string;
+  publicId: string;
+  caption?: string;
+  altText?: string;
+}
+
 export interface Project extends Document {
   title: string;
   description: string;
@@ -27,6 +34,7 @@ export interface Project extends Document {
   demoUrls: DemoURL[];
   image: string;
   imagePublicId: string;
+  additionalImages?: ProjectImage[];
   completionDate: Date;
   featured: boolean;
   status: 'draft' | 'published';
@@ -111,6 +119,40 @@ const demoUrlSchema = new Schema<DemoURL>({
   }
 });
 
+const projectImageSchema = new Schema<ProjectImage>({
+  url: {
+    type: String,
+    required: [true, 'Image URL is required'],
+    trim: true,
+    validate: {
+      validator: (value: string) => {
+        try {
+          new URL(value);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      message: 'Invalid image URL format'
+    }
+  },
+  publicId: {
+    type: String,
+    required: [true, 'Image public ID is required'],
+    trim: true
+  },
+  caption: {
+    type: String,
+    trim: true,
+    maxlength: [200, 'Caption cannot be longer than 200 characters']
+  },
+  altText: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Alt text cannot be longer than 100 characters']
+  }
+});
+
 const projectSchema = new Schema<Project>({
   title: {
     type: String,
@@ -139,12 +181,32 @@ const projectSchema = new Schema<Project>({
         'Web Development',
         'Mobile Development',
         'Desktop Development',
+        'NPM Package',
+        'Python Package (pip)',
+        'Library/Package',
+        'Chrome Extension',
+        'VS Code Extension',
+        'CLI Tool',
         'Machine Learning',
+        'Artificial Intelligence',
         'Data Science',
+        'Data Engineering',
         'DevOps',
+        'Cloud Computing',
+        'Cyber Security',
         'Blockchain',
         'Game Development',
         'IoT',
+        'Embedded Systems',
+        'Computer Vision',
+        'Natural Language Processing',
+        'Robotics',
+        'Augmented Reality',
+        'Virtual Reality',
+        'API Development',
+        'Automation',
+        'WordPress Plugin',
+        'Browser Extension',
         'Other'
       ],
       message: 'Invalid category'
@@ -192,9 +254,18 @@ const projectSchema = new Schema<Project>({
     required: [true, 'Image public ID is required'],
     trim: true
   },
+  additionalImages: {
+    type: [projectImageSchema],
+    default: [],
+    validate: {
+      validator: (value: ProjectImage[]) => value.length <= 10,
+      message: 'Cannot have more than 10 additional images'
+    }
+  },
   completionDate: {
     type: Date,
-    required: [true, 'Completion date is required'],
+    required: false,
+    default: null,
     index: true
   },
   featured: {
@@ -243,11 +314,21 @@ projectSchema.pre('save', async function(this: Project & { constructor: Model<Pr
   }
 });
 
-// Ensure old image is deleted when project is deleted
+// Ensure old images are deleted when project is deleted
 projectSchema.pre('deleteOne', { document: true }, async function(this: Project) {
   if (this.imagePublicId) {
     const { deleteImage } = await import('@/lib/cloudinary');
     await deleteImage(this.imagePublicId);
+  }
+  
+  // Delete additional images
+  if (this.additionalImages && this.additionalImages.length > 0) {
+    const { deleteImage } = await import('@/lib/cloudinary');
+    for (const img of this.additionalImages) {
+      if (img.publicId) {
+        await deleteImage(img.publicId);
+      }
+    }
   }
 });
 

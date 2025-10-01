@@ -48,7 +48,16 @@ export async function PUT(
     }
 
     const data = await request.json();
+    console.log('Update request data:', JSON.stringify(data, null, 2));
     
+    // Normalize lineSpacing to UI-supported values
+    if (typeof data.lineSpacing === 'string') {
+      const allowed = ['08', '10', '115', '125', '15', '20'];
+      if (!allowed.includes(data.lineSpacing)) {
+        data.lineSpacing = '10';
+      }
+    }
+
     // If title is being changed and slug not provided, regenerate unique slug
     if (data.title && !data.slug) {
       const baseSlug = data.title

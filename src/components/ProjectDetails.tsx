@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Github, ExternalLink, Calendar, Tag, Layers, Clock, Globe, Code } from "lucide-react";
+import { ExternalLink, Globe, Code, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
 import { Project } from "@/types/dashboard";
+import ProjectCard from '@/components/ProjectCard';
+import RichTextViewer from '@/components/shared/RichTextViewer';
 import { FaGithub, FaGitlab, FaBitbucket, FaGlobe } from 'react-icons/fa';
 
 interface ProjectDetailsProps {
@@ -16,7 +18,10 @@ interface ProjectDetailsProps {
 export default function ProjectDetails({ id }: ProjectDetailsProps) {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'details'>('overview');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [related, setRelated] = useState<Project[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -40,50 +45,106 @@ export default function ProjectDetails({ id }: ProjectDetailsProps) {
     fetchProject();
   }, [id]);
 
-  const formatDate = (dateString: string | Date) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }).format(date);
-  };
+  // Fetch related projects by category once project is loaded
+  useEffect(() => {
+    const fetchRelated = async () => {
+      if (!project?.category) return;
+      try {
+        setRelatedLoading(true);
+        const params = new URLSearchParams({ category: project.category, status: 'published', limit: '6' }).toString();
+        const res = await fetch(`/api/projects?${params}`);
+        const data = await res.json();
+        const items: Project[] = data?.data?.projects || [];
+        // Exclude current project id
+        setRelated(items.filter(p => p._id !== project._id).slice(0, 3));
+      } catch (e) {
+        setRelated([]);
+      } finally {
+        setRelatedLoading(false);
+      }
+    };
+    fetchRelated();
+  }, [project?._id, project?.category]);
+
+  // kept for potential future use (e.g., timeline/metadata)
 
   const getRepositoryIcon = (type: string) => {
     switch (type) {
       case 'github':
-        return <FaGithub className="w-5 h-5" />;
+        return <FaGithub className="w-4 h-4" />;
       case 'gitlab':
-        return <FaGitlab className="w-5 h-5" />;
+        return <FaGitlab className="w-4 h-4" />;
       case 'bitbucket':
-        return <FaBitbucket className="w-5 h-5" />;
+        return <FaBitbucket className="w-4 h-4" />;
       default:
-        return <FaGlobe className="w-5 h-5" />;
+        return <FaGlobe className="w-4 h-4" />;
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg text-gray-600 animate-pulse">Loading project details...</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 font-ui">
+        <Header />
+        <main className="max-w-6xl mx-auto px-6 py-8">
+          <div className="relative z-20 mx-4 mb-6 bg-white rounded-xl p-4 outline outline-2 outline-black overflow-visible box-border">
+
+          {/* Project Header Skeleton */}
+          <div className="mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column Skeleton */}
+              <div className="space-y-6">
+                <div className="w-20 h-5 bg-gray-200 rounded animate-pulse" />
+                <div className="space-y-3">
+                  <div className="w-3/4 h-8 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-full h-4 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-2/3 h-4 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="space-y-3">
+                  <div className="w-48 h-4 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-40 h-4 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-32 h-10 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-28 h-10 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="space-y-3">
+                  <div className="w-24 h-5 bg-gray-200 rounded animate-pulse" />
+                  <div className="flex flex-wrap gap-2">
+                    {[1,2,3,4,5].map(i => (
+                      <div key={i} className="w-16 h-6 bg-gray-200 rounded animate-pulse" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right Column Skeleton */}
+              <div className="h-80 lg:h-96 bg-gray-200 rounded-lg animate-pulse" />
+            </div>
+          </div>
+
+          {/* Content Skeleton */}
+          <div className="space-y-6">
+            <div className="h-32 bg-gray-200 rounded-lg animate-pulse" />
+            <div className="h-24 bg-gray-200 rounded-lg animate-pulse" />
+            <div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
         </div>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-white font-ui flex flex-col items-center justify-center">
         <div className="text-center space-y-4">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Project Not Found</h2>
-          <p className="text-gray-600 mb-6">The project you're looking for doesn't exist or has been removed.</p>
+          <h2 className="text-h3 font-bold text-gray-800">Loading issue</h2>
+          <p className="text-body-sm text-gray-600">We couldn't load this project right now. Please try again or return to the projects page.</p>
           <Link
             href="/projects"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all transform hover:scale-105"
+            className="btn btn-primary inline-flex items-center gap-2"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Projects
           </Link>
         </div>
@@ -93,106 +154,60 @@ export default function ProjectDetails({ id }: ProjectDetailsProps) {
 
   const mainRepo = project.repositories?.[0];
   const mainDemo = project.demoUrls?.[0];
+  const images = project?.additionalImages || [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="pt-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 font-ui">
         <Header />
-      </div>
 
-      <main className="container mx-auto px-4 py-12 max-w-6xl">
-        {/* Back Button */}
-        <Link
-          href="/projects"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-all transform hover:-translate-x-1 mb-8 group"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
-          Back to Projects
-        </Link>
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        <div className="relative z-10 mx-4 mb-6 bg-white rounded-xl p-6 border border-black shadow-sm box-border overflow-visible">
 
-        {/* Project Hero */}
-        <div className="relative h-[500px] w-full rounded-2xl overflow-hidden shadow-xl mb-8 animate-fadeIn">
-          <Image
-            src={project?.image || '/placeholder-project.svg'}
-            alt={project?.title || 'Project Image'}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-          
-          {/* Hero Content */}
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-            <div className="animate-slideUp">
+        {/* Project Header - Two Column Layout */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* Left Column - Project Details */}
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-h2 font-bold text-gray-900 leading-tight mb-3">
+                  {project?.title}
+                </h1>
               {project?.category && (
-                <span className="px-4 py-1.5 bg-blue-600/90 text-white rounded-full inline-block text-sm font-medium mb-4 backdrop-blur-sm shadow-lg">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-700 ring-1 ring-gray-200 mb-4">
                   {project.category}
                 </span>
               )}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                {project?.title}
-              </h1>
-              <p className="text-white/90 text-lg max-w-3xl mb-6">
+                <p className="text-body text-gray-700 leading-relaxed">
                 {project.shortDescription}
               </p>
-              
-              {/* Project Meta */}
-              <div className="flex flex-wrap gap-6 text-white/80">
-                <div className="flex items-center">
-                  <Clock className="w-5 h-5 mr-2" />
-                  <span>Completed {formatDate(project.completionDate)}</span>
-                </div>
-                <div className="flex items-center">
-                  <Layers className="w-5 h-5 mr-2" />
-                  <span>{project.technologies?.length} Technologies</span>
-                </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {project?.technologies?.slice(0, 6).map((tech, idx) => (
+                  <span key={idx} className="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700 ring-1 ring-gray-200">
+                    {tech.name}
+                  </span>
+                ))}
+                {project?.technologies && project.technologies.length > 6 && (
+                  <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-700">
+                    +{project.technologies.length - 6}
+                  </span>
+                )}
               </div>
-            </div>
-          </div>
-        </div>
+              </div>
+              
+              {/* Project Meta (removed per UX refinement) */}
         
-        {/* Project Content */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl animate-fadeIn">
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`px-6 py-4 text-sm font-medium transition-colors ${
-                  activeTab === 'overview'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveTab('details')}
-                className={`px-6 py-4 text-sm font-medium transition-colors ${
-                  activeTab === 'details'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Technical Details
-              </button>
-            </div>
-          </div>
-          
-          <div className="p-8">
-            {activeTab === 'overview' && (
-              <div className="animate-fadeIn">
-                {/* Project Links */}
-                <div className="flex flex-wrap gap-4 mb-8">
+              {/* Primary Actions */}
+              <div className="flex flex-wrap gap-2">
                   {mainRepo && (
                     <a
                       href={mainRepo.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all transform hover:scale-105 hover:shadow-lg"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200 text-sm focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
+                    aria-label={`View source on ${mainRepo.type}`}
                     >
                       {getRepositoryIcon(mainRepo.type)}
-                      <span className="ml-2">View Source Code</span>
+                    <span>View Source</span>
                     </a>
                   )}
                   {mainDemo && (
@@ -200,106 +215,310 @@ export default function ProjectDetails({ id }: ProjectDetailsProps) {
                       href={mainDemo.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all transform hover:scale-105 hover:shadow-lg"
-                    >
-                      <ExternalLink className="w-5 h-5 mr-2" />
-                      View Live Demo
-                    </a>
-                  )}
-                </div>
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
+                    aria-label="Open live demo in new tab"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Live Demo</span>
+                  </a>
+                )}
+              </div>
 
-                {/* Project Description */}
-                <div className="prose max-w-none">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">About this Project</h2>
-                  <div className="bg-gray-50 rounded-xl p-6 shadow-inner">
-                    <div 
-                      className="text-gray-700 leading-relaxed prose prose-gray max-w-none"
-                      dangerouslySetInnerHTML={{ __html: project?.description || '' }}
-                    />
+                {/* Technologies */}
+              {project?.technologies && project.technologies.length > 0 && (
+                <div>
+                  <h3 className="text-h6 font-semibold text-gray-900 mb-3">Technologies</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {(() => {
+                      const maxTech = 6;
+                      const techs = project.technologies || [];
+                      const visible = techs.slice(0, maxTech);
+                      const overflow = techs.length - visible.length;
+                      return (
+                        <>
+                          {visible.map((tech, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg ring-1 ring-gray-200 transition-colors duration-200 hover:bg-white"
+                            >
+                              {tech.icon ? (
+                                <img 
+                                  src={tech.icon} 
+                                  alt={`${tech.name} icon`}
+                                  className="w-4 h-4 object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <Code className="w-4 h-4 text-blue-500" />
+                              )}
+                              <span className="text-xs font-medium text-gray-700">{tech.name}</span>
+                            </div>
+                          ))}
+                          {overflow > 0 && (
+                            <span className="inline-flex items-center rounded-full bg-gray-50 ring-1 ring-gray-200 px-3 py-2 text-xs font-medium text-gray-700">+{overflow}</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Project Image */}
+            {project?.image && (
+              <div className="relative">
+                <div className="rounded-2xl p-[2px] bg-black shadow-md">
+                  <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-white ring-1 ring-gray-200">
+                  <Image
+                    src={project.image}
+                    alt={project?.title || 'Project Image'}
+                    fill
+                    className="object-cover transition-transform duration-500 hover:scale-105"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 hover:opacity-60 transition-opacity duration-300"></div>
                   </div>
                 </div>
               </div>
             )}
+          </div>
+        </div>
 
-            {activeTab === 'details' && (
-              <div className="animate-fadeIn">
-                {/* Technologies */}
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Technologies Used</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {project?.technologies?.map((tech, index) => (
-                      <div
-                        key={index}
-                        className="px-4 py-3 bg-gray-50 border border-gray-100 text-gray-800 rounded-lg font-medium transition-all hover:bg-gray-100 hover:shadow-sm flex items-center"
-                      >
-                        <Code className="w-4 h-4 mr-2 text-blue-500" />
-                        {tech.name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+        {/* Project Description */}
+          <div className="mb-8">
+          <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
+            <h2 className="text-h5 font-semibold text-gray-900 mb-6">About this Project</h2>
+            <div className="prose prose-sm prose-compact max-w-none font-prose">
+            <RichTextViewer
+              html={project?.description || ''}
+              lineSpacing={'10'}
+              className="
+                prose-headings:text-gray-900 prose-headings:font-bold
+                prose-headings:scroll-mt-24
+                prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm prose-h1:my-1 prose-h2:my-1 prose-h3:my-1 prose-h4:my-0 prose-headings:leading-tight
+                prose-p:text-gray-700 prose-p:text-base prose-p:leading-relaxed prose-p:my-2
+                prose-a:text-blue-600 prose-a:underline-offset-2 hover:prose-a:underline
+                prose-img:rounded-xl prose-img:shadow-md prose-img:my-3
+                prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:bg-gray-50 prose-blockquote:p-2 prose-blockquote:my-1 prose-blockquote:text-xs
+                prose-ul:my-1 prose-ol:my-1
+                prose-li:my-0.5 prose-li:text-base list-disc list-outside pl-5
+                prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-[12px]
+                prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-3 prose-pre:rounded-xl prose-pre:my-2 prose-pre:text-[12px]
+                prose-strong:text-gray-900 prose-strong:font-semibold
+                prose-em:text-gray-700
+                prose-hr:border-gray-200 prose-hr:my-1
+              "
+            />
+            </div>
+          </div>
+        </div>
 
-                {/* All Repositories */}
+
+        {/* Repositories */}
                 {project.repositories?.length > 0 && (
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Repositories</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
+              <h3 className="text-h5 font-semibold text-gray-900 mb-4">Repositories</h3>
+              <div className="space-y-3">
                       {project.repositories.map((repo, index) => (
                         <a
                           key={`repo-${index}`}
                           href={repo.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center p-4 bg-gray-50 border border-gray-100 rounded-lg hover:bg-gray-100 transition-all group"
+                    className="flex items-center p-4 bg-white rounded-lg ring-1 ring-gray-200 hover:bg-gray-50 transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
                         >
-                          <div className="mr-3 text-gray-600 group-hover:text-blue-600">
+                    <div className="mr-3 text-gray-600 group-hover:text-blue-600 transition-colors">
                             {getRepositoryIcon(repo.type)}
                           </div>
-                          <div>
-                            <div className="font-medium text-gray-900 group-hover:text-blue-600">
-                              {repo.name || `${repo.type} Repository`}
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {repo.name || `${repo.type.charAt(0).toUpperCase() + repo.type.slice(1)} Repository`}
                             </div>
-                            <div className="text-sm text-gray-500">{repo.type.charAt(0).toUpperCase() + repo.type.slice(1)}</div>
+                      <div className="text-xs text-gray-500 capitalize">{repo.type}</div>
                           </div>
-                          <ExternalLink className="w-4 h-4 ml-auto text-gray-400 group-hover:text-blue-600" />
+                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
                         </a>
                       ))}
+              </div>
                     </div>
                   </div>
                 )}
 
-                {/* All Demo Links */}
+        {/* Demo Links */}
                 {project.demoUrls?.length > 0 && (
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Demo Links</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {project.demoUrls.map((demo, index) => (
+            <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
+              <h3 className="text-h5 font-semibold text-gray-900 mb-4">Demo Links</h3>
+              <div className="space-y-3">
+                {project.demoUrls.map((demo, index) => {
+                  const getDemoBadgeColor = (type: string) => {
+                    switch (type) {
+                      case 'live': return 'bg-green-50 text-green-800 ring-1 ring-green-200';
+                      case 'staging': return 'bg-yellow-50 text-yellow-800 ring-1 ring-yellow-200';
+                      case 'demo': return 'bg-blue-50 text-blue-800 ring-1 ring-blue-200';
+                      case 'documentation': return 'bg-purple-50 text-purple-800 ring-1 ring-purple-200';
+                      default: return 'bg-gray-50 text-gray-800 ring-1 ring-gray-200';
+                    }
+                  };
+                  
+                  return (
                         <a
                           key={`demo-${index}`}
                           href={demo.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center p-4 bg-gray-50 border border-gray-100 rounded-lg hover:bg-gray-100 transition-all group"
-                        >
-                          <Globe className="w-5 h-5 mr-3 text-gray-600 group-hover:text-blue-600" />
-                          <div>
-                            <div className="font-medium text-gray-900 group-hover:text-blue-600">
-                              {demo.name || `${demo.type} Demo`}
+                      className="flex items-center p-4 bg-white rounded-lg ring-1 ring-gray-200 hover:bg-gray-50 transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
+                      aria-label={`Open ${demo.type} link in new tab`}
+                    >
+                      <Globe className="w-4 h-4 mr-3 text-gray-600 group-hover:text-green-600 transition-colors" />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-900 group-hover:text-green-600 transition-colors">
+                          {demo.name || `${demo.type.charAt(0).toUpperCase() + demo.type.slice(1)} Demo`}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${getDemoBadgeColor(demo.type)}`}>
+                            {demo.type.charAt(0).toUpperCase() + demo.type.slice(1)}
+                          </span>
                             </div>
-                            <div className="text-sm text-gray-500">{demo.type.charAt(0).toUpperCase() + demo.type.slice(1)}</div>
                           </div>
-                          <ExternalLink className="w-4 h-4 ml-auto text-gray-400 group-hover:text-blue-600" />
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-green-600 transition-colors" />
                         </a>
-                      ))}
+                  );
+                })}
+              </div>
                     </div>
                   </div>
                 )}
+
+        {/* Additional Images Gallery */}
+        {project.additionalImages && project.additionalImages.length > 0 && (
+          <div className="mb-8">
+            <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
+              <h3 className="text-h5 font-semibold text-gray-900 mb-6">Project Gallery</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {project.additionalImages.map((image, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => { setLightboxIndex(index); setLightboxOpen(true); }}
+                    className="group relative overflow-hidden rounded-xl transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <div className="aspect-video relative overflow-hidden">
+                      <Image
+                        src={image.url}
+                        alt={image.altText || `Project image ${index + 1}`}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      {image.caption && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white p-3 transform translate-y-full transition-transform duration-300 group-hover:translate-y-0">
+                          <p className="text-sm font-medium">{image.caption}</p>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Related Projects */}
+        {related.length > 0 ? (
+          <div className="mt-12">
+            <div className="bg-white rounded-xl p-6 ring-1 ring-gray-200 shadow-sm">
+              <h2 className="text-h4 font-semibold text-gray-900 mb-6">Related Projects</h2>
+              {relatedLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {related.map(p => (
+                    <ProjectCard key={p._id} project={p} />
+                  ))}
               </div>
             )}
           </div>
         </div>
+        ) : (
+          <div className="mt-12">
+            <div className="bg-white rounded-xl p-6 ring-1 ring-gray-200 shadow-sm text-center text-gray-600">
+              <h2 className="text-h5 font-semibold text-gray-900 mb-2">Related Projects</h2>
+              <p className="text-sm">No related projects found. Explore more on the projects page.</p>
+              <Link href="/projects" className="inline-flex items-center mt-3 text-blue-600 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500 rounded-md px-2 py-1">
+                Browse Projects
+              </Link>
+            </div>
+          </div>
+        )}
+        </div>
       </main>
+
       <Footer />
+
+      {/* Lightbox */}
+      {lightboxOpen && images.length ? (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Project image viewer"
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setLightboxOpen(false);
+            if (e.key === 'ArrowLeft') setLightboxIndex((prev) => (prev - 1 + images.length) % images.length);
+            if (e.key === 'ArrowRight') setLightboxIndex((prev) => (prev + 1) % images.length);
+          }}
+          tabIndex={-1}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 text-white hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-white/50"
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Close lightbox"
+            autoFocus
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            className="absolute left-4 text-white hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-white/50"
+            onClick={() => setLightboxIndex((prev) => (prev - 1 + images.length) % images.length)}
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            className="absolute right-4 text-white hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-white/50"
+            onClick={() => setLightboxIndex((prev) => (prev + 1) % images.length)}
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+          <div className="relative w-[90vw] max-w-4xl aspect-video">
+            <Image
+              src={images[lightboxIndex].url}
+              alt={images[lightboxIndex].altText || `Project image ${lightboxIndex + 1}`}
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          {images[lightboxIndex]?.caption && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white bg-black/60 px-3 py-1 rounded text-sm">
+              {images[lightboxIndex].caption}
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 } 

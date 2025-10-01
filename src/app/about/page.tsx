@@ -1,160 +1,50 @@
 "use client";
+import React from "react";
 
 import { useState, useEffect, useRef } from "react";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import Image from "next/image";
 import {
-  FaAward,
+  FaBriefcase,
   FaEnvelope,
   FaLinkedin,
-  FaCode,
-  FaPaintBrush,
-  FaGlobe,
-  FaGraduationCap,
-  FaChevronDown,
-  FaChevronUp
+  FaUniversity
 } from "react-icons/fa";
-import { programmingSkills, softwareSkills, languages } from "../../data/data";
 import ProjectGrid from "@/components/ProjectGrid";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
-import ExperienceSection from "@/components/ExperienceSection";
+import dynamic from "next/dynamic";
+import ExperienceSectionTight from "@/components/ExperienceSectionTight";
+import SkillsSection from "@/components/SkillsSection";
 import { Project, ProjectListApiResponse } from '@/types/dashboard';
+const ExperienceSection = dynamic(() => import("@/components/ExperienceSection"), { ssr: false });
 
-interface SkillProgressBarProps {
-  skill: { name: string; level: string };
-  delay?: number;
-}
-
-interface AnimatedCounterProps {
-  end: number;
-  duration?: number;
-  suffix?: string;
-}
-
-// Animated Counter Component
-function AnimatedCounter({
-  end,
-  duration = 2000,
-  suffix = "",
-}: AnimatedCounterProps) {
-  const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isVisible) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, [isVisible]);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    let startTime: number;
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      setCount(Math.floor(progress * end));
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [isVisible, end, duration]);
-
-  return (
-    <span ref={ref}>
-      {count}
-      {suffix}
-    </span>
-  );
-}
-
-// Skill Progress Bar Component
-function SkillProgressBar({
-  skill,
-  delay = 0,
-}: SkillProgressBarProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  const getProgressWidth = (level: string) => {
-    switch (level.toLowerCase()) {
-      case "expert":
-        return 95;
-      case "advanced":
-        return 85;
-      case "intermediate":
-        return 70;
-      case "basic":
-        return 50;
-      case "beginner":
-        return 30;
-      default:
-        return 60;
-    }
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), delay);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div
-      ref={ref}
-      className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-gray-800">{skill.name}</span>
-        <span className="text-xs text-gray-500">{skill.level}</span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-1000 ease-out"
-          style={{
-            width: isVisible ? `${getProgressWidth(skill.level)}%` : "0%",
-          }}
-        />
-      </div>
-    </div>
-  );
-}
 
 export default function About() {
-  const [activeSkillTab, setActiveSkillTab] = useState<
-    "programming" | "software" | "languages"
-  >("programming");
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set()
-  );
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Scroll animation hooks
+  const introAnimation = useScrollAnimation();
+  const experienceAnimation = useScrollAnimation();
+  const projectsAnimation = useScrollAnimation();
+  const contactAnimation = useScrollAnimation();
+
+  // Check for reduced motion preference
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const profileImage = "/assets/home/profile-img.jpg";
 
@@ -181,15 +71,6 @@ export default function About() {
     fetchProjects();
   }, []);
 
-  const toggleSection = (section: string) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(section)) {
-      newExpanded.delete(section);
-    } else {
-      newExpanded.add(section);
-    }
-    setExpandedSections(newExpanded);
-  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -199,50 +80,62 @@ export default function About() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
       <div className="pt-6">
         <Header />
       </div>
 
-      <div className="bg-gray-100">
-        {/* Hero Section */}
-        <section className="py-16 flex flex-col items-center">
-          <div className="text-center mb-12">
-            <h4 className="text-md text-gray-600">Get to Know</h4>
-            <h2 className="text-5xl font-bold text-black">About Me</h2>
+      <main className="relative">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-7xl mx-auto">
+            {/* Page Title */}
+            <div className="text-center mb-6 md:mb-8">
+              <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Get to Know</h4>
+              <h1 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
+                Avishek Devnath
+              </h1>
+              <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Discover my journey, skills, and passion for creating innovative solutions in web development and software engineering.
+              </p>
           </div>
 
-          <div className="w-full max-w-7xl px-4">
-            {/* Introduction */}
-            <div className="bg-white rounded-xl shadow-md p-8 mb-12">
-              <div className="flex flex-col lg:flex-row items-center gap-8">
-                <div className="w-48 h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0">
-                  <img
+            {/* Introduction Card */}
+            <div 
+              ref={introAnimation.ref}
+              className={`bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 p-4 md:p-6 mb-6 md:mb-8 shadow-inner transition-all duration-700 ease-out hover:scale-105 hover:shadow-xl ${
+                introAnimation.isVisible ? 'opacity-100 translate-y-0' : prefersReducedMotion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`} style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+              <div className="flex flex-col lg:flex-row items-center gap-4 md:gap-6">
+                <div className="w-48 h-48 rounded-full overflow-hidden shadow-lg flex-shrink-0 border-4 border-white">
+                  <Image
                     src={profileImage}
                     alt="Avishek Devnath"
+                    width={192}
+                    height={192}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                   />
                 </div>
-                <div className="flex-1 text-center lg:text-left">
-                  <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                <div className="flex-1 text-center">
+                  <h1 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-3">
                     Hi, I'm <span className="text-blue-600">Avishek Devnath</span>
                   </h1>
-                  <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                    I'm a passionate Full-Stack Developer with over 3 years of experience
-                    building modern web applications. I specialize in the MERN stack
-                    (MongoDB, Express.js, React, Node.js) and love creating intuitive,
-                    user-friendly solutions that make a real impact.
+                  <p className="text-body-sm text-gray-600 mb-6 leading-relaxed">
+                    Hi, I'm Avishek Devnath! I am a CSE graduate from BGC Trust University and an MSc student at Dhaka University, specializing in MERN Stack development with experience in Docker, Kubernetes, and Django. As a Senior CS Instructor at Phitron, I've mentored students in C, C++, Python, DSA, SQL, and web development, and built open-source projects like Xerror and Py-OneSend. I am now seeking opportunities as a Software Engineer to build scalable, secure, and user-focused applications.
                   </p>
-                  <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                  <div className="flex flex-wrap gap-4 justify-center">
                     <button
                       onClick={() => scrollToSection("experience")}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 text-button font-semibold shadow-lg border border-blue-500"
                     >
                       View Experience
                     </button>
                     <button
                       onClick={() => scrollToSection("skills")}
-                      className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all duration-300 text-button font-semibold shadow-inner"
+                      style={{boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)'}}
                     >
                       See Skills
                     </button>
@@ -251,251 +144,81 @@ export default function About() {
               </div>
             </div>
 
-            {/* About Me Section */}
-            <section
-              id="about"
-              className="min-h-[80vh] flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8"
-            >
-              <div className="text-center mb-8 sm:mb-12 animate-fade-in">
-                <h4 className="text-sm sm:text-md text-gray-600">Get To Know More</h4>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black">
-                  About Me
-                </h2>
-              </div>
-
-              <div className="w-full max-w-[90%] grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center px-4 py-6 sm:py-10">
-                {/* Photo */}
-                <div className="flex justify-center md:justify-end">
-                  <div className="relative group">
-                    <img
-                      src={profileImage || "/placeholder.svg"}
-                      alt="Avishek Devnath"
-                      className="h-48 w-48 sm:h-56 sm:w-56 md:h-64 md:w-64 object-cover rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-blue-600/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                </div>
-
-                {/* Text Section */}
-                <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-6 sm:space-y-8">
-                  <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                    {/* Experience */}
-                    <div className="bg-white text-center text-black flex flex-col items-center justify-center px-4 sm:px-6 py-4 rounded-lg border shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                      <FaAward className="text-3xl sm:text-4xl text-yellow-500 mb-2 animate-bounce" />
-                      <h5 className="text-lg sm:text-xl font-semibold">Experience</h5>
-                      <p className="text-xs sm:text-sm mt-4">
-                        <AnimatedCounter end={3} suffix="+" /> years as a Full-Stack
-                        Developer
-                      </p>
-                    </div>
-
-                    {/* Education */}
-                    <div className="bg-white text-center text-black flex flex-col items-center justify-center px-4 sm:px-6 py-4 rounded-lg border shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2">
-                      <FaGraduationCap className="text-3xl sm:text-4xl text-blue-500 mb-2 animate-pulse" />
-                      <h5 className="text-lg sm:text-xl font-semibold">Education</h5>
-                      <p className="text-xs sm:text-sm mt-4">
-                        MSc in CSE (Ongoing), Dhaka University <br />
-                        BSc in CSE, BGC Trust University, 2020–2024
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Paragraph */}
-                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-                    Hi, I'm Avishek Devnath! I'm a CSE graduate with a BSc from BGC
-                    Trust University Bangladesh, and I'm currently pursuing an MSc at
-                    Dhaka University. I specialize in MERN Stack Development and have
-                    explored technologies like Docker, Kubernetes, and Django. I'm
-                    seeking an internship or junior full-stack web developer role. I'm
-                    a quick learner, love to learn and apply new things, and always
-                    enjoy teamwork.
-                  </p>
-                </div>
-              </div>
-            </section>
 
             {/* Dynamic Experience Section */}
-            <section className="py-12 sm:py-16 bg-white">
-              <ExperienceSection 
+            <section
+              ref={experienceAnimation.ref}
+              className={`mb-8 md:mb-10 transition-all duration-700 ease-out ${
+                experienceAnimation.isVisible ? 'opacity-100 translate-y-0' : prefersReducedMotion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}>
+              <div className="text-center mb-4 md:mb-6">
+                <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Professional Journey</h4>
+                <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-6">
+                  Work Experience & Education
+                </h2>
+                <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                  My professional journey and academic background in computer science and software development.
+                      </p>
+                    </div>
+              <ExperienceSectionTight 
                 type="both"
                 variant="compact"
                 showFeaturedOnly={true}
                 limit={6}
-                title="Experience & Education"
-                subtitle="Professional journey and academic background"
+                title=""
+                subtitle=""
                 className="bg-transparent"
               />
             </section>
 
             {/* Skills Section */}
-            <section
-              id="skills"
-              className="py-12 sm:py-16 flex flex-col items-center bg-gray-100"
-            >
-              <div className="text-center mb-8 sm:mb-12">
-                <h4 className="text-sm sm:text-md text-gray-600">Explore My</h4>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black">
-                  Skills
-                </h2>
-              </div>
-
-              <div className="w-full max-w-6xl px-4 sm:px-6">
-                {/* Skill Tabs */}
-                <div className="flex justify-center mb-8">
-                  <div className="bg-gray-100 p-1 rounded-lg">
-                    {[
-                      {
-                        key: "programming",
-                        label: "Programming",
-                        icon: FaCode,
-                        color: "text-blue-500",
-                      },
-                      {
-                        key: "software",
-                        label: "Software",
-                        icon: FaPaintBrush,
-                        color: "text-purple-500",
-                      },
-                      {
-                        key: "languages",
-                        label: "Languages",
-                        icon: FaGlobe,
-                        color: "text-red-500",
-                      },
-                    ].map(({ key, label, icon: Icon, color }) => (
-                      <button
-                        key={key}
-                        onClick={() => setActiveSkillTab(key as any)}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-300 ${
-                          activeSkillTab === key
-                            ? "bg-white shadow-md text-gray-900"
-                            : "text-gray-600 hover:text-gray-900"
-                        }`}
-                      >
-                        <Icon
-                          className={`${color} ${
-                            activeSkillTab === key ? "animate-pulse" : ""
-                          }`}
-                        />
-                        <span className="font-medium">{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Skills Content */}
-                <div className="min-h-[400px]">
-                  {activeSkillTab === "programming" && (
-                    <div className="space-y-8">
-                      {Object.entries(programmingSkills).map(
-                        ([category, skills]) => (
-                          <div key={category} className="space-y-4">
-                            <button
-                              onClick={() => toggleSection(category)}
-                              className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                            >
-                              <h4 className="text-lg font-semibold text-gray-800 capitalize">
-                                {category.replace(/([A-Z])/g, " $1").trim()}
-                              </h4>
-                              {expandedSections.has(category) ? (
-                                <FaChevronUp />
-                              ) : (
-                                <FaChevronDown />
-                              )}
-                            </button>
-
-                            {expandedSections.has(category) && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
-                                {skills.map((skill, skillIndex) => (
-                                  <SkillProgressBar
-                                    key={skillIndex}
-                                    skill={skill}
-                                    delay={skillIndex * 100}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      )}
-                    </div>
-                  )}
-
-                  {activeSkillTab === "software" && (
-                    <div className="space-y-8">
-                      {Object.entries(softwareSkills).map(([category, skills]) => (
-                        <div key={category} className="space-y-4">
-                          <button
-                            onClick={() => toggleSection(`software-${category}`)}
-                            className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                          >
-                            <h4 className="text-lg font-semibold text-gray-800 capitalize">
-                              {category.replace(/([A-Z])/g, " $1").trim()}
-                            </h4>
-                            {expandedSections.has(`software-${category}`) ? (
-                              <FaChevronUp />
-                            ) : (
-                              <FaChevronDown />
-                            )}
-                          </button>
-
-                          {expandedSections.has(`software-${category}`) && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
-                              {skills.map((skill, skillIndex) => (
-                                <SkillProgressBar
-                                  key={skillIndex}
-                                  skill={skill}
-                                  delay={skillIndex * 100}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {activeSkillTab === "languages" && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {languages.map((lang, index) => (
-                        <SkillProgressBar
-                          key={index}
-                          skill={lang}
-                          delay={index * 100}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
+            <SkillsSection />
 
             {/* Projects Section */}
             <section
               id="projects"
-              className="py-12 sm:py-16 flex flex-col items-center bg-gray-100"
-            >
-              <div className="text-center mb-8 sm:mb-12">
-                <h4 className="text-sm sm:text-md text-gray-600">Browse My Recent</h4>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black">
+              ref={projectsAnimation.ref}
+              className={`mt-16 mb-8 md:mb-10 transition-all duration-700 ease-out ${
+                projectsAnimation.isVisible ? 'opacity-100 translate-y-0' : prefersReducedMotion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}>
+              <div className="text-center mb-4 md:mb-6">
+                <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Browse My Recent</h4>
+                <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-6">
                   Projects
                 </h2>
+                <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                  A showcase of my recent projects and work in web development, featuring modern technologies and innovative solutions.
+                </p>
               </div>
 
-              <div className="w-full max-w-[90%] sm:max-w-6xl">
+              <div className="w-full">
                 {loading ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
-                    <p className="text-gray-600">Loading projects...</p>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {Array.from({ length: 6 }).map((_, idx) => (
+                      <div key={idx} className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 overflow-hidden animate-pulse" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+                        <div className="h-32 bg-gray-200" />
+                        <div className="p-4 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4" />
+                          <div className="h-3 bg-gray-200 rounded w-full" />
+                          <div className="h-3 bg-gray-200 rounded w-5/6" />
+                          <div className="flex gap-1.5 pt-1.5">
+                            <div className="h-5 bg-gray-200 rounded-full w-12" />
+                            <div className="h-5 bg-gray-200 rounded-full w-16" />
+                            <div className="h-5 bg-gray-200 rounded-full w-14" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : error ? (
                   <div className="flex flex-col items-center justify-center py-12">
-                    <p className="text-red-500">{error}</p>
+                    <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-2xl shadow-sm">
+                      <p className="text-red-700">{error}</p>
+                    </div>
                   </div>
                 ) : (
                   <ProjectGrid 
                     projects={projects}
-                    defaultStatus="published"
                   />
                 )}
               </div>
@@ -504,19 +227,24 @@ export default function About() {
             {/* Contact Section */}
             <section
               id="contact"
-              className="py-12 sm:py-16 flex flex-col items-center bg-white"
-            >
-              <div className="text-center mb-8 sm:mb-12">
-                <h4 className="text-sm sm:text-md text-gray-600">Get in Touch</h4>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black">
+              ref={contactAnimation.ref}
+              className={`mb-8 md:mb-10 transition-all duration-700 ease-out ${
+                contactAnimation.isVisible ? 'opacity-100 translate-y-0' : prefersReducedMotion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}>
+              <div className="text-center mb-4 md:mb-6">
+                <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Get in Touch</h4>
+                <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-6">
                   Contact Me
                 </h2>
+                <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                  Ready to collaborate or have a question? I'd love to hear from you. Let's connect and discuss how we can work together.
+                </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-12 sm:mb-16 px-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto">
                 <a
                   href="mailto:avishekdevnath@gmail.com"
-                  className="group flex items-center justify-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 rounded-full text-base sm:text-lg font-medium text-black hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto"
+                  className="group flex items-center justify-center space-x-3 px-6 py-3 bg-blue-600 text-white rounded-xl text-button font-semibold hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg border border-blue-500 w-full sm:w-auto"
                 >
                   <FaEnvelope className="group-hover:animate-bounce" />
                   <span>avishekdevnath@gmail.com</span>
@@ -525,7 +253,8 @@ export default function About() {
                   href="https://www.linkedin.com/in/avishekdevnath"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center justify-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 rounded-full text-base sm:text-lg font-medium text-black hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto"
+                  className="group flex items-center justify-center space-x-3 px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl text-button font-semibold hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all duration-300 shadow-inner w-full sm:w-auto"
+                  style={{boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)'}}
                 >
                   <FaLinkedin className="group-hover:animate-pulse" />
                   <span>LinkedIn</span>
@@ -533,8 +262,8 @@ export default function About() {
               </div>
             </section>
           </div>
-        </section>
       </div>
+      </main>
 
       <Footer />
 

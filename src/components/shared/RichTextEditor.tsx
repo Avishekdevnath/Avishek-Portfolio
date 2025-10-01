@@ -5,7 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import clsx from 'classnames';
 import {
   Bold,
@@ -21,6 +21,14 @@ import {
   Link as LinkIcon,
   Undo2,
   Redo2,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Image as ImageIcon,
+  Youtube as YoutubeIcon,
+  PaintBucket,
+  Type,
 } from 'lucide-react';
 import TextStyle from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
@@ -30,7 +38,6 @@ import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
 import { uploadImage } from '@/lib/cloudinary';
 import { ChangeEvent } from 'react';
-import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Image as ImageIcon, Youtube as YoutubeIcon, PaintBucket } from 'lucide-react';
 
 interface RichTextEditorProps {
   value: string;
@@ -39,6 +46,8 @@ interface RichTextEditorProps {
   className?: string;
   minHeight?: string;
   readOnly?: boolean;
+  lineSpacing?: string;
+  onLineSpacingChange?: (lineSpacing: string) => void;
 }
 
 function ToolbarButton({
@@ -76,6 +85,15 @@ const FONT_FAMILIES = [
   'Georgia',
 ];
 
+const LINE_SPACING_OPTIONS = [
+  { value: '08', label: '0.8x (Tight)', icon: Type },
+  { value: '10', label: '1.0x (Single)', icon: Type },
+  { value: '115', label: '1.15x (Default)', icon: Type },
+  { value: '125', label: '1.25x (Relaxed)', icon: Type },
+  { value: '15', label: '1.5x (Loose)', icon: Type },
+  { value: '20', label: '2.0x (Double)', icon: Type },
+];
+
 export default function RichTextEditor({
   value,
   onChange,
@@ -83,7 +101,10 @@ export default function RichTextEditor({
   className,
   minHeight = '200px',
   readOnly = false,
+  lineSpacing: externalLineSpacing,
+  onLineSpacingChange,
 }: RichTextEditorProps) {
+  const [lineSpacing, setLineSpacing] = useState(externalLineSpacing || '10');
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -101,6 +122,7 @@ export default function RichTextEditor({
     ],
     content: value || '<p></p>',
     editable: !readOnly,
+    immediatelyRender: false,
     onUpdate({ editor }) {
       onChange(editor.getHTML());
     },
@@ -108,6 +130,18 @@ export default function RichTextEditor({
       attributes: {
         class: clsx(
           'prose prose-sm sm:prose lg:prose-lg focus:outline-none',
+          'prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm prose-h1:my-1 prose-h2:my-1 prose-h3:my-1 prose-h4:my-0 prose-headings:leading-tight',
+          'prose-p:text-gray-700 prose-p:text-sm prose-p:my-0',
+          'prose-img:rounded-lg prose-img:shadow-sm prose-img:my-1',
+          'prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:bg-gray-50 prose-blockquote:p-2 prose-blockquote:my-1 prose-blockquote:text-xs',
+          'prose-ul:my-0 prose-ol:my-0',
+          'prose-li:my-0 prose-li:text-sm list-inside',
+          'prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[11px]',
+          'prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-1.5 prose-pre:rounded-lg prose-pre:my-1 prose-pre:text-[11px]',
+          'prose-strong:text-gray-900 prose-strong:font-semibold',
+          'prose-em:text-gray-700',
+          'prose-hr:border-gray-200 prose-hr:my-1',
+          `line-spacing-${lineSpacing}`,
           className
         ),
         style: `min-height:${minHeight}`,
@@ -152,7 +186,7 @@ export default function RichTextEditor({
   return (
     <div className="rich-text-editor flex flex-col">
       {editor && !readOnly && (
-        <div className="toolbar">
+        <div className="toolbar motion-reduce:animate-none">
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             icon={Bold}
@@ -252,6 +286,23 @@ export default function RichTextEditor({
           <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} icon={AlignCenter} active={editor.isActive({ textAlign: 'center' })} title="Align Center" />
           <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} icon={AlignRight} active={editor.isActive({ textAlign: 'right' })} title="Align Right" />
           <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} icon={AlignJustify} active={editor.isActive({ textAlign: 'justify' })} title="Justify" />
+          <span className="w-px h-5 bg-gray-200 mx-1" />
+          <select
+            value={lineSpacing}
+            onChange={(e) => {
+              const newLineSpacing = e.target.value;
+              setLineSpacing(newLineSpacing);
+              onLineSpacingChange?.(newLineSpacing);
+            }}
+            className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            title="Line Spacing"
+          >
+            {LINE_SPACING_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
           <span className="w-px h-5 bg-gray-200 mx-1" />
           <ToolbarButton onClick={() => fileInputRef.current?.click()} icon={ImageIcon} title="Insert Image" />
           <ToolbarButton

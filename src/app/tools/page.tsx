@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import Loader from '@/components/shared/Loader';
+import LoadingScreen from '@/components/shared/LoadingScreen';
 import Link from 'next/link';
 import Header from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';

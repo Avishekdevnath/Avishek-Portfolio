@@ -103,8 +103,8 @@ export default function CommentSection({ slug }: CommentSectionProps) {
   const totalCount = comments.reduce((acc, c) => acc + 1 + (c.replies ? c.replies.length : 0), 0);
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-2xl font-bold">Comments ({totalCount})</h2>
+    <div className="space-y-6 font-ui">
+      <h2 className="text-h4 weight-semibold">Comments ({totalCount})</h2>
       
       {/* Error Message */}
       {error && (
@@ -114,10 +114,10 @@ export default function CommentSection({ slug }: CommentSectionProps) {
       )}
 
       {/* Comment Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-4 mb-6 text-sm weight-regular">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label htmlFor="comment-name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="comment-name" className="block text-caption text-gray-700">
               Name *
             </label>
             <input
@@ -126,13 +126,13 @@ export default function CommentSection({ slug }: CommentSectionProps) {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               disabled={submitting}
               placeholder="Your name"
             />
           </div>
           <div>
-            <label htmlFor="comment-email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="comment-email" className="block text-caption text-gray-700">
               Email (optional)
             </label>
             <input
@@ -140,23 +140,23 @@ export default function CommentSection({ slug }: CommentSectionProps) {
               id="comment-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
               disabled={submitting}
               placeholder="your@email.com"
             />
           </div>
         </div>
         <div>
-          <label htmlFor="comment-content" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="comment-content" className="block text-caption text-gray-700 weight-medium">
             Comment *
           </label>
           <textarea
             id="comment-content"
             required
-            rows={4}
+            rows={3}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
             disabled={submitting}
             placeholder="Write your comment here..."
           />
@@ -165,7 +165,7 @@ export default function CommentSection({ slug }: CommentSectionProps) {
           <button
             type="submit"
             disabled={submitting || !name.trim() || !content.trim()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-button"
           >
             {submitting ? 'Posting...' : 'Post Comment'}
           </button>
@@ -179,11 +179,11 @@ export default function CommentSection({ slug }: CommentSectionProps) {
           <p className="mt-2 text-gray-600">Loading comments...</p>
         </div>
       ) : comments.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-6 text-gray-500 text-sm">
           <p>No comments yet. Be the first to comment!</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {comments.map((comment) => (
             <div key={comment.id} className="space-y-4">
               <CommentCard comment={comment} />
@@ -198,20 +198,20 @@ export default function CommentSection({ slug }: CommentSectionProps) {
 // Small component for comment + its replies recursively
 function CommentCard({ comment }: { comment: Comment }) {
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
+    <div className="bg-gray-50 rounded-lg p-3 text-sm">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center space-x-2 mb-2">
-            <h4 className="font-medium text-gray-900">{comment.name}</h4>
-            <span className="text-sm text-gray-500">
+          <div className="flex items-center space-x-2 mb-1.5">
+            <h4 className="font-medium text-gray-900 text-sm">{comment.name}</h4>
+            <span className="text-xs text-gray-500">
               {new Date(comment.createdAt).toLocaleDateString()}
             </span>
           </div>
-          <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+          <p className="text-gray-700 whitespace-pre-wrap text-sm leading-5">{comment.content}</p>
         </div>
       </div>
       {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-4 pl-6 border-l-2 border-gray-200 space-y-4">
+        <div className="mt-3 pl-5 border-l-2 border-gray-200 space-y-3 text-sm">
           {comment.replies.map((r) => (
             <CommentCard key={r.id} comment={r} />
           ))}

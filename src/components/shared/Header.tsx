@@ -12,7 +12,7 @@ export default function Header() {
     { name: "About", href: "/about" },
     { name: "Projects", href: "/projects" },
     { name: "Blogs", href: "/blogs" },
-    { name: "Tools", href: "/tools" },
+    { name: "Tools", href: "https://aitoolbox-v1.vercel.app/" },
     { name: "Contact", href: "/contact" },
     { name: "Hire Me", href: "/hire-me" },
   ];

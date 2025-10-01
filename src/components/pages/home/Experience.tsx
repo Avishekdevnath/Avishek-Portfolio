@@ -125,16 +125,14 @@ export default function Experience() {
   if (error) return null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
       {/* Header Section */}
       <div className="text-center mb-16 transform transition-all duration-500 ease-out">
-        <span className="bg-blue-100 text-blue-600 px-4 py-2 rounded-full text-sm font-medium inline-block hover:bg-blue-200 transition-colors">
-          Technical Expertise
-        </span>
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mt-6 mb-4">
+        <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Technical Expertise</h4>
+        <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
           Professional Skills
         </h2>
-        <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+        <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
           A comprehensive overview of my technical capabilities and expertise across various domains of software development.
         </p>
       </div>
@@ -144,21 +142,24 @@ export default function Experience() {
         {Object.entries(skillsByCategory).map(([category, skills], index) => (
           <div
             key={category}
-            className={`bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform border border-gray-100 ${
+            className={`bg-gradient-to-b from-gray-50 to-white p-8 rounded-2xl border border-gray-300 shadow-inner hover:shadow-lg transition-all duration-300 transform ${
               animate ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
             }`}
-            style={{ transitionDelay: `${index * 100}ms` }}
+            style={{ 
+              transitionDelay: `${index * 100}ms`,
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'
+            }}
           >
             {/* Category Header */}
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors group">
-                {CategoryIcons[category] || <Code className="text-gray-500 group-hover:scale-110 transition-transform duration-300" size={32} />}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 transition-colors group shadow-sm">
+                {CategoryIcons[category] || <Code className="text-gray-500 group-hover:scale-110 transition-transform duration-300" size={28} />}
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                <h3 className="text-h5 weight-semibold text-gray-900 mb-1">
                   {formatCategoryName(category)}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-caption text-gray-500">
                   {skills.length} {skills.length === 1 ? 'Skill' : 'Skills'}
                 </p>
               </div>
@@ -171,7 +172,7 @@ export default function Experience() {
                 .map((skill, skillIndex) => (
                   <div 
                     key={skill._id} 
-                    className="group p-4 rounded-xl hover:bg-gray-50 transition-all duration-300"
+                    className="group p-4 rounded-xl hover:bg-white transition-all duration-300 border border-transparent hover:border-gray-200"
                   >
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2">
@@ -180,11 +181,11 @@ export default function Experience() {
                             {SkillIcons[skill.name]}
                           </span>
                         )}
-                        <span className="text-gray-800 font-medium group-hover:text-blue-600 transition-colors">
+                        <span className="text-gray-800 font-medium group-hover:text-blue-600 transition-colors text-sm">
                           {skill.name}
                         </span>
                       </div>
-                      <span className="text-gray-600 font-medium">
+                      <span className="text-gray-600 font-medium text-sm">
                         {skill.proficiency}/5
                       </span>
                     </div>
@@ -192,7 +193,7 @@ export default function Experience() {
                       <StarRating rating={skill.proficiency} />
                     </div>
                     {skill.description && (
-                      <p className="mt-2 text-sm text-gray-500 group-hover:text-gray-700 transition-colors">
+                      <p className="mt-2 text-body-sm text-gray-500 group-hover:text-gray-700 transition-colors leading-relaxed">
                         {skill.description}
                       </p>
                     )}

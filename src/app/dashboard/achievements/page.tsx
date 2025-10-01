@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import Loader from '@/components/shared/Loader';
+import LoadingScreen from '@/components/shared/LoadingScreen';
 import ConfirmModal from '@/components/shared/ConfirmModal';
-import { Eye } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 
 interface Achievement {
   _id: string;
@@ -131,12 +131,12 @@ export default function AchievementsPage() {
   };
 
   // Get all years from achievements
-  const years = useMemo(() => {
+  const years = useMemo<string[]>(() => {
     const y = Array.from(
       new Set(
         achievements
-          .map(a => a.date && a.date.length >= 4 ? new Date(a.date).getFullYear().toString() : null)
-          .filter(Boolean)
+          .map(a => (a.date && a.date.length >= 4 ? new Date(a.date).getFullYear().toString() : null))
+          .filter((v): v is string => v !== null)
       )
     );
     return y.sort((a, b) => Number(b) - Number(a));
@@ -237,13 +237,13 @@ export default function AchievementsPage() {
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow"
             disabled={submitting}
           >
-            {submitting ? <Loader size={20} /> : editId ? 'Update Achievement' : 'Add Achievement'}
+          {submitting ? <Loader2 className="animate-spin" size={20} /> : editId ? 'Update Achievement' : 'Add Achievement'}
           </button>
         </form>
       )}
 
       {loading ? (
-        <Loader text="Loading achievements..." />
+        <LoadingScreen message="Loading achievements..." />
       ) : error ? (
         <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-8">{error}</div>
       ) : filtered.length === 0 ? (
@@ -274,7 +274,7 @@ export default function AchievementsPage() {
                         title="View Details"
                         onClick={() => setViewAchievement(ach)}
                       >
-                        <Eye size={18} />
+                        <Search size={18} />
                       </button>
                       <button
                         className="px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"

@@ -1,5 +1,5 @@
 import React from 'react';
-import Loader from './Loader';
+import LoadingScreen from './LoadingScreen';
 
 interface LoadingPageProps {
   text?: string;
@@ -7,7 +7,7 @@ interface LoadingPageProps {
 
 const LoadingPage: React.FC<LoadingPageProps> = ({ text }) => (
   <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-    <Loader text={text || 'Loading...'} size={48} />
+    <LoadingScreen type="global" message={text || 'Loading...'} />
   </div>
 );
 

@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Project, Technology, Repository, DemoURL } from '@/types/dashboard';
 import { Trash2, Plus } from 'lucide-react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+const RichTextEditor = dynamic(() => import('@/components/shared/RichTextEditor'), { ssr: false });
 
 // Define enum options
 const REPOSITORY_TYPES = ['github', 'gitlab', 'bitbucket', 'other'] as const;
@@ -13,12 +16,32 @@ const CATEGORIES = [
   'Web Development',
   'Mobile Development',
   'Desktop Development',
+  'NPM Package',
+  'Python Package (pip)',
+  'Library/Package',
+  'Chrome Extension',
+  'VS Code Extension',
+  'CLI Tool',
   'Machine Learning',
+  'Artificial Intelligence',
   'Data Science',
+  'Data Engineering',
   'DevOps',
+  'Cloud Computing',
+  'Cyber Security',
   'Blockchain',
   'Game Development',
   'IoT',
+  'Embedded Systems',
+  'Computer Vision',
+  'Natural Language Processing',
+  'Robotics',
+  'Augmented Reality',
+  'Virtual Reality',
+  'API Development',
+  'Automation',
+  'WordPress Plugin',
+  'Browser Extension',
   'Other'
 ] as const;
 const STATUS_OPTIONS = ['draft', 'published'] as const;
@@ -31,7 +54,6 @@ type ProjectStatus = 'draft' | 'published';
 
 export default function EditProjectForm({ projectId }: EditProjectFormProps) {
   const router = useRouter();
-  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,8 +74,13 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
     technologies: [],
     repositories: [],
     demoUrls: [],
-    completionDate: new Date().toISOString().split('T')[0]
+    completionDate: '',
+    order: 0,
+    createdAt: new Date(),
+    updatedAt: new Date()
   });
+
+  const [lineSpacing, setLineSpacing] = useState('10');
 
   useEffect(() => {
     fetchProject();
@@ -75,10 +102,9 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         throw new Error(data.error || 'Project not found');
       }
 
-      const project = data.data;
-      setProject(project);
-      setFormData(project);
-      setPreviewImage(project.image || '/placeholder-project.svg');
+      const projectData = data.data;
+      setFormData(projectData);
+      setPreviewImage(projectData.image || '/placeholder-project.svg');
     } catch (err) {
       console.error('Error fetching project:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch project');
@@ -109,17 +135,16 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         technologies: 'Technologies',
         repositories: 'Repositories',
         image: 'Project image',
-        imagePublicId: 'Image ID',
-        completionDate: 'Completion date'
+        imagePublicId: 'Image ID'
       };
 
       const missingFields = Object.entries(requiredFields)
-        .filter(([key, label]) => {
+        .filter(([key]) => {
           if (key === 'technologies') return formData.technologies.length === 0;
           if (key === 'repositories') return formData.repositories.length === 0;
           return !formData[key as keyof Project];
         })
-        .map(([_, label]) => label);
+        .map(([, label]) => label);
 
       if (missingFields.length > 0) {
         throw new Error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
@@ -306,15 +331,16 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
       {/* Description */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Description
+          Description *
         </label>
-        <textarea
+        <RichTextEditor
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-          rows={3}
-          placeholder="Describe your project in detail..."
-          required
+          onChange={(html: string) => setFormData({ ...formData, description: html })}
+          lineSpacing={lineSpacing}
+          onLineSpacingChange={(spacing: string) => setLineSpacing(spacing)}
+          minHeight="250px"
+          placeholder="Enter detailed project description..."
+          className="border border-gray-300 rounded-md shadow-sm focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500"
         />
       </div>
 
@@ -354,47 +380,52 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
 
       {/* Technologies */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Technologies
-        </label>
-        {formData.technologies.map((tech, index) => (
-          <div key={index} className="flex gap-4 mb-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={tech.name}
-                onChange={(e) => updateTechnology(index, 'name', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                placeholder="Technology name"
-                required
-              />
+        <div className="flex justify-between items-center mb-3">
+          <label className="block text-body-sm weight-medium text-gray-700">
+            Technologies & Packages <span className="text-red-500">*</span>
+          </label>
+          <button
+            type="button"
+            onClick={addTechnology}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-body-sm weight-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            <Plus className="icon-sm" />
+            Add
+          </button>
+        </div>
+        <div className="space-y-3">
+          {formData.technologies.map((tech, index) => (
+            <div key={index} className="flex flex-col sm:flex-row gap-3 items-start p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="w-full sm:flex-1">
+                <input
+                  type="text"
+                  value={tech.name}
+                  onChange={(e) => updateTechnology(index, 'name', e.target.value)}
+                  className="block w-full px-3 py-2 text-body-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  placeholder="e.g., React, pandas, Docker"
+                  required
+                />
+              </div>
+              <div className="w-full sm:flex-1">
+                <input
+                  type="text"
+                  value={tech.icon || ''}
+                  onChange={(e) => updateTechnology(index, 'icon', e.target.value)}
+                  className="block w-full px-3 py-2 text-body-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  placeholder="Icon URL (optional)"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeTechnology(index)}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Remove technology"
+              >
+                <Trash2 className="icon-sm" />
+              </button>
             </div>
-            <div className="flex-1">
-              <input
-                type="text"
-                value={tech.icon || ''}
-                onChange={(e) => updateTechnology(index, 'icon', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                placeholder="Icon URL (optional)"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => removeTechnology(index)}
-              className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-            >
-              <Trash2 size={20} />
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addTechnology}
-          className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
-        >
-          <Plus size={20} />
-          Add Technology
-        </button>
+          ))}
+        </div>
       </div>
 
       {/* Repositories */}
@@ -460,7 +491,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
       {/* Demo URLs */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Demo URLs
+          Demo URLs (Optional)
         </label>
         {formData.demoUrls.map((demo, index) => (
           <div key={index} className="flex gap-4 mb-4">
@@ -471,7 +502,6 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
                 onChange={(e) => updateDemoUrl(index, 'name', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 placeholder="Demo name"
-                required
               />
             </div>
             <div className="flex-1">
@@ -481,7 +511,6 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
                 onChange={(e) => updateDemoUrl(index, 'url', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 placeholder="Demo URL"
-                required
               />
             </div>
             <div>
@@ -489,7 +518,6 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
                 value={demo.type}
                 onChange={(e) => updateDemoUrl(index, 'type', e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                required
               >
                 {DEMO_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -517,17 +545,52 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         </button>
       </div>
 
+      {/* Project Image */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Project Image *
+        </label>
+        <div className="flex items-start gap-4">
+          <div className="relative w-48 h-32 border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-50">
+            <Image
+              src={previewImage}
+              alt="Project preview"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+              <Plus size={16} />
+              {formData.image ? 'Change Image' : 'Upload Image'}
+              <input
+                type="file"
+                className="sr-only"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={imageUploading}
+              />
+            </label>
+            {imageUploading && (
+              <p className="text-sm text-gray-500">Uploading...</p>
+            )}
+            {formData.image && (
+              <p className="text-xs text-gray-500">Current image uploaded</p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Completion Date */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Completion Date
+          Completion Date (Optional)
         </label>
         <input
           type="date"
-          value={formData.completionDate}
+          value={formData.completionDate ? (typeof formData.completionDate === 'string' ? formData.completionDate : new Date(formData.completionDate).toISOString().split('T')[0]) : ''}
           onChange={(e) => setFormData({ ...formData, completionDate: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-          required
         />
       </div>
 

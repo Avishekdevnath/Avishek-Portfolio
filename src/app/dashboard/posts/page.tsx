@@ -82,48 +82,91 @@ export default function BlogDashboard() {
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Blog Posts</h1>
+        <h1 className="text-h2 text-gray-800">Blog Posts</h1>
         <Link
           href="/dashboard/posts/new"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 transition-colors"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 transition-colors text-button"
         >
           <FaPlus /> New Post
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <form onSubmit={handleSearch} className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <form onSubmit={handleSearch} className="flex flex-wrap gap-4 items-end">
+          {/* Search Input */}
+          <div className="flex-1 min-w-[280px]">
+            <label className="block text-gray-700 text-caption mb-2">
+              Search Posts
+            </label>
             <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <FaSearch className="h-5 w-5 text-gray-400" />
+              </div>
               <input
                 type="text"
-                placeholder="Search posts..."
+                placeholder="Search by title, content, or author..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="block w-full !pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <span className="text-lg leading-none">&times;</span>
+                </button>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <FaFilter className="text-gray-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
+
+          {/* Status Filter */}
+          <div className="min-w-[160px]">
+            <label className="block text-gray-700 text-caption mb-2">
+              Status
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <FaFilter className="h-5 w-5 text-gray-400" />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="block w-full !pl-12 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+              >
+                <option value="all">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
-          <button
-            type="submit"
-            className="bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            Apply Filters
-          </button>
+
+          {/* Apply Button */}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-button"
+            >
+              Apply Filters
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('all');
+              }}
+              className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-button"
+            >
+              Clear
+            </button>
+          </div>
         </form>
       </div>
 
@@ -133,24 +176,24 @@ export default function BlogDashboard() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Likes</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-table-header text-gray-500">Title</th>
+                <th className="px-6 py-3 text-left text-table-header text-gray-500">Category</th>
+                <th className="px-6 py-3 text-left text-table-header text-gray-500">Status</th>
+                <th className="px-6 py-3 text-left text-table-header text-gray-500">Views</th>
+                <th className="px-6 py-3 text-left text-table-header text-gray-500">Likes</th>
+                <th className="px-6 py-3 text-right text-table-header text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500 text-body-sm">
                     Loading...
                   </td>
                 </tr>
               ) : blogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500 text-body-sm">
                     No blog posts found
                   </td>
                 </tr>
@@ -159,17 +202,17 @@ export default function BlogDashboard() {
                   <tr key={blog._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{blog.title}</span>
-                        <span className="text-sm text-gray-500">{blog.excerpt.substring(0, 60)}...</span>
+                        <span className="font-medium text-gray-900 text-body-sm">{blog.title}</span>
+                        <span className="text-body-xs text-gray-500">{blog.excerpt.substring(0, 60)}...</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-sm rounded-full bg-blue-100 text-blue-800">
+                      <span className="px-2 py-1 text-small rounded-full bg-blue-100 text-blue-800">
                         {blog.category}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-sm rounded-full ${
+                      <span className={`px-2 py-1 text-small rounded-full ${
                         blog.status === 'published' 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-yellow-100 text-yellow-800'
@@ -177,8 +220,8 @@ export default function BlogDashboard() {
                         {blog.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-500">{blog.views}</td>
-                    <td className="px-6 py-4 text-gray-500">{blog.likes}</td>
+                    <td className="px-6 py-4 text-gray-500 text-table-cell">{blog.views}</td>
+                    <td className="px-6 py-4 text-gray-500 text-table-cell">{blog.likes}</td>
                     <td className="px-6 py-4 text-right space-x-2">
                       <Link
                         href={`/blogs/${blog.slug}`}

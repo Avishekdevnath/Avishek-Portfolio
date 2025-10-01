@@ -1,4 +1,4 @@
-import { Code2, Star, Layers, BarChart2, Eye, CheckCircle2, Clock, Loader2, BookOpen, Mail, Briefcase, Bell } from 'lucide-react';
+import { Code2, Star, Layers, BarChart2, Eye, CheckCircle2, Clock, BookOpen, Mail, Briefcase, Bell } from 'lucide-react';
 
 interface LoadingScreenProps {
   type?: 'skills' | 'projects' | 'blogs' | 'messages' | 'global';
@@ -59,7 +59,7 @@ export default function LoadingScreen({
     global: {
       title: message,
       subtitle: 'Please wait while we prepare your content...',
-      icon: Loader2,
+      icon: Eye,
       stats: [
         { icon: Eye, color: 'blue' },
         { icon: Star, color: 'yellow' },
@@ -74,12 +74,6 @@ export default function LoadingScreen({
 
   return (
     <div className={`flex flex-col items-center justify-center p-8 ${className}`}>
-      {/* Main Icon */}
-      <div className="relative mb-8">
-        <Icon className="w-16 h-16 text-blue-500 animate-spin" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent animate-pulse" />
-      </div>
-
       {/* Title and Subtitle */}
       <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
         {config.title}
@@ -88,23 +82,18 @@ export default function LoadingScreen({
         {config.subtitle}
       </p>
 
-      {/* Loading Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl w-full">
-        {config.stats.map(({ icon: StatIcon, color }, index) => (
-          <div 
-            key={index}
-            className={`bg-${color}-50 p-4 rounded-lg flex items-center justify-center
-              animate-pulse`}
-            style={{ animationDelay: `${index * 200}ms` }}
-          >
-            <StatIcon className={`w-6 h-6 text-${color}-500`} />
+      {/* Wireframe Skeleton Blocks */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl">
+        {Array.from({ length: 6 }).map((_, idx) => (
+          <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="h-24 bg-gray-200 animate-pulse" />
+            <div className="p-4 space-y-2">
+              <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3 w-full bg-gray-200 rounded animate-pulse" />
+              <div className="h-3 w-5/6 bg-gray-200 rounded animate-pulse" />
+            </div>
           </div>
         ))}
-      </div>
-
-      {/* Loading Bar */}
-      <div className="w-full max-w-md mt-8 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-        <div className="h-full bg-blue-500 rounded-full animate-loading" />
       </div>
     </div>
   );

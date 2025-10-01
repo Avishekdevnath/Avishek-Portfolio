@@ -17,23 +17,10 @@ export default function Footer() {
     { href: '/contact', label: 'Contact' },
   ];
 
-  if (loading) {
-    return (
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-gray-700 rounded w-48 mx-auto"></div>
-            <div className="h-4 bg-gray-700 rounded w-64 mx-auto"></div>
-            <div className="flex justify-center space-x-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-10 w-10 bg-gray-700 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
-    );
-  }
+  // Do not render a loader for footer; show minimal footer using fallbacks
+  const title = settings?.websiteSettings?.title || 'Portfolio';
+  const description = settings?.websiteSettings?.metaDescription || 'Full Stack Developer';
+  const email = settings?.contactInfo?.email;
 
   return (
     <footer className="bg-gray-900 text-white py-12">
@@ -51,7 +38,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="text-center">
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">Quick Links</h3>
             <nav className="flex flex-wrap justify-center gap-4">
               {footerLinks.map((link) => (
                 <Link
@@ -75,16 +62,16 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-          <p>
+        <div className="mt-12 pt-8 border-t border-gray-700 text-center">
+          <p className="text-body-sm text-gray-200">
             © {currentYear} {settings?.websiteSettings?.title || 'Portfolio'}. All rights reserved.
           </p>
           {settings?.contactInfo?.email && (
-            <p className="mt-2">
+            <p className="mt-2 text-body-sm text-gray-200">
               Contact me at{' '}
               <a
                 href={`mailto:${settings.contactInfo.email}`}
-                className="text-orange-400 hover:text-orange-300 transition-colors"
+                className="text-orange-200 hover:text-orange-100 transition-colors font-medium underline underline-offset-4"
               >
                 {settings.contactInfo.email}
               </a>

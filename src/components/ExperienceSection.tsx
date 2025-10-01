@@ -36,7 +36,7 @@ export default function ExperienceSection({
     const fetchExperiences = async () => {
       try {
         setLoading(true);
-        console.log('🔄 ExperienceSection: Fetching experiences...', { type, showFeaturedOnly, limit });
+        
         
         const params = new URLSearchParams({
           status: 'published',
@@ -53,7 +53,7 @@ export default function ExperienceSection({
           url = `/api/experience?${params}`;
         }
 
-        console.log('🌐 ExperienceSection: Fetching from URL:', url);
+        
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -61,16 +61,7 @@ export default function ExperienceSection({
         }
         
         const data: ExperienceListApiResponse = await response.json();
-        console.log('📦 ExperienceSection: Received data:', {
-          type,
-          url,
-          success: data.success,
-          hasWork: 'work' in data.data,
-          hasEducation: 'education' in data.data,
-          hasExperiences: 'experiences' in data.data,
-          workCount: data.data?.work?.length || data.data?.experiences?.filter(e => e.type === 'work').length || 0,
-          educationCount: data.data?.education?.length || data.data?.experiences?.filter(e => e.type === 'education').length || 0
-        });
+        
 
         if (!data.success) {
           throw new Error(data.error || 'Failed to fetch experiences');
@@ -78,8 +69,9 @@ export default function ExperienceSection({
 
         // Handle both response formats
         if (type === 'work') {
-          const workExperiences = data.data?.experiences || [];
-          console.log('💼 ExperienceSection: Setting work experiences:', workExperiences.length);
+          const workExperiences = (data.data?.experiences || []).filter(
+            (exp): exp is IWorkExperience => exp.type === 'work'
+          );
           setExperiences({
             work: workExperiences,
             education: []
@@ -87,14 +79,14 @@ export default function ExperienceSection({
         } else if (type === 'education') {
           // Check if we have the education array in the response
           if (data.data?.education) {
-            console.log('🎓 ExperienceSection: Setting education experiences from education array:', data.data.education.length);
             setExperiences({
               work: [],
               education: data.data.education
             });
           } else {
-            const educationExperiences = data.data?.experiences || [];
-            console.log('🎓 ExperienceSection: Setting education experiences from experiences array:', educationExperiences.length);
+            const educationExperiences = (data.data?.experiences || []).filter(
+              (exp): exp is IEducation => exp.type === 'education'
+            );
             setExperiences({
               work: [],
               education: educationExperiences
@@ -102,14 +94,12 @@ export default function ExperienceSection({
           }
         } else {
           // For 'both', check if we have the new format or old format
-          if ('work' in data.data) {
-            console.log('🔄 ExperienceSection: Using combined format');
+          if (data.data && 'work' in data.data) {
             setExperiences({
               work: data.data.work || [],
               education: data.data.education || []
             });
           } else {
-            console.log('🔄 ExperienceSection: Using experiences array format');
             // Old format with experiences array
             const workExp = (data.data?.experiences || []).filter(
               (exp): exp is IWorkExperience => exp.type === 'work'
@@ -123,17 +113,10 @@ export default function ExperienceSection({
             });
           }
         }
-
-        console.log('✅ ExperienceSection: State updated', { 
-          type,
-          workCount: experiences.work.length, 
-          educationCount: experiences.education.length,
-          hasWork: experiences.work.length > 0,
-          hasEducation: experiences.education.length > 0
-        });
+        
 
       } catch (error) {
-        console.error('❌ ExperienceSection Error:', error);
+        
         setError(error instanceof Error ? error.message : 'Failed to fetch experiences');
       } finally {
         setLoading(false);
@@ -164,16 +147,9 @@ export default function ExperienceSection({
   const hasEducation = experiences.education.length > 0;
   const hasExperiences = hasWork || hasEducation;
 
-  console.log('🎯 ExperienceSection: Rendering with:', { 
-    hasWork, 
-    hasEducation, 
-    workCount: experiences.work.length,
-    educationCount: experiences.education.length,
-    type
-  });
+  
 
   if (!hasExperiences) {
-    console.log('⚠️ ExperienceSection: No experiences to show');
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">No experiences found</p>
@@ -185,45 +161,39 @@ export default function ExperienceSection({
   const getDefaultTitle = () => {
     if (type === 'work') return 'Work Experience';
     if (type === 'education') return 'Education';
-    return 'Experience & Education';
+    return '';
   };
 
   const getDefaultSubtitle = () => {
     if (type === 'work') return 'Professional journey and career highlights';
     if (type === 'education') return 'Academic background and qualifications';
-    return 'Professional and academic background';
+    return '';
   };
 
   return (
-    <section className={`py-16 px-4 ${className}`}>
+    <section className={`py-12 md:py-16 px-4 ${className}`}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        {(title || subtitle) && (
-          <div className="text-center mb-12">
-            {title && (
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                {title || getDefaultTitle()}
-              </h2>
-            )}
-            {subtitle && (
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {subtitle || getDefaultSubtitle()}
-              </p>
-            )}
-          </div>
-        )}
+        <header className="text-center mb-1 md:mb-2 font-ui">
+          <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-2">
+            {title || getDefaultTitle()}
+          </h2>
+          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto">
+            {subtitle || getDefaultSubtitle()}
+          </p>
+        </header>
 
         {/* Work Experience Section */}
         {(type === 'both' || type === 'work') && hasWork && (
-          <div className="mb-12">
+          <div className="mb-8">
             {type === 'both' && (
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <FaBriefcase className="text-2xl text-blue-600" />
+              <div className="flex items-center gap-3 mb-2 font-ui">
+                <div className="p-1.5 rounded-lg icon-work-bg">
+                  <FaBriefcase className="icon-md icon-work" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Work Experience</h3>
-                  <p className="text-gray-600">Professional career journey</p>
+                  <h3 className="text-h5 weight-semibold text-gray-900">Work Experience</h3>
+                  <p className="text-caption text-gray-600">Professional career journey</p>
                 </div>
               </div>
             )}
@@ -247,13 +217,13 @@ export default function ExperienceSection({
         {(type === 'both' || type === 'education') && hasEducation && (
           <div>
             {type === 'both' && (
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <FaGraduationCap className="text-2xl text-purple-600" />
+              <div className="flex items-center gap-3 mb-2 font-ui">
+                <div className="p-1.5 rounded-lg icon-edu-bg">
+                  <FaGraduationCap className="icon-md icon-edu" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Education</h3>
-                  <p className="text-gray-600">Academic background and qualifications</p>
+                  <h3 className="text-h5 weight-semibold text-gray-900">Education</h3>
+                  <p className="text-caption text-gray-600">Academic background and qualifications</p>
                 </div>
               </div>
             )}

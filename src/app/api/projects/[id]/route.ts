@@ -64,8 +64,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       technologies: 'Technologies',
       repositories: 'Repositories',
       image: 'Project image',
-      imagePublicId: 'Image ID',
-      completionDate: 'Completion date'
+      imagePublicId: 'Image ID'
     };
 
     const missingFields = Object.entries(requiredFields)
@@ -110,13 +109,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Update project
+    const updateData = {
+      ...body,
+      // Ensure proper date format if completionDate is provided
+      ...(body.completionDate && { completionDate: new Date(body.completionDate) })
+    };
+
     const updatedProject = await Project.findByIdAndUpdate(
       params.id,
-      {
-        ...body,
-        // Ensure proper date format
-        completionDate: new Date(body.completionDate)
-      },
+      updateData,
       { new: true, runValidators: true }
     ).lean({ virtuals: true });
 

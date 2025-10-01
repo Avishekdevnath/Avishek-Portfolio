@@ -35,15 +35,20 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, description }) => (
-  <div className="bg-white p-6 rounded-xl shadow-md transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+  <div 
+    className="bg-gradient-to-b from-gray-50 to-white p-6 rounded-2xl border border-gray-300 shadow-inner transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-ui"
+    style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}
+  >
     <div className="flex items-center justify-between mb-4">
-      <div className="text-gray-600">{title}</div>
-      <Icon className="text-2xl text-blue-500" />
+      <div className="text-gray-600 text-sm font-medium">{title}</div>
+      <div className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm">
+        <Icon className="text-xl text-blue-600" />
+      </div>
     </div>
-    <div className="text-3xl font-bold mb-2">
+    <div className="text-h4 weight-bold mb-2 text-gray-900">
       <CountUp end={value} duration={2.5} />+
     </div>
-    <div className="text-sm text-gray-500">{description}</div>
+    <div className="text-body-sm text-gray-600 leading-relaxed">{description}</div>
   </div>
 );
 
@@ -123,12 +128,15 @@ export default function Stats() {
   ];
 
   return (
-    <div className="py-16 px-4 bg-gray-50">
-      <div className="max-w-6xl mx-auto">
+    <div className="py-16 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h4 className="text-md text-gray-600">Career Highlights</h4>
-          <h4 className="text-5xl font-bold text-black">Achievement Numbers</h4>
+          <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Career Highlights</h4>
+          <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">Achievement Numbers</h2>
+          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Key metrics that showcase my professional growth and impact in software development and education.
+          </p>
         </div>
 
         {/* Stats Grid */}
@@ -161,9 +169,11 @@ export default function Stats() {
 
         {/* Tagline */}
         <div className="mt-12 text-center">
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            {stats.tagline}
-          </p>
+          <div className="bg-gradient-to-b from-gray-50 to-white p-8 rounded-2xl border border-gray-300 shadow-inner max-w-4xl mx-auto" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+            <p className="text-body-sm text-gray-600 leading-relaxed">
+              {stats.tagline}
+            </p>
+          </div>
         </div>
       </div>
     </div>

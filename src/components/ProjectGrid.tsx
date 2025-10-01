@@ -1,26 +1,13 @@
 import { useState, useEffect } from 'react';
-import { LayoutGrid, List, Filter, ArrowUpDown, Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import ProjectCard from './ProjectCard';
+import SearchFilter from './SearchFilter';
 import { Project, Technology, Repository, DemoURL } from '@/types/dashboard';
 import ConfirmModal from './shared/ConfirmModal';
 
-// Define enum options from the model
-const CATEGORIES = [
-  'Web Development',
-  'Mobile Development',
-  'Desktop Development',
-  'Machine Learning',
-  'Data Science',
-  'DevOps',
-  'Blockchain',
-  'Game Development',
-  'IoT',
-  'Other'
-] as const;
-
-const STATUS_OPTIONS = ['draft', 'published'] as const;
+// Search and filter functionality moved to SearchFilter component
 
 interface ProjectGridProps {
   projects?: Project[];
@@ -46,7 +33,6 @@ export default function ProjectGrid({
   const [selectedStatus, setSelectedStatus] = useState(defaultStatus);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'order'>('order');
-  const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const [activeTechFilter, setActiveTechFilter] = useState<string>('');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -63,8 +49,11 @@ export default function ProjectGrid({
   // Sort projects safely
   const sortedProjects = [...(projects || [])].sort((a, b) => {
     switch (sortBy) {
-      case 'date':
-        return new Date(b.completionDate).getTime() - new Date(a.completionDate).getTime();
+      case 'date': {
+        const aTime = a.completionDate ? new Date(a.completionDate as any).getTime() : 0;
+        const bTime = b.completionDate ? new Date(b.completionDate as any).getTime() : 0;
+        return bTime - aTime;
+      }
       case 'title':
         return a.title.localeCompare(b.title);
       default:
@@ -186,176 +175,28 @@ export default function ProjectGrid({
   ].filter(Boolean).length;
 
   return (
-    <div className="space-y-6">
-      {/* Search and View Toggle */}
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="w-4 h-4 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search projects..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {searchTerm && (
-            <button 
-              className="absolute inset-y-0 right-0 flex items-center pr-3"
-              onClick={() => setSearchTerm('')}
-            >
-              <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
-            </button>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsFiltersVisible(!isFiltersVisible)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
-              activeFiltersCount > 0 
-                ? 'border-blue-500 bg-blue-50 text-blue-600' 
-                : 'border-gray-300 bg-white text-gray-700'
-            } transition-colors`}
-          >
-            <Filter className="w-4 h-4" />
-            <span>Filters</span>
-            {activeFiltersCount > 0 && (
-              <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                {activeFiltersCount}
-              </span>
-            )}
-          </button>
-          
-          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 ${
-                viewMode === 'grid'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              } transition-colors`}
-              aria-label="Grid view"
-            >
-              <LayoutGrid className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 ${
-                viewMode === 'list'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              } transition-colors`}
-              aria-label="List view"
-            >
-              <List className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Expanded Filters */}
-      {isFiltersVisible && (
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm animate-fadeIn">
-          <div className="flex flex-wrap gap-4 items-end">
-            {/* Category Filter */}
-            <div className="w-full sm:w-48">
-              <label htmlFor="category-filter" className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <select
-                id="category-filter"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">All Categories</option>
-                {CATEGORIES.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Filter (Admin Only) */}
-            {isAdmin && (
-              <div className="w-full sm:w-48">
-                <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  id="status-filter"
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  {STATUS_OPTIONS.map((status) => (
-                    <option key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Sort */}
-            <div className="w-full sm:w-48">
-              <label htmlFor="sort-filter" className="block text-sm font-medium text-gray-700 mb-1">
-                Sort By
-              </label>
-              <select
-                id="sort-filter"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="order">Default Order</option>
-                <option value="date">Completion Date</option>
-                <option value="title">Title</option>
-              </select>
-            </div>
-
-            {/* Clear Filters */}
-            {activeFiltersCount > 0 && (
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
-
-          {/* Technology Pills */}
-          {allTechnologies.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Technologies</p>
-              <div className="flex flex-wrap gap-2">
-                {allTechnologies.map(tech => (
-                  <button
-                    key={tech}
-                    onClick={() => setActiveTechFilter(activeTechFilter === tech ? '' : tech)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                      activeTechFilter === tech
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {tech}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
+    <div className="space-y-4 text-sm font-ui">
+      <SearchFilter
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        activeTechFilter={activeTechFilter}
+        setActiveTechFilter={setActiveTechFilter}
+        allTechnologies={allTechnologies}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        isAdmin={isAdmin}
+        onClearFilters={clearFilters}
+        activeFiltersCount={activeFiltersCount}
+      />
       {/* Results Count */}
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-600">
+      <div className="flex justify-between items-center -mt-2">
+        <p className="text-caption text-gray-700 font-medium">
           Showing {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'}
           {activeFiltersCount > 0 ? ' with filters applied' : ''}
         </p>
@@ -366,7 +207,7 @@ export default function ProjectGrid({
         <div 
           className={`
             ${viewMode === 'grid' 
-              ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr' 
+              ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr' 
               : 'space-y-4'
             }
             transition-all duration-300
@@ -390,12 +231,12 @@ export default function ProjectGrid({
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="bg-gray-100 rounded-full p-4 mb-4">
-            <Search className="h-8 w-8 text-gray-400" />
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="bg-gray-100 rounded-full p-6 mb-6 shadow-sm">
+            <Search className="h-10 w-10 text-gray-500" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">No projects found</h3>
-          <p className="text-gray-600 max-w-md">
+          <h3 className="text-h5 weight-semibold text-gray-900 mb-3">No projects found</h3>
+          <p className="text-body-sm text-gray-600 max-w-md leading-relaxed">
             {activeFiltersCount > 0 
               ? 'Try adjusting your filters or search term to find what you\'re looking for.'
               : 'There are no projects available at the moment.'}
@@ -403,7 +244,7 @@ export default function ProjectGrid({
           {activeFiltersCount > 0 && (
             <button
               onClick={clearFilters}
-              className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              className="mt-6 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 text-button font-semibold border border-gray-300"
             >
               Clear all filters
             </button>

@@ -124,16 +124,14 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-16 bg-gradient-to-br from-orange-50 via-white to-amber-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <div className="inline-block bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            Get in Touch
-          </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+    <section id="contact" className="py-16 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Get in Touch</h4>
+          <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
             Let's Work Together
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Have a project in mind or just want to chat? I'd love to hear from you.
             Let's create something amazing together!
           </p>
@@ -143,47 +141,47 @@ export default function Contact() {
           {/* Contact Information */}
           <div className="space-y-8">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              <h3 className="text-h5 weight-semibold text-gray-900 mb-3">
                 Contact Information
               </h3>
-              <p className="text-gray-600 mb-8">
+              <p className="text-body-sm text-gray-600 mb-6 leading-relaxed">
                 Feel free to reach out through any of these channels. I'm always excited
                 to connect and discuss new opportunities.
               </p>
             </div>
 
             {/* Contact Info */}
-            <div className="bg-white rounded-xl shadow-sm p-8">
+            <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 shadow-inner p-8" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
               <ContactInfo />
             </div>
 
             {/* Social Links */}
-            <div className="bg-white rounded-xl shadow-sm p-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Connect With Me</h3>
+            <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 shadow-inner p-8" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+              <h3 className="text-h5 weight-semibold text-gray-900 mb-5">Connect With Me</h3>
               <SocialLinks showLabels />
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white rounded-xl shadow-sm p-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Send a Message</h3>
+          <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 shadow-inner p-8" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+            <h3 className="text-h5 weight-semibold text-gray-900 mb-5">Send a Message</h3>
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-gray-700 text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-caption mb-2">
                   Your Name
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <User className="h-4 w-4 text-gray-400" />
                   </div>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className={`block w-full pl-10 pr-3 py-2 border ${
+                    className={`block w-full !pl-12 pr-3 py-2.5 text-sm border ${
                       errors.name ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                     placeholder="John Doe"
                   />
                 </div>
@@ -193,21 +191,21 @@ export default function Contact() {
               </div>
 
               <div>
-                <label className="block text-gray-700 text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-caption mb-2">
                   Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 text-gray-400" />
                   </div>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`block w-full pl-10 pr-3 py-2 border ${
+                    className={`block w-full !pl-12 pr-3 py-2.5 text-sm border ${
                       errors.email ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                     placeholder="john@example.com"
                   />
                 </div>
@@ -217,20 +215,20 @@ export default function Contact() {
               </div>
 
               <div>
-                <label className="block text-gray-700 text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-caption mb-2">
                   Subject
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MessageSquare className="h-5 w-5 text-gray-400" />
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <MessageSquare className="h-4 w-4 text-gray-400" />
                   </div>
                   <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
-                    className={`block w-full pl-10 pr-3 py-2 border ${
+                    className={`block w-full !pl-12 pr-3 py-2.5 text-sm border ${
                       errors.subject ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                   >
                     {Object.values(MessageCategory).map((category) => (
                       <option key={category} value={category}>
@@ -245,7 +243,7 @@ export default function Contact() {
               </div>
 
               <div>
-                <label className="block text-gray-700 text-sm font-medium mb-2">
+                <label className="block text-gray-700 text-caption mb-2">
                   Message
                 </label>
                 <textarea
@@ -253,9 +251,9 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleInputChange}
                   rows={6}
-                  className={`block w-full px-3 py-2 border ${
+                  className={`block w-full px-3 py-2.5 text-sm border ${
                     errors.message ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                   placeholder="Tell me about your project, ideas, or questions..."
                 />
                 {errors.message && (
@@ -266,9 +264,9 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-medium
-                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-600"}
-                  transition-colors duration-200`}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-button shadow-lg border border-blue-500
+                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}
+                  transition-all duration-300`}
               >
                 {isSubmitting ? (
                   <>
@@ -284,14 +282,20 @@ export default function Contact() {
               </button>
 
               {submitStatus === "success" && (
-                <div className="mt-4 p-4 bg-green-50 text-green-700 rounded-lg">
-                  Message sent successfully! I'll get back to you soon.
+                <div className="mt-4 p-4 bg-gradient-to-b from-green-50 to-white border border-green-200 rounded-xl shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <p className="text-green-700 font-medium">Message sent successfully! I'll get back to you soon.</p>
+                  </div>
                 </div>
               )}
 
               {submitStatus === "error" && (
-                <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg">
-                  Failed to send message. Please try again.
+                <div className="mt-4 p-4 bg-gradient-to-b from-red-50 to-white border border-red-200 rounded-xl shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <p className="text-red-700 font-medium">Failed to send message. Please try again.</p>
+                  </div>
                 </div>
               )}
             </form>

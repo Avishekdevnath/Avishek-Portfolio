@@ -53,3 +53,12 @@ logs
 # Build output
 dist/
 build/
+
+# Professional information (private)
+src/data/professional-info.md
+
+# Home page styling plan (private)
+src/data/home-page-styling-plan.md
+
+# Theme documentation (private)
+src/data/theme-spec.private.md
