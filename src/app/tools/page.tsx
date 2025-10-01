@@ -97,7 +97,7 @@ export default function ToolsPage() {
 
               {loading ? (
                 <div className="flex justify-center items-center min-h-[200px]">
-                  <Loader text="Loading tools..." />
+                  <LoadingScreen />
                 </div>
               ) : error ? (
                 <div className="text-red-600 text-center py-8 font-medium text-lg">{error}</div>

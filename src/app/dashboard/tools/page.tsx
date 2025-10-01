@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import LoadingScreen from '@/components/shared/LoadingScreen';
+// import LoadingScreen from '@/components/shared/LoadingScreen';
 import ConfirmModal from '@/components/shared/ConfirmModal';
 import { Eye } from 'lucide-react';
 
@@ -150,7 +150,7 @@ export default function ToolsPage() {
     <div className="p-8 max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Tools</h1>
-        <button
+          <button
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow self-start"
           onClick={() => {
             setShowForm((v) => !v);
@@ -228,13 +228,15 @@ export default function ToolsPage() {
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow"
             disabled={submitting}
           >
-            {submitting ? <Loader size={20} /> : editId ? 'Update Tool' : 'Add Tool'}
+            {submitting ? 'Saving...' : editId ? 'Update Tool' : 'Add Tool'}
           </button>
         </form>
       )}
 
       {loading ? (
-        <Loader text="Loading tools..." />
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="w-6 h-6 rounded-full border-2 border-gray-300 border-t-gray-700 animate-spin" />
+        </div>
       ) : error ? (
         <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-8">{error}</div>
       ) : filtered.length === 0 ? (
