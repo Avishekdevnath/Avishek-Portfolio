@@ -25,6 +25,10 @@ const validateId = (id: string) => {
 // GET /api/projects/[id] - Get a single project
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Validate ID format first
+    const idValidation = validateId(params.id);
+    if (idValidation) return idValidation;
+
     await connectDB();
 
     const project = await Project.findById(params.id).lean({ virtuals: true });

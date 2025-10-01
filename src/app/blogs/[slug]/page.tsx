@@ -17,14 +17,14 @@ import { ArrowLeft } from 'lucide-react';
 
 interface BlogPostPageProps {
   params: {
-    id: string;
+    slug: string;
   };
 }
 
 // Generate metadata for the page
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   await connectToDatabase();
-  const blog = await Blog.findOne({ slug: params.id });
+  const blog = await Blog.findOne({ slug: params.slug });
 
   if (!blog) {
     return {
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   await connectToDatabase();
-  const blog: any = await Blog.findOne({ slug: params.id });
+  const blog: any = await Blog.findOne({ slug: params.slug });
 
   if (!blog) {
     notFound();

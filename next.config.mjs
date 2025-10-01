@@ -8,13 +8,20 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['res.cloudinary.com'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
     ],
+  },
+  // Ensure API routes work properly on Vercel
+  experimental: {
+    serverComponentsExternalPackages: ['mongoose'],
+  },
+  // Runtime configuration for Vercel
+  env: {
+    MONGODB_URI: process.env.MONGODB_URI,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {

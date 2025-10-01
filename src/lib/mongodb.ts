@@ -31,14 +31,23 @@ export async function connectDB() {
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: true,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      bufferCommands: false, // Disable buffering for serverless
+      maxPoolSize: 1, // Reduce pool size for serverless
+      serverSelectionTimeoutMS: 10000, // Increase timeout for Vercel
       socketTimeoutMS: 45000,
-      family: 4
+      family: 4,
+      // Add retry logic for Vercel
+      retryWrites: true,
+      retryReads: true,
+      // Optimize for serverless
+      maxIdleTimeMS: 30000,
+      connectTimeoutMS: 10000
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts);
+    cached.promise = mongoose.connect(MONGODB_URI, opts).catch((err) => {
+      cached.promise = null;
+      throw err;
+    });
   }
 
   try {

@@ -5,13 +5,13 @@ import { generateMetadata as generateSEOMetadata } from '@/components/shared/SEO
 
 interface BlogPostPageProps {
   params: {
-    id: string;
+    slug: string;
   };
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+export async function generateBlogMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   await connectToDatabase();
-  const blog = await Blog.findOne({ slug: params.id }).lean();
+  const blog = await Blog.findOne({ slug: params.slug }).lean();
 
   if (!blog) {
     return {

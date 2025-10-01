@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/projects/:id",
+      "destination": "/projects/:id"
+    },
+    {
+      "source": "/blogs/:slug",
+      "destination": "/blogs/:slug"
+    }
+  ],
+  "trailingSlash": false,
+  "cleanUrls": false
+}

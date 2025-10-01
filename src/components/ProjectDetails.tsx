@@ -26,8 +26,20 @@ export default function ProjectDetails({ id }: ProjectDetailsProps) {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`/api/projects/${id}`);
-        if (!response.ok) throw new Error('Project not found');
+        setLoading(true);
+        const response = await fetch(`/api/projects/${id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Project not found');
+          }
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const { success, data } = await response.json();
         if (success && data) {
           setProject(data);
@@ -42,7 +54,11 @@ export default function ProjectDetails({ id }: ProjectDetailsProps) {
       }
     };
 
-    fetchProject();
+    if (id) {
+      fetchProject();
+    } else {
+      setLoading(false);
+    }
   }, [id]);
 
   // Fetch related projects by category once project is loaded
