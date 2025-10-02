@@ -18,6 +18,7 @@ const nextConfig = {
   // Ensure API routes work properly on Vercel
   experimental: {
     serverComponentsExternalPackages: ['mongoose'],
+    serverActions: true,
   },
   // Runtime configuration for Vercel
   env: {

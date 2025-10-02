@@ -93,7 +93,9 @@ export async function getPublishedProjectById(id: string) {
     const project = await Project.findOne({ 
       _id: id, 
       status: 'published' 
-    }).lean({ virtuals: true });
+    })
+    .lean({ virtuals: true })
+    .maxTimeMS(10000); // 10 second timeout for individual queries
     
     return project as any; // Type assertion to fix TypeScript issues
   } catch (error) {
@@ -116,7 +118,8 @@ export async function listProjectIds(limit = 100) {
       { projection: { _id: 1 } }
     )
     .limit(limit)
-    .lean();
+    .lean()
+    .maxTimeMS(5000); // 5 second timeout for ID listing
     
     return projects.map(project => project._id);
   } catch (error) {

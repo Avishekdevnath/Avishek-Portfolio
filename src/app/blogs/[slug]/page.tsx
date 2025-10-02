@@ -88,9 +88,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     author: blog.author.name
   };
 
-  // Server-side debug to confirm lineSpacing and data reaching page
-  // eslint-disable-next-line no-console
-  console.log('[PublicBlogPage] slug:', blog.slug, 'lineSpacing:', blog.lineSpacing);
 
   // Add structured data script
   const structuredData = blog.structuredData || {
@@ -263,7 +260,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center space-x-4 text-gray-600 text-xs">
                 <ViewCounter 
-                  slug={params.id} 
+                  slug={params.slug} 
                   initialViews={blog.stats?.views?.total || 0} 
                 />
                 <div className="flex items-center space-x-2">
@@ -273,10 +270,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
               <div className="flex items-center space-x-2 text-xs">
                 <LikeButton 
-                  slug={params.id} 
+                  slug={params.slug} 
                   initialLikes={likesTotal} 
                 />
-                <ShareButtons shareData={shareData} slug={params.id} />
+                <ShareButtons shareData={shareData} slug={params.slug} />
               </div>
             </div>
           </div>
@@ -353,7 +350,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Comments Section */}
           <CommentSection 
-            slug={params.id} 
+            slug={params.slug} 
           />
         </div>
 

@@ -8,7 +8,13 @@ import RichTextViewer from '@/components/shared/RichTextViewer';
 import { FaGithub, FaGitlab, FaBitbucket, FaGlobe } from 'react-icons/fa';
 import { getPublishedProjectById, getRelatedProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
-import ProjectLightbox from './ProjectLightbox';
+import dynamic from 'next/dynamic';
+
+// Dynamically import ProjectLightbox to avoid SSR issues
+const ProjectLightbox = dynamic(() => import('./ProjectLightbox'), {
+  ssr: false,
+  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 gap-4">Loading images...</div>
+});
 import { Technology, Repository, DemoURL } from '@/models/Project';
 
 interface ProjectDetailsProps {

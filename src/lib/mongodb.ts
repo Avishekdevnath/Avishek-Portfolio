@@ -32,28 +32,27 @@ export async function connectDB() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false, // Disable buffering for serverless
-      maxPoolSize: 1, // Reduce pool size for serverless
-      serverSelectionTimeoutMS: 10000, // Increase timeout for Vercel
-      socketTimeoutMS: 45000,
-      family: 4,
-      // Add retry logic for Vercel
-      retryWrites: true,
-      retryReads: true,
-      // Optimize for serverless
-      maxIdleTimeMS: 30000, // Close idle connections after 30s
-      connectTimeoutMS: 10000,
-      // Additional serverless optimizations
+      // Connection pooling optimizations
+      maxPoolSize: 1, // Single connection for serverless
+      minPoolSize: 0, // No minimum connections
       maxConnecting: 1,
+      maxIdleTimeMS: 30000, // Close idle connections quickly
+      // Timeout configurations
+      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 5000, // Faster server selection
+      socketTimeoutMS: 45000,
+      // Network optimizations
+      family: 4,
       heartbeatFrequencyMS: 10000, // Less frequent heartbeats
-      // Additional modern optimizations
-      compressors: ['zlib'], // Enable compression
-      zlibCompressionLevel: 6, // Balanced compression
-      // Connection management
-      minPoolSize: 0, // Allow connections to close completely
-      // Error handling
+      // Compression
+      compressors: ['zlib' as const], // Enable compression
+      zlibCompressionLevel: 6 as const, // Balanced compression
+      // Read preferences
+      readPreference: 'secondaryPreferred' as const, // Use secondary for reads when available
+      // Error handling and retries
       directConnection: false, // Use replica set for better reliability
-      // Timeout optimizations for serverless
-      serverSelectionTimeoutMS: 5000 // Faster server selection
+      retryWrites: true,
+      retryReads: true
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).catch((err) => {
