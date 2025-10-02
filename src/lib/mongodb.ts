@@ -40,11 +40,20 @@ export async function connectDB() {
       retryWrites: true,
       retryReads: true,
       // Optimize for serverless
-      maxIdleTimeMS: 30000,
+      maxIdleTimeMS: 30000, // Close idle connections after 30s
       connectTimeoutMS: 10000,
       // Additional serverless optimizations
       maxConnecting: 1,
-      heartbeatFrequencyMS: 10000
+      heartbeatFrequencyMS: 10000, // Less frequent heartbeats
+      // Additional modern optimizations
+      compressors: ['zlib'], // Enable compression
+      zlibCompressionLevel: 6, // Balanced compression
+      // Connection management
+      minPoolSize: 0, // Allow connections to close completely
+      // Error handling
+      directConnection: false, // Use replica set for better reliability
+      // Timeout optimizations for serverless
+      serverSelectionTimeoutMS: 5000 // Faster server selection
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).catch((err) => {
@@ -61,6 +70,20 @@ export async function connectDB() {
   }
 
   return cached.conn;
+}
+
+// Connection health check for serverless environments
+export async function checkConnectionHealth() {
+  try {
+    const conn = await connectDB();
+    if (conn.connection.readyState === 1) {
+      return { healthy: true, state: 'connected' };
+    } else {
+      return { healthy: false, state: conn.connection.readyState };
+    }
+  } catch (error) {
+    return { healthy: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }
 
 // Graceful shutdown

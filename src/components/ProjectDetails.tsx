@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ExternalLink, Globe, Code, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, Globe, Code } from "lucide-react";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
-import { Project } from "@/types/dashboard";
 import ProjectCard from '@/components/ProjectCard';
 import RichTextViewer from '@/components/shared/RichTextViewer';
 import { FaGithub, FaGitlab, FaBitbucket, FaGlobe } from 'react-icons/fa';
 import { getPublishedProjectById, getRelatedProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
+import ProjectLightbox from './ProjectLightbox';
+import { Technology, Repository, DemoURL } from '@/models/Project';
 
 interface ProjectDetailsProps {
   id: string;
@@ -45,7 +46,6 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
 
   const mainRepo = project.repositories?.[0];
   const mainDemo = project.demoUrls?.[0];
-  const images = project?.additionalImages || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 font-ui">
@@ -72,7 +72,7 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
                 {project.shortDescription}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {project?.technologies?.slice(0, 6).map((tech, idx) => (
+                {project?.technologies?.slice(0, 6).map((tech: Technology, idx: number) => (
                   <span key={idx} className="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700 ring-1 ring-gray-200">
                     {tech.name}
                   </span>
@@ -127,7 +127,7 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
                       const overflow = techs.length - visible.length;
                       return (
                         <>
-                          {visible.map((tech, index) => (
+                          {visible.map((tech: Technology, index: number) => (
                             <div
                               key={index}
                               className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg ring-1 ring-gray-200 transition-colors duration-200 hover:bg-white"
@@ -214,7 +214,7 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
             <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
               <h3 className="text-h5 font-semibold text-gray-900 mb-4">Repositories</h3>
               <div className="space-y-3">
-                      {project.repositories.map((repo, index) => (
+                      {project.repositories.map((repo: Repository, index: number) => (
                         <a
                           key={`repo-${index}`}
                           href={repo.url}
@@ -245,7 +245,7 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
             <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
               <h3 className="text-h5 font-semibold text-gray-900 mb-4">Demo Links</h3>
               <div className="space-y-3">
-                {project.demoUrls.map((demo, index) => {
+                {project.demoUrls.map((demo: DemoURL, index: number) => {
                   const getDemoBadgeColor = (type: string) => {
                     switch (type) {
                       case 'live': return 'bg-green-50 text-green-800 ring-1 ring-green-200';
@@ -290,31 +290,7 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
           <div className="mb-8">
             <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
               <h3 className="text-h5 font-semibold text-gray-900 mb-6">Project Gallery</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {project.additionalImages.map((image, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => { setLightboxIndex(index); setLightboxOpen(true); }}
-                    className="group relative overflow-hidden rounded-xl transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <div className="aspect-video relative overflow-hidden">
-                      <Image
-                        src={image.url}
-                        alt={image.altText || `Project image ${index + 1}`}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      {image.caption && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white p-3 transform translate-y-full transition-transform duration-300 group-hover:translate-y-0">
-                          <p className="text-sm font-medium">{image.caption}</p>
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <ProjectLightbox images={project.additionalImages} />
             </div>
           </div>
         )}
@@ -324,19 +300,11 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
           <div className="mt-12">
             <div className="bg-white rounded-xl p-6 ring-1 ring-gray-200 shadow-sm">
               <h2 className="text-h4 font-semibold text-gray-900 mb-6">Related Projects</h2>
-              {relatedLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[1,2,3].map(i => (
-                    <div key={i} className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl animate-pulse" />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {related.map(p => (
-                    <ProjectCard key={p._id} project={p} />
-                  ))}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {related.map(p => (
+                  <ProjectCard key={p._id} project={p} />
+                ))}
               </div>
-            )}
           </div>
         </div>
         ) : (
@@ -354,62 +322,6 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
       </main>
 
       <Footer />
-
-      {/* Lightbox */}
-      {lightboxOpen && images.length ? (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Project image viewer"
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setLightboxOpen(false);
-            if (e.key === 'ArrowLeft') setLightboxIndex((prev) => (prev - 1 + images.length) % images.length);
-            if (e.key === 'ArrowRight') setLightboxIndex((prev) => (prev + 1) % images.length);
-          }}
-          tabIndex={-1}
-        >
-          <button
-            type="button"
-            className="absolute top-4 right-4 text-white hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-white/50"
-            onClick={() => setLightboxOpen(false)}
-            aria-label="Close lightbox"
-            autoFocus
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <button
-            type="button"
-            className="absolute left-4 text-white hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-white/50"
-            onClick={() => setLightboxIndex((prev) => (prev - 1 + images.length) % images.length)}
-            aria-label="Previous image"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            type="button"
-            className="absolute right-4 text-white hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-white/50"
-            onClick={() => setLightboxIndex((prev) => (prev + 1) % images.length)}
-            aria-label="Next image"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-          <div className="relative w-[90vw] max-w-4xl aspect-video">
-            <Image
-              src={images[lightboxIndex].url}
-              alt={images[lightboxIndex].altText || `Project image ${lightboxIndex + 1}`}
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-          {images[lightboxIndex]?.caption && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white bg-black/60 px-3 py-1 rounded text-sm">
-              {images[lightboxIndex].caption}
-            </div>
-          )}
-        </div>
-      ) : null}
     </div>
   );
 } 

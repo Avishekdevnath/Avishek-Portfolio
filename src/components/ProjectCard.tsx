@@ -50,11 +50,20 @@ const formatDate = (date: string | Date): string => {
   }
 };
 
-// Function to strip HTML tags and get plain text for preview
+// Function to strip HTML tags and get plain text for preview (SSR-safe)
 const stripHtml = (html: string) => {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
+  if (!html) return '';
+  // Basic tag removal
+  const withoutTags = html.replace(/<[^>]*>/g, ' ');
+  // Decode common HTML entities
+  const decoded = withoutTags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  return decoded.replace(/\s+/g, ' ').trim();
 };
 
 // Function to truncate text to specified length
