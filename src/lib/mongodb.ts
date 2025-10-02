@@ -41,7 +41,10 @@ export async function connectDB() {
       retryReads: true,
       // Optimize for serverless
       maxIdleTimeMS: 30000,
-      connectTimeoutMS: 10000
+      connectTimeoutMS: 10000,
+      // Additional serverless optimizations
+      maxConnecting: 1,
+      heartbeatFrequencyMS: 10000
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).catch((err) => {

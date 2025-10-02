@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink, Globe, Code, X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -10,77 +7,25 @@ import { Project } from "@/types/dashboard";
 import ProjectCard from '@/components/ProjectCard';
 import RichTextViewer from '@/components/shared/RichTextViewer';
 import { FaGithub, FaGitlab, FaBitbucket, FaGlobe } from 'react-icons/fa';
+import { getPublishedProjectById, getRelatedProjects } from '@/lib/projects';
+import { notFound } from 'next/navigation';
 
 interface ProjectDetailsProps {
   id: string;
 }
 
-export default function ProjectDetails({ id }: ProjectDetailsProps) {
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [related, setRelated] = useState<Project[]>([]);
-  const [relatedLoading, setRelatedLoading] = useState(false);
+export default async function ProjectDetails({ id }: ProjectDetailsProps) {
+  // Get project data directly from database (no HTTP calls)
+  const project = await getPublishedProjectById(id);
+  
+  if (!project) {
+    notFound();
+  }
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/projects/${id}`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Project not found');
-          }
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const { success, data } = await response.json();
-        if (success && data) {
-          setProject(data);
-        } else {
-          throw new Error('Project data not found');
-        }
-      } catch (error) {
-        console.error('Error fetching project:', error);
-        setProject(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchProject();
-    } else {
-      setLoading(false);
-    }
-  }, [id]);
-
-  // Fetch related projects by category once project is loaded
-  useEffect(() => {
-    const fetchRelated = async () => {
-      if (!project?.category) return;
-      try {
-        setRelatedLoading(true);
-        const params = new URLSearchParams({ category: project.category, status: 'published', limit: '6' }).toString();
-        const res = await fetch(`/api/projects?${params}`);
-        const data = await res.json();
-        const items: Project[] = data?.data?.projects || [];
-        // Exclude current project id
-        setRelated(items.filter(p => p._id !== project._id).slice(0, 3));
-      } catch (e) {
-        setRelated([]);
-      } finally {
-        setRelatedLoading(false);
-      }
-    };
-    fetchRelated();
-  }, [project?._id, project?.category]);
+  // Get related projects
+  const related = project.category 
+    ? await getRelatedProjects(project.category, project._id, 3)
+    : [];
 
   // kept for potential future use (e.g., timeline/metadata)
 
@@ -97,76 +42,6 @@ export default function ProjectDetails({ id }: ProjectDetailsProps) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 font-ui">
-        <Header />
-        <main className="max-w-6xl mx-auto px-6 py-8">
-          <div className="relative z-20 mx-4 mb-6 bg-white rounded-xl p-4 outline outline-2 outline-black overflow-visible box-border">
-
-          {/* Project Header Skeleton */}
-          <div className="mb-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Column Skeleton */}
-              <div className="space-y-6">
-                <div className="w-20 h-5 bg-gray-200 rounded animate-pulse" />
-                <div className="space-y-3">
-                  <div className="w-3/4 h-8 bg-gray-200 rounded animate-pulse" />
-                  <div className="w-full h-4 bg-gray-200 rounded animate-pulse" />
-                  <div className="w-2/3 h-4 bg-gray-200 rounded animate-pulse" />
-                </div>
-                <div className="space-y-3">
-                  <div className="w-48 h-4 bg-gray-200 rounded animate-pulse" />
-                  <div className="w-40 h-4 bg-gray-200 rounded animate-pulse" />
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-32 h-10 bg-gray-200 rounded animate-pulse" />
-                  <div className="w-28 h-10 bg-gray-200 rounded animate-pulse" />
-                </div>
-                <div className="space-y-3">
-                  <div className="w-24 h-5 bg-gray-200 rounded animate-pulse" />
-                  <div className="flex flex-wrap gap-2">
-                    {[1,2,3,4,5].map(i => (
-                      <div key={i} className="w-16 h-6 bg-gray-200 rounded animate-pulse" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Right Column Skeleton */}
-              <div className="h-80 lg:h-96 bg-gray-200 rounded-lg animate-pulse" />
-            </div>
-          </div>
-
-          {/* Content Skeleton */}
-          <div className="space-y-6">
-            <div className="h-32 bg-gray-200 rounded-lg animate-pulse" />
-            <div className="h-24 bg-gray-200 rounded-lg animate-pulse" />
-            <div className="h-20 bg-gray-200 rounded-lg animate-pulse" />
-        </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-white font-ui flex flex-col items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-h3 font-bold text-gray-800">Loading issue</h2>
-          <p className="text-body-sm text-gray-600">We couldn't load this project right now. Please try again or return to the projects page.</p>
-          <Link
-            href="/projects"
-            className="btn btn-primary inline-flex items-center gap-2"
-          >
-            Back to Projects
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   const mainRepo = project.repositories?.[0];
   const mainDemo = project.demoUrls?.[0];

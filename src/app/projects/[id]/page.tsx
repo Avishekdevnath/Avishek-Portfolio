@@ -1,6 +1,8 @@
 import ProjectDetails from '@/components/ProjectDetails';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getPublishedProjectById, listProjectIds } from '@/lib/projects';
+import { getSiteUrl } from '@/lib/url';
 
 interface Props {
   params: {
@@ -8,10 +10,22 @@ interface Props {
   };
 }
 
+// Enable ISR with 1 hour revalidation
+export const revalidate = 3600;
+
+// Declare Node.js runtime for MongoDB access
+export const runtime = 'nodejs';
+
 export async function generateStaticParams() {
-  // Return empty array to enable dynamic rendering
-  // This prevents build-time static generation issues
-  return [];
+  try {
+    const projectIds = await listProjectIds(200);
+    return projectIds.map((id) => ({
+      id: String(id),
+    }));
+  } catch (error) {
+    console.warn('Error generating static params for projects:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -24,50 +38,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    // Use absolute URL for fetch to work in both dev and production
-    const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const url = `${base}/api/projects/${params.id}`;
+    // Get project data directly from database (no HTTP calls)
+    const project = await getPublishedProjectById(params.id);
     
-    // Add timeout and better error handling for Vercel
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-    
-    const response = await fetch(url, {
-      cache: 'no-store',
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      console.warn(`Failed to fetch project metadata for ${params.id}: ${response.status}`);
+    if (!project) {
       return {
-        title: 'Project Details',
-        description: 'Project details and information.',
+        title: 'Project Not Found',
+        description: 'The requested project could not be found.',
       };
     }
 
-    const { success, data } = await response.json();
+    const title = `${project.title} – Portfolio`;
+    const description = project.shortDescription || project.description || 'Project details and information.';
+    const siteUrl = getSiteUrl();
     
-    if (!success || !data) {
-      console.warn(`Invalid project data for ${params.id}`);
-      return {
-        title: 'Project Details',
-        description: 'Project details and information.',
-      };
-    }
+    // Build OpenGraph image URL
+    const ogImage = project.image ? `${siteUrl}${project.image}` : undefined;
 
     return {
-      title: data.title || 'Project Details',
-      description: data.shortDescription || data.description || 'Project details and information.',
+      title,
+      description,
       openGraph: {
-        title: data.title || 'Project Details',
-        description: data.shortDescription || data.description || 'Project details and information.',
-        type: 'website',
-        images: data.image ? [data.image] : undefined,
+        title,
+        description,
+        url: `${siteUrl}/projects/${params.id}`,
+        type: 'article',
+        images: ogImage ? [{ url: ogImage }] : undefined,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: ogImage ? [ogImage] : undefined,
       },
     };
   } catch (error) {
