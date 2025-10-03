@@ -21,7 +21,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       data: education
     });
   } catch (error) {
-    console.error('Error fetching education entry:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch education entry'
@@ -64,7 +63,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       message: 'Education entry updated successfully'
     });
   } catch (error) {
-    console.error('Error updating education entry:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update education entry'
@@ -91,7 +89,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       message: 'Education entry deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting education entry:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete education entry'

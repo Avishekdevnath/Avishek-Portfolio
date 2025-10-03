@@ -33,7 +33,7 @@ export default function MessageRow({ message, onStatusChange, onDelete }: Messag
         await onDelete(message._id);
       }
     } catch (error) {
-      console.error(`Failed to ${action} message:`, error);
+      // Failed to update message
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +46,7 @@ export default function MessageRow({ message, onStatusChange, onDelete }: Messag
       const newStatus = message.status === MessageStatus.READ ? MessageStatus.UNREAD : MessageStatus.READ;
       await onStatusChange(message._id, newStatus);
     } catch (error) {
-      console.error('Failed to update message status:', error);
+      // Failed to update message status
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +80,7 @@ export default function MessageRow({ message, onStatusChange, onDelete }: Messag
       // Update message status through parent component
       await onStatusChange(message._id, MessageStatus.REPLIED);
     } catch (error) {
-      console.error('Failed to send reply:', error);
+      // Failed to send reply
       setReplyError(error instanceof Error ? error.message : 'Failed to send reply');
     } finally {
       setIsLoading(false);

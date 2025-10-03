@@ -65,7 +65,7 @@ export default function BlogStats({ slug }: BlogStatsProps) {
         throw new Error(data.message);
       }
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      // Error fetching stats
       setError('Failed to load statistics');
     } finally {
       setLoading(false);

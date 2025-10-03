@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { WorkExperience } from '@/models/Experience';
 import { IWorkExperience } from '@/types/experience';
 
@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ): Promise<Response> {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const workExperience = await WorkExperience.findById(params.id);
     
@@ -25,7 +25,6 @@ export async function GET(
       data: workExperience
     });
   } catch (error) {
-    console.error('Error fetching work experience:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch work experience'
@@ -39,7 +38,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ): Promise<Response> {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const body = await request.json();
     
@@ -85,7 +84,6 @@ export async function PUT(
       message: 'Work experience updated successfully'
     });
   } catch (error) {
-    console.error('Error updating work experience:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update work experience'
@@ -99,7 +97,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ): Promise<Response> {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const workExperience = await WorkExperience.findByIdAndDelete(params.id);
     
@@ -115,7 +113,6 @@ export async function DELETE(
       message: 'Work experience deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting work experience:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete work experience'

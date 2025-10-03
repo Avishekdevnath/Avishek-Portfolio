@@ -129,15 +129,12 @@ async function seedEducation() {
     
     // Clear existing education data
     await Education.deleteMany({});
-    console.log('Cleared existing education data');
     
     // Insert sample data
     const result = await Education.insertMany(sampleEducationData);
-    console.log(`Successfully seeded ${result.length} education entries`);
     
     // Display inserted data
     result.forEach((edu, index) => {
-      console.log(`${index + 1}. ${edu.degree} - ${edu.institution}`);
     });
     
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
+import BlogStats from '@/models/BlogStats';
 import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 
 interface MongoError {
@@ -36,7 +37,7 @@ function generateSlug(title: string): string {
 // GET /api/blogs - Get all blogs
 export async function GET(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -101,17 +102,50 @@ export async function GET(request: NextRequest) {
       Blog.countDocuments(query),
     ]);
 
-    // Ensure all blogs have initialized stats
+    // Get blog IDs for fetching stats
+    const blogIds = blogs.map(blog => blog._id);
+    
+    // Fetch BlogStats for all blogs
+    const blogStatsMap = new Map();
+    if (blogIds.length > 0) {
+      const blogStats = await BlogStats.find({ blog: { $in: blogIds } });
+      blogStats.forEach(stat => {
+        const blogIdStr = stat.blog.toString();
+        // Only add if not already present, or if this one has more views/likes (keep the most comprehensive stats)
+        const existing = blogStatsMap.get(blogIdStr);
+        if (!existing || (stat.views.length + stat.likes.length) > (existing.views.length + existing.likes.length)) {
+          blogStatsMap.set(blogIdStr, stat);
+        }
+      });
+    }
+
+    // Merge blog data with stats
     const blogsWithStats = blogs.map(blog => {
       const blogObject = blog.toObject();
+      const blogStats = blogStatsMap.get((blog._id as any).toString());
+      
+      // Update views and likes from BlogStats - use the actual counts
+      const viewsCount = blogStats ? blogStats.views.length : 0;
+      const likesCount = blogStats ? blogStats.likes.length : 0;
+      
+      // Set the direct properties for the dashboard to use
+      blogObject.views = viewsCount;
+      blogObject.likes = likesCount;
+      
+      // Ensure stats structure exists and is properly populated
       if (!blogObject.stats) {
         blogObject.stats = {
-          views: { total: 0, unique: 0, history: [] },
-          likes: { total: 0, users: [], history: [] },
+          views: { total: viewsCount, unique: 0, history: [] },
+          likes: { total: likesCount, users: [], history: [] },
           comments: { total: 0, approved: 0, pending: 0, spam: 0 },
           shares: { total: 0, platforms: { facebook: 0, twitter: 0, linkedin: 0 } }
         };
+      } else {
+        // Update stats with BlogStats data
+        blogObject.stats.views.total = viewsCount;
+        blogObject.stats.likes.total = likesCount;
       }
+      
       return blogObject;
     });
 
@@ -146,22 +180,16 @@ export async function GET(request: NextRequest) {
 // POST /api/blogs - Create a new blog
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== BLOG API CREATE DEBUG ===');
-    await connectToDatabase();
-    console.log('Database connected successfully');
+    await connectDB();
     
     const body = await request.json();
-    console.log('Request body:', JSON.stringify(body, null, 2));
     
     // Validate required fields
     const requiredFields = ['title', 'excerpt', 'content', 'category', 'author.name'];
     const missingFields = requiredFields.filter(field => {
       const value = field.split('.').reduce((obj, key) => obj?.[key], body);
-      console.log(`Checking field ${field}:`, value);
       return !value;
     });
-    
-    console.log('Missing fields:', missingFields);
     
     if (missingFields.length > 0) {
       return sendError(`Missing required fields: ${missingFields.join(', ')}`, 400);
@@ -180,7 +208,6 @@ export async function POST(request: NextRequest) {
 
     // Add slug to body
     body.slug = slug;
-    console.log('Generated slug:', slug);
 
     // Set publishedAt date if status is published
     if (body.status === 'published' && !body.publishedAt) {
@@ -190,7 +217,6 @@ export async function POST(request: NextRequest) {
     // Calculate read time
     const wordCount = body.content.split(/\s+/).length;
     body.readTime = Math.ceil(wordCount / 200);
-    console.log('Calculated read time:', body.readTime);
 
     // Sanitize lineSpacing to allowed UI options
     const allowedLineSpacings = ['08', '10', '115', '125', '15', '20'];
@@ -199,15 +225,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new blog
-    console.log('Creating blog with data:', JSON.stringify(body, null, 2));
     const blog = await Blog.create(body);
-    console.log('Blog created successfully:', blog._id);
     
     return sendSuccess(blog, 'Blog post created successfully');
   } catch (error) {
-    console.error('Error creating blog:', error);
-    console.error('Error type:', typeof error);
-    console.error('Error constructor:', error?.constructor?.name);
     
     const mongoError = error as MongoError;
     if (mongoError.code === 11000 && mongoError.keyPattern?.slug) {

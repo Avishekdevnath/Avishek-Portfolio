@@ -31,15 +31,12 @@ export default function MessagesPage() {
 
   const fetchMessages = async () => {
     try {
-      console.log('Fetching messages...');
       const response = await fetch('/api/messages');
       const data = await response.json();
-      console.log('API Response:', data);
       
       if (!response.ok) throw new Error('Failed to fetch messages');
       
       if (data.success) {
-        console.log('Setting messages:', data.data.messages);
         const messagesWithStringId = data.data.messages.map((message: any) => ({
           ...message,
           _id: message._id.toString()
@@ -50,7 +47,7 @@ export default function MessagesPage() {
         throw new Error(data.error || 'Failed to fetch messages');
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      // Error fetching messages
       setError(error instanceof Error ? error.message : 'Failed to fetch messages');
     } finally {
       setIsLoading(false);
@@ -63,7 +60,6 @@ export default function MessagesPage() {
 
   const handleStatusChange = async (messageId: string, newStatus: MessageStatus) => {
     try {
-      console.log('Updating message status:', messageId, newStatus);
       const response = await fetch(`/api/messages/${messageId}`, {
         method: 'PUT',
         headers: {
@@ -73,14 +69,13 @@ export default function MessagesPage() {
       });
 
       const data = await response.json();
-      console.log('Status update response:', data);
 
       if (!response.ok) throw new Error('Failed to update message status');
       
       // Refresh messages to get updated data
       await fetchMessages();
     } catch (error) {
-      console.error('Error updating message status:', error);
+      // Error updating message status
       setError(error instanceof Error ? error.message : 'Failed to update message');
     }
   };
@@ -89,20 +84,18 @@ export default function MessagesPage() {
     if (!confirm('Are you sure you want to delete this message?')) return;
 
     try {
-      console.log('Deleting message:', messageId);
       const response = await fetch(`/api/messages/${messageId}`, {
         method: 'DELETE',
       });
 
       const data = await response.json();
-      console.log('Delete response:', data);
 
       if (!response.ok) throw new Error('Failed to delete message');
       
       // Refresh messages to get updated data
       await fetchMessages();
     } catch (error) {
-      console.error('Error deleting message:', error);
+      // Error deleting message
       setError(error instanceof Error ? error.message : 'Failed to delete message');
     }
   };

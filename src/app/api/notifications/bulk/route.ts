@@ -104,7 +104,6 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Error performing bulk operation:', error);
     return NextResponse.json(
       { 
         success: false, 

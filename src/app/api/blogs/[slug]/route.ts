@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
 
 // GET /api/blogs/[slug] - Get a single blog
@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
@@ -23,7 +23,6 @@ export async function GET(
       data: blog
     });
   } catch (error) {
-    console.error('Error fetching blog:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch blog'
@@ -37,7 +36,7 @@ export async function PUT(
   { params }: { params: { slug: string } }
 ) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
@@ -48,7 +47,6 @@ export async function PUT(
     }
 
     const data = await request.json();
-    console.log('Update request data:', JSON.stringify(data, null, 2));
     
     // Normalize lineSpacing to UI-supported values
     if (typeof data.lineSpacing === 'string') {
@@ -98,7 +96,6 @@ export async function PUT(
       data: updatedBlog
     });
   } catch (error) {
-    console.error('Error updating blog:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update blog'
@@ -112,7 +109,7 @@ export async function DELETE(
   { params }: { params: { slug: string } }
 ) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
@@ -129,7 +126,6 @@ export async function DELETE(
       message: 'Blog deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting blog:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete blog'
@@ -143,7 +139,7 @@ export async function PATCH(
   { params }: { params: { slug: string } }
 ) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
@@ -182,7 +178,6 @@ export async function PATCH(
       data: blog
     });
   } catch (error) {
-    console.error('Error handling blog action:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to handle blog action'

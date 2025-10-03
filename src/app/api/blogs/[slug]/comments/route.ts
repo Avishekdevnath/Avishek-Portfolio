@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
 import Comment from '@/models/Comment';
 import { createBlogNotification } from '@/lib/notifications';
@@ -7,7 +7,7 @@ import { createBlogNotification } from '@/lib/notifications';
 // Get comments for a blog post
 export async function GET(_request: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
@@ -44,7 +44,6 @@ export async function GET(_request: NextRequest, { params }: { params: { slug: s
       data: { comments: nested }
     });
   } catch (error) {
-    console.error('Error fetching comments:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch comments'
@@ -58,12 +57,11 @@ export async function POST(
   { params }: { params: { slug: string } }
 ) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const { slug } = params;
     const data = await request.json();
 
-    console.log('Creating comment with data:', data);
 
     // Find the blog post
     const blog = await Blog.findOne({ slug });
@@ -83,9 +81,7 @@ export async function POST(
       status: 'approved' // You might want to change this based on your moderation needs
     };
 
-    console.log('Comment data to save:', commentData);
     const comment = await Comment.create(commentData);
-    console.log('Comment created successfully:', comment._id);
 
     // Create notification for new comment
     await createBlogNotification({
@@ -105,7 +101,6 @@ export async function POST(
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Error creating comment:', error);
     return NextResponse.json(
       { error: 'Failed to create comment' },
       { status: 500 }

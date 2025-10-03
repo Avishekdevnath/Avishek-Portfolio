@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Project, { Project as ProjectType } from '@/models/Project';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const { projects } = await request.json();
 
@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in bulk project creation:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create projects',

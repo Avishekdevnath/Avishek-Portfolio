@@ -44,7 +44,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       data: project
     });
   } catch (error) {
-    console.error('Error fetching project:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch project'
@@ -100,7 +99,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       try {
         await deleteImage(existingProject.imagePublicId);
       } catch (error) {
-        console.error('Error deleting old image:', error);
+        // Continue with update even if image deletion fails
       }
     }
 
@@ -131,7 +130,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       message: 'Project updated successfully'
     });
   } catch (error) {
-    console.error('Error updating project:', error);
 
     // Handle validation errors
     if (error instanceof Error && 'errors' in error) {
@@ -187,7 +185,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       message: 'Project updated successfully'
     });
   } catch (error) {
-    console.error('Error updating project:', error);
 
     // Handle validation errors
     if (error instanceof Error && 'errors' in error) {
@@ -225,7 +222,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       try {
         await deleteImage(project.imagePublicId);
       } catch (error) {
-        console.error('Error deleting image:', error);
+        // Continue with deletion even if image deletion fails
       }
     }
 
@@ -237,7 +234,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       message: 'Project deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting project:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete project'

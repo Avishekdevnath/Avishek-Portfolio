@@ -32,7 +32,7 @@ export default function ShareButtons({ shareData, slug }: ShareButtonsProps) {
         body: JSON.stringify({ platform }),
       });
     } catch (err) {
-      console.error('Failed to record share:', err);
+      // Failed to record share, but continue
     }
   };
 
@@ -47,7 +47,7 @@ export default function ShareButtons({ shareData, slug }: ShareButtonsProps) {
         });
         incrementShare('native');
       } catch (error) {
-        console.log('Error sharing:', error);
+        // Error sharing
       }
     } else {
       setIsOpen(!isOpen);
@@ -61,7 +61,7 @@ export default function ShareButtons({ shareData, slug }: ShareButtonsProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy link:', error);
+      // Failed to copy link
     }
   };
 

@@ -112,7 +112,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
       }
       throw new Error(data.error || 'Failed to upload file');
     } catch (error) {
-      console.error('Media upload error:', error);
+      // Media upload error
       toast.error(error instanceof Error ? error.message : 'Failed to upload media');
       throw error; // Re-throw the error instead of returning null
     }
@@ -129,7 +129,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
       setFormData(prev => ({ ...prev, coverImage: imageUrl }));
       toast.success('Cover image uploaded successfully');
     } catch (error) {
-      console.error('Cover image upload error:', error);
+      // Cover image upload error
       toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
     } finally {
       setLoading(false);
@@ -187,7 +187,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         throw new Error(data.error || 'Something went wrong');
       }
     } catch (error) {
-      console.error('Form submission error:', error);
+      // Form submission error
       setError(error instanceof Error ? error.message : 'Failed to save blog post');
       toast.error(error instanceof Error ? error.message : 'Failed to save blog post');
     } finally {

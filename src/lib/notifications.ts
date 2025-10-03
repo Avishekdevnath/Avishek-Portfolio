@@ -31,7 +31,7 @@ export async function createNotification(data: CreateNotificationData) {
 
     return { success: true, data: notification };
   } catch (error) {
-    console.error('Error creating notification:', error);
+    // Error creating notification
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
@@ -61,7 +61,7 @@ export async function createMessageNotification(data: {
 
     return await Notification.createNotification(notificationData);
   } catch (error) {
-    console.error('Error creating message notification:', error);
+    // Error creating message notification
     throw error;
   }
 }
@@ -161,7 +161,7 @@ export async function createSystemNotification(data: {
 
     return await Notification.createNotification(notificationData);
   } catch (error) {
-    console.error('Error creating system notification:', error);
+    // Error creating system notification
     throw error;
   }
 }
@@ -206,7 +206,7 @@ export async function createWarningNotification(data: {
 
     return await Notification.createNotification(notificationData);
   } catch (error) {
-    console.error('Error creating warning notification:', error);
+    // Error creating warning notification
     throw error;
   }
 }
@@ -249,7 +249,7 @@ export async function getUnreadCount(userId: string = 'admin') {
     await connectDB();
     return await Notification.getUnreadCount(userId);
   } catch (error) {
-    console.error('Error getting unread count:', error);
+    // Error getting unread count
     return 0;
   }
 }
@@ -262,7 +262,7 @@ export async function markAllAsRead(userId: string = 'admin') {
     await connectDB();
     return await Notification.markAllAsRead(userId);
   } catch (error) {
-    console.error('Error marking all as read:', error);
+    // Error marking all as read
     return { modifiedCount: 0 };
   }
 }
@@ -275,7 +275,7 @@ export async function cleanupOldNotifications(daysOld: number = 30) {
     await connectDB();
     return await Notification.deleteOldNotifications(daysOld);
   } catch (error) {
-    console.error('Error cleaning up old notifications:', error);
+    // Error cleaning up old notifications
     throw error;
   }
 }
@@ -326,7 +326,7 @@ export async function getNotificationStats(userId: string = 'admin') {
       typeStats
     };
   } catch (error) {
-    console.error('Error getting notification stats:', error);
+    // Error getting notification stats
     return { total: 0, unread: 0, read: 0, highPriority: 0, typeStats: {} };
   }
 }
@@ -355,7 +355,7 @@ export async function createBlogNotification(data: {
 
     return await Notification.createNotification(notificationData);
   } catch (error) {
-    console.error('Error creating blog notification:', error);
+    // Error creating blog notification
     throw error;
   }
 }
@@ -382,7 +382,7 @@ export async function createProjectNotification(data: {
 
     return await Notification.createNotification(notificationData);
   } catch (error) {
-    console.error('Error creating project notification:', error);
+    // Error creating project notification
     throw error;
   }
 }

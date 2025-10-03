@@ -1,0 +1,253 @@
+/* Format Preservation Styles for Blog Content */
+
+/* Table Preservation */
+.preserved-table {
+  border-collapse: separate !important;
+  border-spacing: 2px !important;
+  width: auto !important;
+  margin: 16px 0 !important;
+  color: #374151 !important; /* Ensure dark text */
+}
+
+.preserved-table th,
+.preserved-table td {
+  border: 1px solid #ddd !important;
+  padding: 8px 12px !important;
+  text-align: left !important;
+  vertical-align: top !important;
+  color: #374151 !important; /* Dark text for readability */
+}
+
+.preserved-table th {
+  background-color: #f5f5f5 !important;
+  font-weight: 600 !important;
+  color: #111827 !important; /* Darker text for headers */
+}
+
+.preserved-table tr:nth-child(even) {
+  background-color: #f9f9f9 !important;
+}
+
+/* Code Block Preservation */
+.preserved-code {
+  background-color: #f5f5f5 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  padding: 12px !important;
+  font-family: 'Courier New', 'Monaco', 'Consolas', monospace !important;
+  white-space: pre-wrap !important;
+  overflow-x: auto !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  margin: 12px 0 !important;
+  color: #374151 !important; /* Dark text for readability */
+}
+
+/* List Preservation */
+.preserved-list {
+  margin: 8px 0 !important;
+  padding-left: 20px !important;
+  color: #374151 !important; /* Dark text for readability */
+}
+
+.preserved-list li {
+  margin: 4px 0 !important;
+  line-height: 1.5 !important;
+  color: #374151 !important; /* Dark text for readability */
+}
+
+.preserved-list ul {
+  list-style-type: disc !important;
+}
+
+.preserved-list ol {
+  list-style-type: decimal !important;
+}
+
+/* Spacing Preservation */
+.preserved-spacing {
+  margin: 8px 0 !important;
+  line-height: 1.5 !important;
+  color: #374151 !important; /* Dark text for readability */
+}
+
+/* Block Preservation */
+.preserved-block {
+  margin: 12px 0 !important;
+  padding: 8px 12px !important;
+  border-left: 3px solid #ddd !important;
+  background-color: #fafafa !important;
+  color: #374151 !important; /* Dark text for readability */
+}
+
+/* Formatting Preservation */
+.preserved-formatting {
+  color: #374151 !important; /* Dark text for readability */
+}
+
+/* ChatGPT Specific Styles */
+[data-preserve-formatting="true"] {
+  /* Preserve ChatGPT formatting */
+}
+
+[data-preserve-table="true"] {
+  /* Preserve table formatting */
+}
+
+[data-preserve-list="true"] {
+  /* Preserve list formatting */
+}
+
+[data-preserve-spacing="true"] {
+  /* Preserve spacing */
+}
+
+[data-preserve-block="true"] {
+  /* Preserve block formatting */
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .preserved-table th,
+  .preserved-table td {
+    border-color: #555 !important;
+  }
+  
+  .preserved-table th {
+    background-color: #2d2d2d !important;
+  }
+  
+  .preserved-table tr:nth-child(even) {
+    background-color: #1a1a1a !important;
+  }
+  
+  .preserved-code {
+    background-color: #2d2d2d !important;
+    border-color: #555 !important;
+    color: #f8f8f2 !important;
+  }
+  
+  .preserved-block {
+    border-left-color: #555 !important;
+    background-color: #1a1a1a !important;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .preserved-table {
+    font-size: 14px !important;
+  }
+  
+  .preserved-table th,
+  .preserved-table td {
+    padding: 6px 8px !important;
+  }
+  
+  .preserved-code {
+    font-size: 12px !important;
+    padding: 8px !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .preserved-table {
+    border-collapse: collapse !important;
+  }
+  
+  .preserved-table th,
+  .preserved-table td {
+    border: 1px solid #000 !important;
+  }
+  
+  .preserved-code {
+    background-color: #f0f0f0 !important;
+    border: 1px solid #000 !important;
+  }
+}
+
+/* Accessibility Improvements */
+.preserved-table[role="table"] {
+  /* Ensure proper table semantics */
+}
+
+.preserved-code[role="code"] {
+  /* Ensure proper code semantics */
+}
+
+/* Focus styles for preserved elements */
+.preserved-table:focus,
+.preserved-code:focus,
+.preserved-block:focus {
+  outline: 2px solid #007bff !important;
+  outline-offset: 2px !important;
+}
+
+/* Animation for preserved elements */
+.preserved-table,
+.preserved-code,
+.preserved-block {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover effects */
+.preserved-table:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* General Text Contrast Rules for Pasted Content */
+.prose [data-source-app] {
+  color: #374151 !important; /* Ensure dark text for all pasted content */
+}
+
+.prose [data-source-app] h1,
+.prose [data-source-app] h2,
+.prose [data-source-app] h3,
+.prose [data-source-app] h4,
+.prose [data-source-app] h5,
+.prose [data-source-app] h6 {
+  color: #111827 !important; /* Darker text for headings */
+  font-weight: 600 !important;
+}
+
+.prose [data-source-app] p,
+.prose [data-source-app] li,
+.prose [data-source-app] span,
+.prose [data-source-app] div {
+  color: #374151 !important; /* Dark text for body content */
+}
+
+.prose [data-source-app] strong,
+.prose [data-source-app] b {
+  color: #111827 !important; /* Darker text for bold content */
+  font-weight: 600 !important;
+}
+
+.prose [data-source-app] em,
+.prose [data-source-app] i {
+  color: #374151 !important; /* Dark text for italic content */
+  font-style: italic !important;
+}
+
+.prose [data-source-app] a {
+  color: #2563eb !important; /* Blue links */
+  text-decoration: underline !important;
+}
+
+.prose [data-source-app] a:hover {
+  color: #1d4ed8 !important; /* Darker blue on hover */
+}
+
+/* Override any white text that might be pasted */
+.prose [data-source-app] * {
+  color: inherit !important;
+}
+
+.prose [data-source-app] *:not([style*="color"]) {
+  color: #374151 !important; /* Default dark text */
+}
+
+.preserved-block:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}

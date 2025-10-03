@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await connectToDatabase();
+    await connectDB();
 
     // Update each project's order in a transaction
     const session = await Project.startSession();
@@ -36,7 +36,6 @@ export async function POST(request: Request) {
       message: 'Projects reordered successfully'
     });
   } catch (error) {
-    console.error('Error reordering projects:', error);
     return NextResponse.json(
       { error: 'Failed to reorder projects' },
       { status: 500 }

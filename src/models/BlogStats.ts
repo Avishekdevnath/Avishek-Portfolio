@@ -5,6 +5,7 @@ interface IView {
   ip?: string;
   userAgent?: string;
   referer?: string;
+  sessionId?: string;
 }
 
 interface ILike {
@@ -54,6 +55,7 @@ const blogStatsSchema = new mongoose.Schema({
     ip: String,
     userAgent: String,
     referer: String,
+    sessionId: String,
   }],
   likes: [{
     timestamp: { type: Date, default: Date.now },

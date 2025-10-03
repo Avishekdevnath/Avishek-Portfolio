@@ -439,7 +439,7 @@ export default function ExperiencePage() {
 
       setExperiences(result.data?.experiences as IWorkExperience[] || []);
     } catch (err) {
-      console.error('Error fetching work experiences:', err);
+      // Error fetching work experiences
       setError(err instanceof Error ? err.message : 'Failed to fetch experiences');
     } finally {
       setLoading(false);
@@ -469,7 +469,7 @@ export default function ExperiencePage() {
       // Remove the deleted experience from state
       setExperiences(prev => prev.filter(exp => exp._id !== id));
     } catch (err) {
-      console.error('Error deleting experience:', err);
+      // Error deleting experience
       alert(err instanceof Error ? err.message : 'Failed to delete experience');
     }
   };

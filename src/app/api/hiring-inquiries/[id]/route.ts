@@ -37,7 +37,6 @@ export async function PATCH(
       data: inquiry
     });
   } catch (error) {
-    console.error('Error updating hiring inquiry:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update inquiry' },
       { status: 500 }
@@ -66,7 +65,6 @@ export async function DELETE(
       message: 'Inquiry deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting hiring inquiry:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete inquiry' },
       { status: 500 }

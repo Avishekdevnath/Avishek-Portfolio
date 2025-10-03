@@ -1,33 +1,58 @@
 import { NextRequest } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 import Blog from '@/models/Blog';
+import BlogStats from '@/models/BlogStats';
 
 export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
       return sendError('Blog not found', 404);
     }
 
-    // Get today's date at midnight
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Get client information
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ipAddress = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const referer = request.headers.get('referer') || '';
+    
+    // Get session identifier from request body if available
+    const body = await request.json().catch(() => ({}));
+    const sessionId = body.sessionId || 'anonymous';
 
-    // Update the blog post's views
-    const updatedBlog = await Blog.findByIdAndUpdate(blog._id, {
-      $inc: { 'stats.views.total': 1 },
-      $push: {
-        'stats.views.history': {
-          date: today,
-          count: 1
-        }
-      }
-    }, { new: true });
+    // Find or create blog stats
+    let blogStats = await BlogStats.findOne({ blog: blog._id });
+    if (!blogStats) {
+      blogStats = await BlogStats.create({ blog: blog._id });
+    }
 
-    return sendSuccess({ views: updatedBlog?.stats?.views?.total || 0 });
+    // Check for duplicate views within the last 30 minutes from same IP + UserAgent combination
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const recentView = blogStats.views.find((view: any) => 
+      view.ip === ipAddress && 
+      view.userAgent === userAgent && 
+      new Date(view.timestamp) > thirtyMinutesAgo
+    );
+
+    // If no recent view from this IP/UserAgent combination, add the view
+    if (!recentView) {
+      blogStats.views.push({
+        timestamp: new Date(),
+        ip: ipAddress,
+        userAgent,
+        referer,
+        sessionId
+      });
+      await blogStats.save();
+    }
+
+    return sendSuccess({ 
+      views: blogStats.views.length,
+      uniqueViews: new Set(blogStats.views.map((v: any) => v.ip)).size
+    });
   } catch (error) {
     return handleApiError(error);
   }

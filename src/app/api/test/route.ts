@@ -69,7 +69,6 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Test API Error:', error);
     return sendError(error instanceof Error ? error.message : 'Test failed', 500);
   }
 } 

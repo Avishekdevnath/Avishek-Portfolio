@@ -33,7 +33,7 @@ export function sendError(error: string, status: number = 400) {
 }
 
 export function handleApiError(error: unknown) {
-  console.error('API Error:', error);
+  // API Error
 
   if (error instanceof Error) {
     // Handle Mongoose validation errors

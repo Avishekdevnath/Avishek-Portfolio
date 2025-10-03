@@ -93,27 +93,21 @@ const sampleEducationData = [
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🌱 Starting education seeding...');
     await connectToDatabase();
-    console.log('📡 Database connected');
     
     // Check existing education count
     const existingCount = await Education.countDocuments();
-    console.log('📊 Existing education entries:', existingCount);
     
     // Clear existing education data
     if (existingCount > 0) {
       await Education.deleteMany({});
-      console.log('🗑️ Cleared existing education data');
     }
     
     // Insert sample data
     const result = await Education.insertMany(sampleEducationData);
-    console.log(`✅ Successfully seeded ${result.length} education entries`);
     
     // Verify insertion
     const newCount = await Education.countDocuments();
-    console.log('📈 New education count:', newCount);
     
     return sendSuccess({
       message: `Successfully seeded ${result.length} education entries`,
@@ -126,7 +120,6 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('💥 Error seeding education data:', error);
     return sendError(error instanceof Error ? error.message : 'Seeding failed', 500);
   }
 }
@@ -145,7 +138,6 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Error checking education data:', error);
     return sendError(error instanceof Error ? error.message : 'Check failed', 500);
   }
 } 

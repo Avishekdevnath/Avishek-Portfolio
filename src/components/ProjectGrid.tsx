@@ -106,7 +106,7 @@ export default function ProjectGrid({
       onProjectsChange?.();
       router.refresh();
     } catch (error) {
-      console.error('Error deleting project:', error);
+      // Error deleting project
       toast.error(error instanceof Error ? error.message : 'Failed to delete project');
     } finally {
       setIsLoading(false);
@@ -134,7 +134,7 @@ export default function ProjectGrid({
       onProjectsChange?.();
       router.refresh();
     } catch (error) {
-      console.error('Error updating project:', error);
+      // Error updating project
       toast.error(error instanceof Error ? error.message : 'Failed to update project');
     } finally {
       setIsLoading(false);
@@ -161,7 +161,7 @@ export default function ProjectGrid({
       onProjectsChange?.();
       router.refresh();
     } catch (error) {
-      console.error('Error updating project:', error);
+      // Error updating project
       toast.error(error instanceof Error ? error.message : 'Failed to update project status');
     } finally {
       setIsLoading(false);

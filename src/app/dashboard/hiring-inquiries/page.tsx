@@ -73,7 +73,7 @@ export default function HiringInquiriesPage() {
       setInquiries(data.data.inquiries);
       setStats(data.data.stats);
     } catch (err) {
-      console.error('Error fetching inquiries:', err);
+      // Error fetching inquiries
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
@@ -101,7 +101,7 @@ export default function HiringInquiriesPage() {
       // Refresh stats
       fetchInquiries();
     } catch (err) {
-      console.error('Error updating status:', err);
+      // Error updating status
     }
   };
 

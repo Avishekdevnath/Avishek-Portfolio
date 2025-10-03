@@ -23,7 +23,7 @@ export default function DashboardHeader({ onMenuToggle, isOpen }: HeaderProps) {
           setUsername(data.data.fullName);
         }
       } catch (error) {
-        console.error('Failed to fetch user info:', error);
+        // Failed to fetch user info
       }
     };
     fetchUserInfo();
@@ -42,12 +42,12 @@ export default function DashboardHeader({ onMenuToggle, isOpen }: HeaderProps) {
       if (response.ok) {
         router.push('/login');
       } else {
-        console.error('Logout failed');
+        // Logout failed
         // Still redirect to login even if API fails
         router.push('/login');
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      // Logout error
       // Still redirect to login even if API fails
       router.push('/login');
     } finally {

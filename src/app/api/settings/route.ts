@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Settings, { ISettings } from '@/models/Settings';
 
 export async function GET() {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     // For now, we'll just get the first user's settings
     // In a real app, you'd get the current user's ID from the session
@@ -22,7 +22,6 @@ export async function GET() {
       data: settings
     });
   } catch (error) {
-    console.error('Failed to fetch settings:', error);
     return NextResponse.json({
       success: false,
       message: 'Failed to fetch settings'
@@ -32,7 +31,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const body = await request.json();
     
@@ -65,7 +64,6 @@ export async function POST(request: Request) {
       data: updatedSettings
     });
   } catch (error) {
-    console.error('Failed to update settings:', error);
     return NextResponse.json({
       success: false,
       message: 'Failed to update settings'

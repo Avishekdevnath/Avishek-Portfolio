@@ -14,9 +14,28 @@ export default function ViewCounter({ slug, initialViews }: ViewCounterProps) {
   useEffect(() => {
     const incrementViews = async () => {
       try {
+        // Check if this view has already been counted in this session
+        const sessionKey = `blog_view_${slug}`;
+        const hasViewed = sessionStorage.getItem(sessionKey);
+        
+        if (hasViewed) {
+          // View already counted in this session, don't increment
+          return;
+        }
+
         setIsLoading(true);
+        
+        // Generate a unique session ID for this browser session
+        const sessionId = sessionStorage.getItem('session_id') || 
+          `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        sessionStorage.setItem('session_id', sessionId);
+        
         const response = await fetch(`/api/blogs/${slug}/views`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionId }),
         });
         
         if (!response.ok) {
@@ -26,15 +45,17 @@ export default function ViewCounter({ slug, initialViews }: ViewCounterProps) {
         const data = await response.json();
         if (data.success) {
           setViews(data.data.views);
+          // Mark as viewed in this session
+          sessionStorage.setItem(sessionKey, 'true');
         }
       } catch (error) {
-        console.error('Error incrementing views:', error);
+        // Error incrementing views
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Only increment views when the component mounts
+    // Only increment views when the component mounts and not already viewed in session
     incrementViews();
   }, [slug]);
 

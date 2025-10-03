@@ -152,29 +152,17 @@ const educationData = [
 
 async function seedExperience() {
   try {
-    console.log('🔌 Connecting to database...');
     await connectToDatabase();
     
-    console.log('🗑️ Clearing existing experience data...');
     await WorkExperience.deleteMany({});
     await Education.deleteMany({});
     
-    console.log('💼 Seeding work experience data...');
     const workResults = await WorkExperience.insertMany(workExperienceData);
-    console.log(`✅ Created ${workResults.length} work experience entries`);
     
-    console.log('🎓 Seeding education data...');
     const educationResults = await Education.insertMany(educationData);
-    console.log(`✅ Created ${educationResults.length} education entries`);
     
-    console.log('🎉 Experience data seeded successfully!');
     
     // Display summary
-    console.log('\n📊 Summary:');
-    console.log(`Work Experience: ${workResults.length} entries`);
-    console.log(`Education: ${educationResults.length} entries`);
-    console.log(`Featured Work: ${workResults.filter(w => w.featured).length}`);
-    console.log(`Featured Education: ${educationResults.filter(e => e.featured).length}`);
     
   } catch (error) {
     console.error('❌ Error seeding experience data:', error);
@@ -186,7 +174,6 @@ async function seedExperience() {
 if (require.main === module) {
   seedExperience()
     .then(() => {
-      console.log('✨ Seeding completed successfully!');
       process.exit(0);
     })
     .catch((error) => {

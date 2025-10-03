@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, X, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, X, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface ThesisData {
@@ -140,7 +140,7 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
   const [error, setError] = useState('');
 
   // Convert DraftContent to string if needed
-  const getInitialDescription = (desc: string | undefined): string => {
+  const getInitialDescription = (desc: string | undefined): any => {
     if (!desc) return EMPTY_CONTENT;
     if (typeof desc === 'string') {
       try {
@@ -216,13 +216,6 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
     }
   };
 
-  const handleDescriptionChange = (value: string) => {
-    setFormData(prev => ({ ...prev, description: value }));
-  };
-
-  const handleThesisDescriptionChange = (value: string) => {
-    setFormData(prev => ({ ...prev, thesisDescription: value }));
-  };
 
   const handleArrayChange = (field: keyof Pick<FormData, 'activities' | 'honors' | 'coursework'>) => (values: string[]) => {
     setFormData(prev => ({ ...prev, [field]: values }));
@@ -264,36 +257,16 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
         throw new Error(data.error || 'Failed to save education');
       }
 
+      toast.success(mode === 'create' ? 'Education added successfully!' : 'Education updated successfully!');
       onClose();
     } catch (error) {
-      console.error('Error saving education:', error);
+      // Error saving education
       setError(error instanceof Error ? error.message : 'Failed to save education');
     } finally {
       setLoading(false);
     }
   };
 
-  // Media upload handler for Quill editor
-  const handleEditorMediaUpload = async (file: File): Promise<string> => {
-    try {
-      const isImage = file.type.startsWith('image/');
-      const isVideo = file.type.startsWith('video/');
-      if (!isImage && !isVideo) throw new Error('Unsupported file type');
-      const maxSize = isImage ? 5 * 1024 * 1024 : 100 * 1024 * 1024;
-      if (file.size > maxSize) throw new Error(`File size must be less than ${isImage ? '5MB' : '100MB'}`);
-      const form = new FormData();
-      form.append(isImage ? 'image' : 'video', file);
-      const endpoint = isImage ? '/api/blogs/upload-image' : '/api/blogs/upload-video';
-      const res = await fetch(endpoint, { method: 'POST', body: form });
-      const data = await res.json();
-      if (data.success) return data.url as string;
-      throw new Error(data.error || 'Failed to upload');
-    } catch (err) {
-      console.error('Media upload error', err);
-      toast.error(err instanceof Error ? err.message : 'Upload failed');
-      throw err; // Re-throw the error instead of returning null
-    }
-  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto py-6">
@@ -520,7 +493,7 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
           Description
         </label>
         <textarea
-          value={formData.description || ''}
+          value={typeof formData.description === 'string' ? formData.description : JSON.stringify(formData.description)}
           onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
           className="min-h-[100px] w-full border rounded-md p-2"
           placeholder="Describe your education..."
@@ -570,7 +543,7 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
                 Thesis Description
               </label>
               <textarea
-                value={formData.thesisDescription || ''}
+                value={typeof formData.thesisDescription === 'string' ? formData.thesisDescription : JSON.stringify(formData.thesisDescription)}
                 onChange={e => setFormData(prev => ({ ...prev, thesisDescription: e.target.value }))}
                 className="min-h-[100px] w-full border rounded-md p-2"
                 placeholder="Describe your thesis..."

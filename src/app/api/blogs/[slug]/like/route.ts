@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 import Blog from '@/models/Blog';
 import BlogStats from '@/models/BlogStats';
@@ -12,7 +12,7 @@ interface Like {
 
 export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const { slug } = params;
 
@@ -68,7 +68,6 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
     });
 
   } catch (error) {
-    console.error('Error handling blog like:', error);
     return NextResponse.json(
       { error: 'Failed to process like' },
       { status: 500 }
@@ -79,22 +78,30 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
 // Get like status for a user
 export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
-    const email = request.nextUrl.searchParams.get('email');
-    if (!email) {
-      return sendError('Email is required', 400);
-    }
+    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
 
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
       return sendError('Blog not found', 404);
     }
 
-    const isLiked = blog.stats.likes.users.includes(email);
+    // Find blog stats
+    const blogStats = await BlogStats.findOne({ blog: blog._id });
+    if (!blogStats) {
+      return sendSuccess({
+        likes: 0,
+        isLiked: false,
+      });
+    }
+
+    const isLiked = blogStats.likes.some((like: Like) => like.ip === ipAddress);
 
     return sendSuccess({
-      likes: blog.stats.likes.total,
+      likes: blogStats.likes.length,
       isLiked,
     });
   } catch (error) {

@@ -47,7 +47,7 @@ export default function CommentSection({ slug }: CommentSectionProps) {
         throw new Error(data.error || 'Failed to load comments');
       }
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      // Error fetching comments
       setError('Failed to load comments. Please try refreshing the page.');
     } finally {
       setLoading(false);
@@ -93,7 +93,7 @@ export default function CommentSection({ slug }: CommentSectionProps) {
         throw new Error(data.error || 'Failed to post comment');
       }
     } catch (error) {
-      console.error('Error posting comment:', error);
+      // Error posting comment
       setError(error instanceof Error ? error.message : 'Failed to post comment');
     } finally {
       setSubmitting(false);

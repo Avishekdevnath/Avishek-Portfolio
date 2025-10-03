@@ -91,11 +91,10 @@ if (process.env.NODE_ENV !== 'development') {
     try {
       if (cached.conn) {
         await cached.conn.connection.close();
-        console.log('MongoDB connection closed through app termination');
       }
       process.exit(0);
     } catch (err) {
-      console.error('Error during MongoDB disconnection:', err);
+      // Error during MongoDB disconnection
       process.exit(1);
     }
   });

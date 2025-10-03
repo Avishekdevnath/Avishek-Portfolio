@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import mongoose from 'mongoose';
+import { connectDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { BaseQuery, SortConfig, PaginationOptions } from '@/types/api';
 import { Project as ProjectType } from '@/types/dashboard';
@@ -7,7 +8,7 @@ import { Project as ProjectType } from '@/types/dashboard';
 // GET /api/projects - Get all projects with filters and pagination
 export async function GET(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
@@ -62,7 +63,6 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error fetching projects:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch projects'
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 // POST /api/projects - Create a new project
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const body = await request.json();
 
@@ -86,7 +86,6 @@ export async function POST(request: NextRequest) {
       data: project
     });
   } catch (error) {
-    console.error('Error creating project:', error);
     if (error instanceof Error && 'errors' in error) {
       const validationErrors = Object.values(error.errors as Record<string, { message: string }>)
         .map(err => err.message);
@@ -105,7 +104,7 @@ export async function POST(request: NextRequest) {
 // PATCH /api/projects/bulk - Update multiple projects (e.g., for reordering)
 export async function PATCH(request: Request) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const body = await request.json();
     const { projects } = body;
@@ -146,7 +145,6 @@ export async function PATCH(request: Request) {
       message: 'Projects updated successfully'
     });
   } catch (error) {
-    console.error('Error updating projects:', error);
 
     // Handle validation errors
     if (error instanceof mongoose.Error.ValidationError) {

@@ -5,7 +5,6 @@ import Project from '@/models/Project';
 export async function GET() {
   try {
     await connectDB();
-    console.log('MongoDB connected successfully');
 
     // Wrap all database operations in a try-catch for better error logging
     try {
@@ -71,13 +70,6 @@ export async function GET() {
         ])
       ]);
 
-      console.log('Stats retrieved successfully:', {
-        total: totalProjects,
-        published: publishedProjects,
-        draft: draftProjects,
-        featured: featuredProjects
-      });
-
       return NextResponse.json({
         success: true,
         overview: {
@@ -86,22 +78,21 @@ export async function GET() {
           draft: draftProjects,
           featured: featuredProjects
         },
-        categoryDistribution: projectsByCategory.reduce((acc, cat) => {
+        categoryDistribution: projectsByCategory.reduce((acc: Record<string, number>, cat: any) => {
           acc[cat._id] = cat.count;
           return acc;
         }, {}),
         recentProjects,
-        topTechnologies: techStats.reduce((acc, tech) => {
+        topTechnologies: techStats.reduce((acc: Record<string, number>, tech: any) => {
           acc[tech._id] = tech.count;
           return acc;
         }, {}),
-        statusDistribution: statusDistribution.reduce((acc, status) => {
+        statusDistribution: statusDistribution.reduce((acc: Record<string, number>, status: any) => {
           acc[status._id] = status.count;
           return acc;
         }, {})
       });
     } catch (dbError) {
-      console.error('Database operation failed:', dbError);
       return NextResponse.json(
         { 
           success: false,
@@ -112,7 +103,6 @@ export async function GET() {
       );
     }
   } catch (error) {
-    console.error('Error in stats endpoint:', error);
     return NextResponse.json(
       { 
         success: false,

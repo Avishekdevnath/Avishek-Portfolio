@@ -59,7 +59,7 @@ export default function LikeButton({ slug, initialLikes }: LikeButtonProps) {
       likedPosts[slug] = true;
       localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
     } catch (error) {
-      console.error('Error liking post:', error);
+      // Error liking post
       setError(error instanceof Error ? error.message : 'Failed to like');
     } finally {
       setIsLoading(false);

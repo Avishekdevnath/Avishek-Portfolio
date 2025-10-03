@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { WorkExperience } from '@/models/Experience';
 import { IWorkExperience, ExperienceListApiResponse } from '@/types/experience';
 import { FlattenMaps } from 'mongoose';
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/experience/work - Get all work experiences
 export async function GET(request: NextRequest): Promise<Response> {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status') || 'all'; // Default to 'all' to show both draft and published
@@ -81,7 +81,6 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching work experiences:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch work experiences'
@@ -92,7 +91,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 // POST /api/experience/work - Create a new work experience
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const body = await request.json();
     
@@ -160,7 +159,6 @@ export async function POST(request: NextRequest): Promise<Response> {
       message: 'Work experience created successfully'
     });
   } catch (error) {
-    console.error('Error creating work experience:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create work experience'

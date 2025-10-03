@@ -43,7 +43,7 @@ export async function POST(
     });
 
     if (!emailResult.success) {
-      console.error('Failed to send email:', emailResult.error);
+      // Email sending failed, but continue
     }
 
     return NextResponse.json({
@@ -51,7 +51,6 @@ export async function POST(
       data: message,
     });
   } catch (error) {
-    console.error('Error sending reply:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to send reply' },
       { status: 500 }

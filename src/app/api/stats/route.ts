@@ -62,7 +62,7 @@ export async function GET(request: Request) {
         Skill.countDocuments({}).catch(() => 0)
       ]);
     } catch (countError) {
-      console.warn('Error counting documents, using defaults:', countError);
+      // Using defaults due to count error
     }
 
     // Update stats with real data
@@ -87,7 +87,6 @@ export async function GET(request: Request) {
     });
 
   } catch (error) {
-    console.error('Error fetching portfolio stats:', error);
     return NextResponse.json(
       { 
         success: false,
@@ -167,7 +166,6 @@ export async function PUT(request: NextRequest) {
       message: 'Stats updated successfully'
     });
   } catch (error) {
-    console.error('Error updating stats:', error);
     return NextResponse.json(
       { 
         success: false, 

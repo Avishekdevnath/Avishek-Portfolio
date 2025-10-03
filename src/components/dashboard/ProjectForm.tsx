@@ -197,7 +197,7 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
 
       toast.success('Image uploaded successfully');
     } catch (error) {
-      console.error('Upload error:', error);
+      // Upload error
       toast.error(error instanceof Error ? error.message : 'Failed to upload image');
       // Reset preview and file
       setImagePreview(formData.image || '');
@@ -250,7 +250,7 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
 
       toast.success(`${files.length} image(s) uploaded successfully`);
     } catch (error) {
-      console.error('Upload error:', error);
+      // Upload error
       toast.error(error instanceof Error ? error.message : 'Failed to upload images');
     } finally {
       setIsLoading(false);
@@ -295,7 +295,7 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
       if (data.success) return data.url as string;
       throw new Error(data.error || 'Failed to upload');
     } catch (err) {
-      console.error('Media upload error', err);
+      // Media upload error
       toast.error(err instanceof Error ? err.message : 'Upload failed');
       throw err; // Re-throw the error instead of returning null
     }
@@ -369,7 +369,7 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
       router.refresh();
 
     } catch (error) {
-      console.error('Submit error:', error);
+      // Submit error
       toast.error(error instanceof Error ? error.message : 'Failed to save project');
     } finally {
       setIsLoading(false);
@@ -400,7 +400,7 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
 
       toast.success('Image removed successfully');
     } catch (error) {
-      console.error('Delete error:', error);
+      // Delete error
       toast.error(error instanceof Error ? error.message : 'Failed to delete image');
     } finally {
       setIsLoading(false);

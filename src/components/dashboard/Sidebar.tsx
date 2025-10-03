@@ -105,7 +105,7 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
           setFullName(data.data.fullName);
         }
       } catch (error) {
-        console.error('Failed to fetch settings:', error);
+        // Failed to fetch settings
       }
     };
     fetchSettings();

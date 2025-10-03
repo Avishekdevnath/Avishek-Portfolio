@@ -44,7 +44,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, url: uploadResult.secure_url, public_id: uploadResult.public_id });
   } catch (error) {
-    console.error('Video upload error:', error);
     return NextResponse.json({ success: false, error: error instanceof Error ? error.message : 'Failed to upload video' }, { status: 500 });
   }
 } 

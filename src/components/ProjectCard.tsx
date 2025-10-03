@@ -45,7 +45,7 @@ const formatDate = (date: string | Date): string => {
     // If it's a string, try to create a Date object
     return dateFormatter.format(new Date(date));
   } catch (error) {
-    console.error('Error formatting date:', error);
+    // Error formatting date
     return 'Invalid Date';
   }
 };

@@ -37,7 +37,6 @@ export async function POST(request: Request) {
       data: message,
     });
   } catch (error) {
-    console.error('Error handling email reply:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to process email reply' },
       { status: 500 }

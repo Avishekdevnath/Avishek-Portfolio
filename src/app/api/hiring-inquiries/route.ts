@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching hiring inquiries:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch inquiries' }, { status: 500 });
   }
 }
@@ -84,7 +83,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error) {
-    console.error('Error creating hiring inquiry:', error);
     return NextResponse.json({ success: false, error: 'Failed to create inquiry' }, { status: 500 });
   }
 }

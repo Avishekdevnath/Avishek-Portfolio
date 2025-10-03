@@ -3,7 +3,6 @@ import connectDB from '@/lib/mongodb';
 
 export async function GET() {
   try {
-    console.log('MongoDB URI:', process.env.MONGODB_URI);
     // Test database connection
     await connectDB();
     
@@ -16,7 +15,6 @@ export async function GET() {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Health check failed:', error);
     return NextResponse.json(
       { 
         status: 'unhealthy',

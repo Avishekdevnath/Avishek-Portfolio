@@ -36,8 +36,8 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
-import { uploadImage } from '@/lib/cloudinary';
 import { ChangeEvent } from 'react';
+import { usePasteHandler } from '@/lib/paste-handlers';
 
 interface RichTextEditorProps {
   value: string;
@@ -105,6 +105,8 @@ export default function RichTextEditor({
   onLineSpacingChange,
 }: RichTextEditorProps) {
   const [lineSpacing, setLineSpacing] = useState(externalLineSpacing || '10');
+  const [pasteWarnings, setPasteWarnings] = useState<string[]>([]);
+  const { handlePasteEvent } = usePasteHandler();
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -131,21 +133,47 @@ export default function RichTextEditor({
         class: clsx(
           'prose prose-sm sm:prose lg:prose-lg focus:outline-none',
           'prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm prose-h1:my-1 prose-h2:my-1 prose-h3:my-1 prose-h4:my-0 prose-headings:leading-tight',
-          'prose-p:text-gray-700 prose-p:text-sm prose-p:my-0',
+          'prose-p:text-gray-700 prose-p:text-sm',
           'prose-img:rounded-lg prose-img:shadow-sm prose-img:my-1',
           'prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:bg-gray-50 prose-blockquote:p-2 prose-blockquote:my-1 prose-blockquote:text-xs',
-          'prose-ul:my-0 prose-ol:my-0',
-          'prose-li:my-0 prose-li:text-sm list-inside',
-          'prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[11px]',
+          'prose-ul prose-ol',
+          'prose-li:text-sm list-inside',
+          'prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[11px] prose-code:text-gray-800',
           'prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-1.5 prose-pre:rounded-lg prose-pre:my-1 prose-pre:text-[11px]',
           'prose-strong:text-gray-900 prose-strong:font-semibold',
           'prose-em:text-gray-700',
           'prose-hr:border-gray-200 prose-hr:my-1',
+          // Ensure proper text contrast for all content
+          'prose-headings:text-gray-900 prose-headings:font-bold',
+          'prose-p:text-gray-700 prose-p:font-normal',
+          'prose-li:text-gray-700 prose-li:font-normal',
+          'prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline',
+          'prose-table:text-gray-800 prose-table:border-gray-300',
+          'prose-th:text-gray-900 prose-th:font-semibold prose-th:bg-gray-50',
+          'prose-td:text-gray-800 prose-td:border-gray-300',
           `line-spacing-${lineSpacing}`,
           className
         ),
         style: `min-height:${minHeight}`,
         placeholder,
+      },
+      handlePaste: (_, event) => {
+        if (event.clipboardData && editor) {
+          handlePasteEvent(event, editor).then(result => {
+            if (result.success) {
+              setPasteWarnings(result.warnings);
+              // Clear warnings after 5 seconds
+              setTimeout(() => setPasteWarnings([]), 5000);
+            } else {
+              setPasteWarnings(result.warnings);
+            }
+          }).catch(error => {
+            // Paste handling error
+            setPasteWarnings(['Paste failed - using default behavior']);
+          });
+          return true; // Prevent default paste behavior
+        }
+        return false; // Allow default paste behavior
       },
     },
   });
@@ -171,7 +199,7 @@ export default function RichTextEditor({
       editor.chain().focus().setImage({ src: data.url }).run();
       e.target.value = '';
     } catch (error) {
-      console.error('Image upload error:', error);
+      // Image upload error
       alert('Failed to upload image. Please try again.');
     }
   };
@@ -185,6 +213,18 @@ export default function RichTextEditor({
 
   return (
     <div className="rich-text-editor flex flex-col">
+      {/* Paste Warnings */}
+      {pasteWarnings.length > 0 && (
+        <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+          <div className="font-medium">Paste Notice:</div>
+          <ul className="mt-1 list-disc list-inside">
+            {pasteWarnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
       {editor && !readOnly && (
         <div className="toolbar motion-reduce:animate-none">
           <ToolbarButton
@@ -266,7 +306,7 @@ export default function RichTextEditor({
           <select
             className="text-sm border rounded"
             value={editor.getAttributes('textStyle').fontFamily || 'inherit'}
-            onChange={e => editor.chain().focus().setFontFamily(e.target.value).run()}
+            onChange={e => editor.chain().focus().setMark('textStyle', { fontFamily: e.target.value }).run()}
           >
             {FONT_FAMILIES.map(f => (<option key={f} value={f}>{f}</option>))}
           </select>

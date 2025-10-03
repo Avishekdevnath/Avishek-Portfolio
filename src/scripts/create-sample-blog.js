@@ -52,10 +52,6 @@ async function createSampleBlog() {
     });
 
     await sampleBlog.save();
-    console.log('✅ Sample blog post created successfully!');
-    console.log('📝 Title:', sampleBlog.title);
-    console.log('🔗 Slug:', sampleBlog.slug);
-    console.log('🆔 ID:', sampleBlog._id);
     
   } catch (error) {
     console.error('❌ Error creating sample blog:', error);

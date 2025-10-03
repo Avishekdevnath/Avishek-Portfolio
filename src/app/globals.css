@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "../styles/format-preservation.css";
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 255, 255, 255;
@@ -371,19 +373,61 @@ label {
 .prose-compact {
   --tw-prose-headings: inherit;
 }
-.prose-compact :where(p, li){
+
+/* Only apply compact spacing to elements without preservation markers */
+.prose-compact :where(p, li):not([data-preserve-spacing="true"]):not(.preserved-spacing){
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
-.prose-compact :where(h1){ font-size: 1.25rem !important; margin: 0.25rem 0 !important; line-height: 1.1 !important; }
-.prose-compact :where(h2){ font-size: 1.125rem !important; margin: 0.25rem 0 !important; line-height: 1.1 !important; }
-.prose-compact :where(h3){ font-size: 1rem !important; margin: 0.25rem 0 !important; line-height: 1.1 !important; }
-.prose-compact :where(ul,ol){ margin: 0 !important; padding-left: 1.25rem !important; }
-.prose-compact :where(img){ margin: 0.25rem 0 !important; }
-.prose-compact :where(blockquote){ margin: 0.25rem 0 !important; padding: 0.5rem 0.75rem !important; line-height: 1.0 !important; }
-.prose-compact :where(pre){ margin: 0.25rem 0 !important; padding: 0.5rem !important; line-height: 1.0 !important; }
-.prose-compact :where(code){ margin: 0 !important; padding: 0.125rem 0.25rem !important; line-height: 1.0 !important; }
-.prose-compact :where(hr){ margin: 0.5rem 0 !important; }
+
+.prose-compact :where(h1):not([data-preserve-spacing="true"]):not(.preserved-spacing){ 
+  font-size: 1.25rem !important; 
+  margin: 0.25rem 0 !important; 
+  line-height: 1.1 !important; 
+}
+
+.prose-compact :where(h2):not([data-preserve-spacing="true"]):not(.preserved-spacing){ 
+  font-size: 1.125rem !important; 
+  margin: 0.25rem 0 !important; 
+  line-height: 1.1 !important; 
+}
+
+.prose-compact :where(h3):not([data-preserve-spacing="true"]):not(.preserved-spacing){ 
+  font-size: 1rem !important; 
+  margin: 0.25rem 0 !important; 
+  line-height: 1.1 !important; 
+}
+
+.prose-compact :where(ul,ol):not([data-preserve-list="true"]):not(.preserved-list){ 
+  margin: 0 !important; 
+  padding-left: 1.25rem !important; 
+}
+
+.prose-compact :where(img):not([data-preserve-formatting="true"]):not(.preserved-formatting){ 
+  margin: 0.25rem 0 !important; 
+}
+
+.prose-compact :where(blockquote):not([data-preserve-formatting="true"]):not(.preserved-formatting){ 
+  margin: 0.25rem 0 !important; 
+  padding: 0.5rem 0.75rem !important; 
+  line-height: 1.0 !important; 
+}
+
+.prose-compact :where(pre):not([data-preserve-formatting="true"]):not(.preserved-code){ 
+  margin: 0.25rem 0 !important; 
+  padding: 0.5rem !important; 
+  line-height: 1.0 !important; 
+}
+
+.prose-compact :where(code):not([data-preserve-formatting="true"]):not(.preserved-code){ 
+  margin: 0 !important; 
+  padding: 0.125rem 0.25rem !important; 
+  line-height: 1.0 !important; 
+}
+
+.prose-compact :where(hr):not([data-preserve-formatting="true"]):not(.preserved-formatting){ 
+  margin: 0.5rem 0 !important; 
+}
 
 /* Quill Editor Styles */
 .quill-editor-wrapper {

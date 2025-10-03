@@ -185,7 +185,6 @@ async function seedSkills() {
     
     // Clear existing skills
     await Skill.deleteMany({});
-    console.log('Cleared existing skills');
 
     // Add order to each skill within its category
     const skillsByCategory = skillsData.reduce((acc, skill) => {
@@ -208,11 +207,9 @@ async function seedSkills() {
 
     // Insert skills
     await Skill.insertMany(orderedSkills);
-    console.log('Successfully seeded skills data');
 
     // Verify
     const count = await Skill.countDocuments();
-    console.log(`Total skills in database: ${count}`);
 
   } catch (error) {
     console.error('Error seeding skills:', error);

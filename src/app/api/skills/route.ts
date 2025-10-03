@@ -46,7 +46,6 @@ export async function GET(request: NextRequest) {
       data: skillsByCategory
     });
   } catch (error) {
-    console.error('Error in GET /api/skills:', error);
     return NextResponse.json({
       success: false,
       error: 'Failed to fetch skills'
@@ -99,7 +98,6 @@ export async function POST(request: Request) {
       data: skill
     });
   } catch (error) {
-    console.error('Error in POST /api/skills:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create skill'
@@ -135,7 +133,6 @@ export async function PATCH(request: Request) {
       data: updatedSkills,
     });
   } catch (error) {
-    console.error('Error updating skills:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update skills' },
       { status: 500 }

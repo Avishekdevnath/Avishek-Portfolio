@@ -111,7 +111,6 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error fetching messages:', error);
     return NextResponse.json(
       { error: 'Failed to fetch messages' },
       { status: 500 }
@@ -177,7 +176,7 @@ export async function POST(request: NextRequest) {
         message
       });
     } catch (emailError) {
-      console.error('Failed to send email notification:', emailError);
+        // Email notification failed, but continue
       // Don't fail the request if email fails
     }
 
@@ -191,7 +190,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Error creating message:', error);
     return NextResponse.json(
       { error: 'Failed to send message' },
       { status: 500 }
@@ -231,7 +229,6 @@ export async function PUT(
       data: message
     });
   } catch (error) {
-    console.error('Error updating message:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update message' },
       { status: 500 }

@@ -56,7 +56,7 @@ export default function ProjectsPage() {
         }
       }
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      // Error fetching projects
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function ProjectsPage() {
         fetchProjects();
       }
     } catch (error) {
-      console.error('Error deleting project:', error);
+      // Error deleting project
     }
   };
 
@@ -95,7 +95,7 @@ export default function ProjectsPage() {
         fetchProjects();
       }
     } catch (error) {
-      console.error('Error updating project:', error);
+      // Error updating project
     }
   };
 

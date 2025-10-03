@@ -85,7 +85,6 @@ export async function POST(request: Request) {
       try {
         await deleteImage(oldPublicId);
       } catch (error) {
-        console.error('Error deleting old image:', error);
         // Continue with upload even if deletion fails
       }
     }
@@ -109,7 +108,6 @@ export async function POST(request: Request) {
       }
     });
   } catch (error) {
-    console.error('Upload error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to upload file'
@@ -143,7 +141,6 @@ export async function DELETE(request: Request) {
       message: 'Image deleted successfully'
     });
   } catch (error) {
-    console.error('Delete error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete file'

@@ -75,7 +75,7 @@ export default function NotificationsPage() {
       setNotifications(data.data.notifications);
       setStats(data.data.stats);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      // Error fetching notifications
       setError(error instanceof Error ? error.message : 'Failed to fetch notifications');
       
       // Only create sample notifications on initial load if there's an error
@@ -115,7 +115,7 @@ export default function NotificationsPage() {
       // Refresh notifications after creating samples
       setTimeout(fetchNotifications, 1000);
     } catch (error) {
-      console.error('Error creating sample notifications:', error);
+      // Error creating sample notifications
       setNotifications([]);
     }
   };
@@ -196,7 +196,7 @@ export default function NotificationsPage() {
         ));
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      // Error marking notification as read
     }
   };
 
@@ -216,7 +216,7 @@ export default function NotificationsPage() {
         ));
       }
     } catch (error) {
-      console.error('Error marking notification as unread:', error);
+      // Error marking notification as unread
     }
   };
 
@@ -230,7 +230,7 @@ export default function NotificationsPage() {
         setNotifications(prev => prev.filter(notification => notification._id !== id));
       }
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      // Error deleting notification
     }
   };
 
@@ -250,7 +250,7 @@ export default function NotificationsPage() {
         })));
       }
     } catch (error) {
-      console.error('Error marking all as read:', error);
+      // Error marking all as read
     }
   };
 
@@ -282,7 +282,7 @@ export default function NotificationsPage() {
         setSelectedNotifications([]);
       }
     } catch (error) {
-      console.error('Error performing bulk action:', error);
+      // Error performing bulk action
     }
   };
 
@@ -336,7 +336,7 @@ export default function NotificationsPage() {
         fetchNotifications(); // Refresh the list
       }
     } catch (error) {
-      console.error('Error creating test notification:', error);
+      // Error creating test notification
     }
   };
 

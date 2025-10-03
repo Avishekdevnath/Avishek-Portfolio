@@ -106,7 +106,7 @@ export default function Header() {
     //   </div>
     // </header>
     <header
-      className={`${styles.navStyle}   border mx-auto mt-8 sticky top-0 z-50 shadow-md lg:max-w-[70%] md:max-w-[90%] sm:max-w-[95%] ${isOpen ? "rounded-lg" : "rounded-full"}`}
+      className={`${styles.navStyle}   border mx-auto mt-8 z-50 shadow-md lg:max-w-[70%] md:max-w-[90%] sm:max-w-[95%] ${isOpen ? "rounded-lg" : "rounded-full"}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div className="flex justify-between items-center py-4">

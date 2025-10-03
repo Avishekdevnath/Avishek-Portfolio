@@ -31,7 +31,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error fetching notification:', error);
     return NextResponse.json(
       { 
         success: false, 
@@ -80,7 +79,6 @@ export async function PUT(
     });
 
   } catch (error) {
-    console.error('Error updating notification:', error);
     return NextResponse.json(
       { 
         success: false, 
@@ -116,7 +114,6 @@ export async function DELETE(
     });
 
   } catch (error) {
-    console.error('Error deleting notification:', error);
     return NextResponse.json(
       { 
         success: false, 

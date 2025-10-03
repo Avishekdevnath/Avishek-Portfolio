@@ -24,7 +24,7 @@ interface UploadResponse {
 
 interface UploadOptions {
   folder: string;
-  resource_type: string;
+  resource_type: 'auto' | 'image' | 'video' | 'raw';
   allowed_formats: string[];
   transformation: Array<Record<string, string>>;
   file?: string;
@@ -120,7 +120,7 @@ export async function uploadImage(file: string | Buffer, folder: string = 'portf
       height: result.height
     };
   } catch (error) {
-    console.error('Error uploading image to Cloudinary:', error);
+    // Error uploading image to Cloudinary
     throw error;
   }
 }
@@ -148,7 +148,7 @@ export async function deleteImage(publicId: string) {
 
     return result;
   } catch (error) {
-    console.error('Error deleting image from Cloudinary:', error);
+    // Error deleting image from Cloudinary
     throw error;
   }
 }
@@ -173,7 +173,7 @@ export async function generateImageUrl(publicId: string, options: Record<string,
     const finalOptions = { ...defaultOptions, ...options };
     return cloudinary.url(publicId, finalOptions);
   } catch (error) {
-    console.error('Error generating Cloudinary URL:', error);
+    // Error generating Cloudinary URL
     throw error;
   }
 }
@@ -199,7 +199,7 @@ export async function validateImage(file: ImageFile) {
 
     return true;
   } catch (error) {
-    console.error('Error validating image:', error);
+    // Error validating image
     throw error;
   }
 }
@@ -229,7 +229,7 @@ export async function getImageInfo(publicId: string) {
       quality_score: result.quality_analysis?.quality_score
     };
   } catch (error) {
-    console.error('Error getting image info:', error);
+    // Error getting image info
     throw error;
   }
 }
@@ -254,7 +254,7 @@ export async function updateImageTransformations(publicId: string, options: any 
     const finalOptions = { ...defaultOptions, ...options };
     return cloudinary.url(publicId, finalOptions);
   } catch (error) {
-    console.error('Error updating image transformations:', error);
+    // Error updating image transformations
     throw error;
   }
 }
@@ -272,7 +272,7 @@ export async function getImageDimensions(publicId: string) {
       height: result.height
     };
   } catch (error) {
-    console.error('Error getting image dimensions:', error);
+    // Error getting image dimensions
     throw error;
   }
 } 

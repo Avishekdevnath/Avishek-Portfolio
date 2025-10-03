@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { handleApiError, sendError, sendSuccess } from '@/lib/api-utils';
 import Blog from '@/models/Blog';
+import BlogStats from '@/models/BlogStats';
 
 export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const blog = await Blog.findOne({ slug: params.slug });
     if (!blog) {
@@ -14,22 +15,20 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
 
     const { platform } = await request.json();
 
-    // Build dynamic increment object
-    const inc: Record<string, number> = {
-      'stats.shares.total': 1,
-    };
-
-    if (platform && ['facebook', 'twitter', 'linkedin'].includes(platform)) {
-      inc[`stats.shares.platforms.${platform}`] = 1;
+    // Find or create blog stats
+    let blogStats = await BlogStats.findOne({ blog: blog._id });
+    if (!blogStats) {
+      blogStats = await BlogStats.create({ blog: blog._id });
     }
 
-    const updatedBlog = await Blog.findByIdAndUpdate(
-      blog._id,
-      { $inc: inc },
-      { new: true }
-    );
+    // Add the share
+    blogStats.shares.push({ 
+      platform: platform || 'unknown', 
+      timestamp: new Date() 
+    });
+    await blogStats.save();
 
-    return sendSuccess({ shares: updatedBlog?.stats?.shares?.total || 0 });
+    return sendSuccess({ shares: blogStats.shares.length });
   } catch (error) {
     return handleApiError(error);
   }

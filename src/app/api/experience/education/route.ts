@@ -63,7 +63,6 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error fetching education:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch education'
@@ -88,7 +87,6 @@ export async function POST(request: NextRequest) {
       data: education
     });
   } catch (error) {
-    console.error('Error creating education:', error);
     if (error instanceof Error && 'errors' in error) {
       const validationErrors = Object.values(error.errors as Record<string, { message: string }>)
         .map(err => err.message);

@@ -131,7 +131,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
           });
         }
       } catch (error) {
-        console.error('Failed to fetch settings:', error);
+        // Failed to fetch settings
       }
     };
     fetchSettings();
@@ -199,7 +199,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
       if (data.success) return data.url as string;
       throw new Error(data.error || 'Failed to upload');
     } catch (err) {
-      console.error('Media upload error', err);
+      // Media upload error
       toast.error(err instanceof Error ? err.message : 'Upload failed');
       throw err; // Re-throw the error instead of returning null
     }
@@ -216,7 +216,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
       setFormData(prev => ({ ...prev, coverImage: imageUrl }));
       toast.success('Cover image uploaded successfully');
     } catch (error) {
-      console.error('Cover image upload error:', error);
+      // Cover image upload error
       toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
     } finally {
       setLoading(false);
@@ -249,7 +249,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         setFormData(prev => ({ ...prev, coverImage: imageUrl }));
         toast.success('Cover image uploaded successfully');
       } catch (error) {
-        console.error('Cover image upload error:', error);
+        // Cover image upload error
         toast.error(error instanceof Error ? error.message : 'Failed to upload cover image');
       } finally {
         setLoading(false);
@@ -371,7 +371,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         throw new Error(data.error || 'Something went wrong');
       }
     } catch (error) {
-      console.error('Form submission error:', error);
+      // Form submission error
       setError(error instanceof Error ? error.message : 'Failed to save blog post');
       toast.error(error instanceof Error ? error.message : 'Failed to save blog post');
     } finally {

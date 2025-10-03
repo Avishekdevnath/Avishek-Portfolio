@@ -1,7 +1,6 @@
 import { sendContactFormEmail, sendNotificationEmail } from '../lib/email';
 
 async function testEmailFunctionality() {
-  console.log('Testing email functionality...\n');
 
   // Test data
   const testData = {
@@ -13,17 +12,12 @@ async function testEmailFunctionality() {
 
   try {
     // Test contact form email
-    console.log('1. Testing contact form email...');
     const contactFormResult = await sendContactFormEmail(testData);
     
     if (contactFormResult) {
-      console.log('✅ Contact form email sent successfully');
-      console.log(`   Message ID: ${contactFormResult.messageId}`);
     } else {
-      console.log('❌ Contact form email failed');
     }
 
-    console.log('\n2. Testing notification email...');
     const notificationResult = await sendNotificationEmail({
       subject: 'Test Notification',
       message: 'This is a test notification email.',
@@ -31,10 +25,7 @@ async function testEmailFunctionality() {
     });
 
     if (notificationResult) {
-      console.log('✅ Notification email sent successfully');
-      console.log(`   Message ID: ${notificationResult.messageId}`);
     } else {
-      console.log('❌ Notification email failed');
     }
 
   } catch (error) {
@@ -46,7 +37,6 @@ async function testEmailFunctionality() {
 if (require.main === module) {
   testEmailFunctionality()
     .then(() => {
-      console.log('\n🎉 Email test completed!');
       process.exit(0);
     })
     .catch((error) => {

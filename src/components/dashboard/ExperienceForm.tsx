@@ -15,7 +15,7 @@ import {
 } from '@/types/experience';
 
 interface ExperienceFormProps {
-  initialData?: Partial<ExperienceFormData>;
+  initialData?: Partial<ExperienceFormData> & { _id?: string };
   type: ExperienceType;
   mode: 'create' | 'edit';
   onClose: () => void;
@@ -238,7 +238,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
       if (data.success) return data.url as string;
       throw new Error(data.error || 'Failed to upload');
     } catch (err) {
-      console.error('Media upload error', err);
+      // Media upload error
       toast.error(err instanceof Error ? err.message : 'Upload failed');
       throw err; // Re-throw the error instead of returning null
     }
@@ -327,7 +327,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
         onClose();
       }, 1500);
     } catch (err) {
-      console.error('Error saving experience:', err);
+      // Error saving experience
       setError(err instanceof Error ? err.message : 'Failed to save experience');
     } finally {
       setLoading(false);
@@ -585,7 +585,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
                 Description
               </label>
               <textarea
-                value={formData.description || ''}
+                value={typeof formData.description === 'string' ? formData.description : ''}
                 onChange={e => handleDescriptionChange(e.target.value)}
                 className="min-h-[100px] w-full border rounded-md p-2"
                 placeholder={

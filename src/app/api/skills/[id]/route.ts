@@ -33,7 +33,6 @@ export async function GET(
       data: skill,
     });
   } catch (error) {
-    console.error('Error fetching skill:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch skill' },
       { status: 500 }
@@ -124,7 +123,6 @@ export async function PATCH(
       data: skill,
     });
   } catch (error) {
-    console.error('Error updating skill:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update skill' },
       { status: 500 }
@@ -163,7 +161,6 @@ export async function DELETE(
       data: skill,
     });
   } catch (error) {
-    console.error('Error deleting skill:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete skill' },
       { status: 500 }

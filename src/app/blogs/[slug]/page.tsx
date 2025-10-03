@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 export const revalidate = 0;
 import { notFound } from 'next/navigation';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
 import BlogStats from '@/models/BlogStats';
 import CommentSection from '@/components/CommentSection';
@@ -13,7 +13,6 @@ import ShareButtons from '@/components/ShareButtons';
 import { FaClock, FaEye, FaComment, FaHeart, FaTwitter, FaLinkedin, FaGithub, FaGlobe } from 'react-icons/fa';
 import RichTextViewer from '@/components/shared/RichTextViewer';
 import Comment from '@/models/Comment';
-import { ArrowLeft } from 'lucide-react';
 
 interface BlogPostPageProps {
   params: {
@@ -23,7 +22,7 @@ interface BlogPostPageProps {
 
 // Generate metadata for the page
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  await connectToDatabase();
+  await connectDB();
   const blog = await Blog.findOne({ slug: params.slug });
 
   if (!blog) {
@@ -64,16 +63,27 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  await connectToDatabase();
+  await connectDB();
   const blog: any = await Blog.findOne({ slug: params.slug });
 
   if (!blog) {
     notFound();
   }
 
-  // Fetch likes count from BlogStats collection
+  // Fetch related blogs based on category and tags
+  const relatedBlogs = await Blog.find({
+    _id: { $ne: blog._id },
+    $or: [
+      { category: blog.category },
+      { tags: { $in: blog.tags } }
+    ],
+    status: 'published'
+  }).limit(3).sort({ createdAt: -1 });
+
+  // Fetch stats from BlogStats collection
   const blogStatsDoc = await BlogStats.findOne({ blog: blog._id });
   const likesTotal = blogStatsDoc ? blogStatsDoc.likes.length : blog.stats?.likes?.total || 0;
+  const viewsTotal = blogStatsDoc ? blogStatsDoc.views.length : blog.stats?.views?.total || 0;
 
   // Fetch comments count from Comment collection
   const commentsCount = await Comment.countDocuments({ blogId: blog._id });
@@ -160,16 +170,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Main Content */}
         <div className="max-w-3xl mx-auto px-6 py-12">
-          {/* Back Button */}
-          <div className="mb-6">
-            <a 
-              href="/blogs"
-              className="inline-flex items-center gap-2 px-3 py-1.5 text-button text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Blogs
-            </a>
-          </div>
           {/* Header for posts without cover image */}
           {!blog.coverImage && (
             <header className="mb-8 text-center">
@@ -203,7 +203,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <span>•</span>
             <div className="flex items-center space-x-1.5">
               <FaEye className="h-3.5 w-3.5" />
-              <span>{blog.stats?.views?.total?.toLocaleString() || 0} views</span>
+              <span>{viewsTotal.toLocaleString()} views</span>
             </div>
             <span>•</span>
             <div className="flex items-center space-x-1.5">
@@ -261,7 +261,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <div className="flex items-center space-x-4 text-gray-600 text-xs">
                 <ViewCounter 
                   slug={params.slug} 
-                  initialViews={blog.stats?.views?.total || 0} 
+                  initialViews={viewsTotal} 
                 />
                 <div className="flex items-center space-x-2">
                   <FaComment className="h-3 w-3" />
@@ -352,6 +352,66 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <CommentSection 
             slug={params.slug} 
           />
+
+          {/* Related Blogs Section */}
+          {relatedBlogs.length > 0 && (
+            <div className="border-t border-gray-200 pt-8 mt-8">
+              <h3 className="text-h5 weight-semibold text-gray-900 mb-6">Related Articles</h3>
+              <div className="grid gap-4">
+                {relatedBlogs.map((relatedBlog: any) => (
+                  <a
+                    key={relatedBlog._id}
+                    href={`/blogs/${relatedBlog.slug}`}
+                    className="flex gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
+                  >
+                    {relatedBlog.coverImage && (
+                      <img
+                        src={relatedBlog.coverImage}
+                        alt={relatedBlog.title}
+                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {relatedBlog.title}
+                      </h4>
+                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                        {relatedBlog.excerpt}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                        <span>{new Date(relatedBlog.createdAt).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric' 
+                        })}</span>
+                        {relatedBlog.category && (
+                          <>
+                            <span>•</span>
+                            <span className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">
+                              {relatedBlog.category}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              
+              {/* View All Blogs CTA */}
+              <div className="text-center mt-6">
+                <a
+                  href="/blogs"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  View All Blog Posts
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          )}
         </div>
 
         <Footer />

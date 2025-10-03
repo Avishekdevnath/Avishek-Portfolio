@@ -35,7 +35,7 @@ function ExperienceCardComponent({
   const [isDescOpen, setIsDescOpen] = useState(false);
   const [isAchOpen, setIsAchOpen] = useState(false);
   if (!experience) {
-    console.error('ExperienceCard: experience is undefined');
+    // ExperienceCard: experience is undefined
     return (
       <div className="bg-white p-6 rounded-xl shadow-md border border-red-200">
         <p className="text-red-500">Error: Experience data is missing</p>

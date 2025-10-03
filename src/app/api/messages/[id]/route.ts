@@ -41,7 +41,6 @@ export async function PUT(
       data: updatedMessage,
     });
   } catch (error) {
-    console.error('Error updating message:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update message' },
       { status: 500 }
@@ -73,7 +72,6 @@ export async function DELETE(
       data: deletedMessage,
     });
   } catch (error) {
-    console.error('Error deleting message:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete message' },
       { status: 500 }
@@ -103,7 +101,6 @@ export async function GET(
       data: message,
     });
   } catch (error) {
-    console.error('Error fetching message:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch message' },
       { status: 500 }

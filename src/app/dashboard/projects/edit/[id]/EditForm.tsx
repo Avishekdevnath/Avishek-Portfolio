@@ -106,7 +106,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
       setFormData(projectData);
       setPreviewImage(projectData.image || '/placeholder-project.svg');
     } catch (err) {
-      console.error('Error fetching project:', err);
+      // Error fetching project
       setError(err instanceof Error ? err.message : 'Failed to fetch project');
       
       // Redirect to projects list if project not found
@@ -170,7 +170,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
 
       router.push('/dashboard/projects');
     } catch (err) {
-      console.error('Error updating project:', err);
+      // Error updating project
       setError(err instanceof Error ? err.message : 'Failed to update project');
     } finally {
       setSaving(false);
@@ -218,7 +218,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
         imagePublicId: data.data.public_id,
       }));
     } catch (err) {
-      console.error('Error uploading image:', err);
+      // Error uploading image
       setError(err instanceof Error ? err.message : 'Failed to upload image');
       setPreviewImage(formData.image || '/placeholder-project.svg');
     } finally {

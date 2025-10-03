@@ -16,13 +16,10 @@ import {
   X,
   User,
   Building,
-  Clock,
   Trophy,
   Users,
   FileText
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
 
 // Import the IEducation interface from the model
 import type { IEducation, DraftContent } from '@/types/experience';
@@ -34,16 +31,38 @@ type Education = Omit<IEducation, '_id' | 'startDate' | 'endDate'> & {
   endDate?: string;
 };
 
-// Create a type for form state that makes _id optional
-type FormEducation = Omit<Education, '_id'> & { _id?: string };
 
-interface FormState {
-  show: boolean;
-  mode: 'create' | 'edit';
-  data?: FormEducation;
-}
 
 import EducationForm from '@/components/dashboard/EducationForm';
+
+// Import EducationData interface from the form component
+interface EducationData {
+  _id?: string;
+  type: 'education';
+  title: string;
+  degree: string;
+  institution: string;
+  organization: string;
+  location: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent: boolean;
+  description: string;
+  featured: boolean;
+  order: number;
+  status: 'draft' | 'published';
+  fieldOfStudy: string;
+  gpa?: number | null;
+  maxGpa?: number | null;
+  activities: string[];
+  honors: string[];
+  coursework: string[];
+  thesis?: {
+    title?: string;
+    description?: string;
+    supervisor?: string;
+  } | null;
+}
 
 // Helper function to safely render description
 const renderDescription = (description: string | DraftContent): JSX.Element => {
@@ -455,7 +474,7 @@ export default function EducationPage() {
   const [showForm, setShowForm] = useState<{
     show: boolean;
     mode: 'create' | 'edit';
-    data?: Omit<Education, '_id'> & { _id?: string };
+    data?: EducationData;
   }>({
     show: false,
     mode: 'create'
@@ -464,25 +483,20 @@ export default function EducationPage() {
   const fetchEducation = async () => {
     try {
       setLoading(true);
-      console.log('🎓 Fetching education data...');
       
       const response = await fetch('/api/experience/education?status=all');
-      console.log('📡 Education API Response Status:', response.status);
       
       const data = await response.json();
-      console.log('📊 Education API Response Data:', data);
 
       if (data.success) {
         const educationData = data.data.education || [];
-        console.log('✅ Education entries found:', educationData.length);
-        console.log('📚 Education data:', educationData);
         setEducationEntries(educationData);
       } else {
-        console.error('❌ API returned error:', data.error);
+        // API returned error
         setError(data.error || 'Failed to fetch education entries');
       }
     } catch (error) {
-      console.error('💥 Error fetching education:', error);
+      // Error fetching education
       setError('Failed to fetch education entries');
     } finally {
       setLoading(false);
@@ -509,18 +523,34 @@ export default function EducationPage() {
         alert('Failed to delete education entry');
       }
     } catch (error) {
-      console.error('Error deleting education:', error);
+      // Error deleting education
       alert('Failed to delete education entry');
     }
   };
 
   const handleEdit = (education: Education) => {
-    // Convert Education to EducationData by making _id optional
-    const { _id, ...rest } = education;
+    // Convert Education to EducationData
+    const { _id, description, thesis, type, title, organization, ...rest } = education;
+    const convertedDescription = typeof description === 'string' ? description : JSON.stringify(description);
+    const convertedThesis = thesis ? {
+      title: thesis.title,
+      description: typeof thesis.description === 'string' ? thesis.description : JSON.stringify(thesis.description),
+      supervisor: thesis.supervisor
+    } : null;
+    
+    const educationData: EducationData = {
+      _id,
+      type: 'education',
+      title: education.degree || education.title || '',
+      organization: education.institution || education.organization || '',
+      description: convertedDescription,
+      thesis: convertedThesis,
+      ...rest
+    };
     setShowForm({
       show: true,
       mode: 'edit',
-      data: { _id, ...rest }
+      data: educationData
     });
   };
 

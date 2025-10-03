@@ -19,7 +19,6 @@ export async function sendEmailNotification(options: EmailOptions) {
   try {
     // Don't send emails if credentials are not configured
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.log('Email notifications are not configured');
       return;
     }
 
@@ -32,10 +31,9 @@ export async function sendEmailNotification(options: EmailOptions) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent:', info.messageId);
     return info;
   } catch (error) {
-    console.error('Error sending email:', error);
+    // Error sending email
     throw error;
   }
 }
@@ -50,7 +48,7 @@ export function parseIncomingEmailReply(emailData: any) {
       date: new Date(),
     };
   } catch (error) {
-    console.error('Error parsing email reply:', error);
+    // Error parsing email reply
     throw error;
   }
 }
@@ -167,10 +165,9 @@ ${process.env.EMAIL_FROM_NAME || 'Portfolio Contact'}
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log('Reply sent successfully:', result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Error sending reply:', error);
+    // Error sending reply
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

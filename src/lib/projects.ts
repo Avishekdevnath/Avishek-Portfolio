@@ -37,7 +37,7 @@ export async function getProjectById(id: string) {
     const project = await Project.findById(id).lean({ virtuals: true });
     return project;
   } catch (error) {
-    console.error('Error fetching project by ID:', error);
+    // Error fetching project by ID
     return null;
   }
 }
@@ -71,7 +71,7 @@ export async function getProjectStats(): Promise<ProjectStats> {
 
     return { total, published, draft, featured, categories };
   } catch (error) {
-    console.error('Error fetching project stats:', error);
+    // Error fetching project stats
     return { total: 0, published: 0, draft: 0, featured: 0, categories: {} };
   }
 }
@@ -99,7 +99,7 @@ export async function getPublishedProjectById(id: string) {
     
     return project as any; // Type assertion to fix TypeScript issues
   } catch (error) {
-    console.error('Error fetching published project by ID:', error);
+    // Error fetching published project by ID
     return null;
   }
 }
@@ -123,7 +123,7 @@ export async function listProjectIds(limit = 100) {
     
     return projects.map(project => project._id);
   } catch (error) {
-    console.error('Error fetching project IDs:', error);
+    // Error fetching project IDs
     return [];
   }
 }
@@ -167,7 +167,7 @@ export async function getPublishedProjects(options: ProjectQueryOptions = {}) {
     
     return projects as any[]; // Type assertion to fix TypeScript issues
   } catch (error) {
-    console.error('Error fetching published projects:', error);
+    // Error fetching published projects
     return [];
   }
 }
@@ -198,7 +198,7 @@ export async function getRelatedProjects(
     
     return projects as any[]; // Type assertion to fix TypeScript issues
   } catch (error) {
-    console.error('Error fetching related projects:', error);
+    // Error fetching related projects
     return [];
   }
 }
