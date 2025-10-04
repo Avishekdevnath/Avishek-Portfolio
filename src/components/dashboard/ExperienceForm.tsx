@@ -2,13 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaSave, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
-import { toast } from 'react-hot-toast';
+import { FaSave, FaTimes, FaPlus } from 'react-icons/fa';
 import {
   ExperienceType,
   ExperienceFormData,
-  IWorkExperience,
-  IEducation,
   EmploymentType,
   ExperienceStatus,
   ExperienceApiResponse
@@ -218,31 +215,6 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
     });
   };
 
-  // Media upload handler for Quill editor
-  const handleEditorMediaUpload = async (file: File): Promise<string> => {
-    try {
-      const isImage = file.type.startsWith('image/');
-      const isVideo = file.type.startsWith('video/');
-      if (!isImage && !isVideo) throw new Error('Unsupported file type');
-
-      const maxSize = isImage ? 5 * 1024 * 1024 : 100 * 1024 * 1024;
-      if (file.size > maxSize) {
-        throw new Error(`File size must be less than ${isImage ? '5MB' : '100MB'}`);
-      }
-
-      const form = new FormData();
-      form.append(isImage ? 'image' : 'video', file);
-      const endpoint = isImage ? '/api/blogs/upload-image' : '/api/blogs/upload-video';
-      const res = await fetch(endpoint, { method: 'POST', body: form });
-      const data = await res.json();
-      if (data.success) return data.url as string;
-      throw new Error(data.error || 'Failed to upload');
-    } catch (err) {
-      // Media upload error
-      toast.error(err instanceof Error ? err.message : 'Upload failed');
-      throw err; // Re-throw the error instead of returning null
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

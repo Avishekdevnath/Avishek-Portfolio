@@ -1,10 +1,75 @@
+"use client";
 import Image from "next/image";
 import styles from "./hero.module.css";
 import { FaLinkedin, FaGithub } from "react-icons/fa";
 import Header from "@/components/shared/Header";
+import { useState, useEffect } from "react";
 
 export default function Hero() {
   const profileImage = "/assets/home/profile-img.jpg";
+  
+  // Settings state
+  const [linkedinUrl, setLinkedinUrl] = useState("https://www.linkedin.com/in/avishek-devnath");
+  const [githubUrl, setGithubUrl] = useState("https://github.com/Avishekdevnath");
+  
+  // Typewriter effect states
+  const [currentText, setCurrentText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const typewriterTexts = [
+    "Building scalable solutions",
+    "Crafting innovative web apps",
+    "Optimizing user experiences",
+    "Creating robust APIs",
+    "Designing system architectures",
+    "Solving complex problems"
+  ];
+  
+  // Fetch settings data
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // Extract social links
+          const socialLinks = data.data.socialLinks || [];
+          const linkedin = socialLinks.find((link: any) => link.platform === 'linkedin');
+          const github = socialLinks.find((link: any) => link.platform === 'github');
+          
+          if (linkedin) setLinkedinUrl(linkedin.url);
+          if (github) setGithubUrl(github.url);
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const current = typewriterTexts[currentIndex];
+      
+      if (isDeleting) {
+        setCurrentText(current.substring(0, currentText.length - 1));
+      } else {
+        setCurrentText(current.substring(0, currentText.length + 1));
+      }
+      
+      if (!isDeleting && currentText === current) {
+        setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && currentText === "") {
+        setIsDeleting(false);
+        setCurrentIndex((prev) => (prev + 1) % typewriterTexts.length);
+      }
+    }, isDeleting ? 50 : 100);
+    
+    return () => clearTimeout(timeout);
+  }, [currentText, currentIndex, isDeleting, typewriterTexts]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
@@ -40,23 +105,35 @@ export default function Hero() {
             <h2 className="text-h4 md:text-h3 weight-semibold text-gray-600">
               A Software Engineer
             </h2>
-            <p className="text-body text-gray-500">
-              Building scalable solutions
-            </p>
+            <div className="h-6 flex items-center justify-center md:justify-center">
+              <p className="text-body text-gray-500 flex items-center">
+                <span className="font-medium">{currentText}</span>
+                <span className="animate-pulse text-gray-400 ml-1">|</span>
+              </p>
+            </div>
 
             {/* Buttons */}
             <div className="flex flex-col items-center justify-center sm:flex-row gap-3 w-full sm:w-auto">
               <a
                 href="/assets/resume.pdf"
                 download
-                className="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300 shadow-inner w-full sm:w-auto text-center text-button"
-                style={{boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)'}}
+                className="bg-white text-black border-2 border-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 w-full sm:w-auto text-center text-button"
+                style={{
+                  color: '#000000',
+                  backgroundColor: '#ffffff',
+                  border: '2px solid #000000'
+                }}
               >
                 Download CV
               </a>
               <a
                 href="/contact"
-                className="bg-blue-600 text-white border border-blue-500 px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg w-full sm:w-auto text-center text-button"
+                className="bg-black text-white border-2 border-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300 w-full sm:w-auto text-center text-button"
+                style={{
+                  color: '#ffffff',
+                  backgroundColor: '#000000',
+                  border: '2px solid #000000'
+                }}
               >
                 Contact Me
               </a>
@@ -65,7 +142,7 @@ export default function Hero() {
             {/* Social Icons */}
             <div className="flex justify-center md:justify-center space-x-4">
               <a
-                href="https://linkedin.com/in/your-profile"
+                href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-blue-600 transition-all duration-300 hover:scale-110"
@@ -74,7 +151,7 @@ export default function Hero() {
                 <FaLinkedin size={24} />
               </a>
               <a
-                href="https://github.com/your-username"
+                href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-blue-600 transition-all duration-300 hover:scale-110"

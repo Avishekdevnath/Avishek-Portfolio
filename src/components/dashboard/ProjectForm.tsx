@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { FiUpload, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
-import { uploadImage } from '@/lib/cloudinary';
 import { FaSave, FaTimes } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
 
@@ -98,6 +97,7 @@ interface ProjectFormProps {
     completionDate?: string;
     featured?: boolean;
     status?: 'draft' | 'published';
+    order?: number;
   };
   isEdit?: boolean;
 }
@@ -123,6 +123,7 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
     completionDate: initialData?.completionDate ? new Date(initialData.completionDate).toISOString().split('T')[0] : '',
     featured: initialData?.featured || false,
     status: initialData?.status || 'draft',
+    order: initialData?.order || 0,
     lineSpacing: '10'
   });
 
@@ -839,6 +840,25 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Project Order */}
+        <div>
+          <label htmlFor="order" className="block text-body-sm weight-medium text-gray-700 mb-3">
+            Display Order
+          </label>
+          <input
+            type="number"
+            id="order"
+            value={formData.order}
+            onChange={(e) => handleChange('order', parseInt(e.target.value) || 0)}
+            className="block w-full px-4 py-2.5 text-body-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            placeholder="0"
+            min="0"
+          />
+          <p className="text-caption text-gray-600 mt-2">
+            Lower numbers appear first. Projects with the same order will be sorted by creation date.
+          </p>
         </div>
 
         {/* Project Status */}

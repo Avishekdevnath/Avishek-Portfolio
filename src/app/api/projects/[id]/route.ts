@@ -3,13 +3,6 @@ import { isValidObjectId } from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { deleteImage } from '@/lib/cloudinary';
-import mongoose from 'mongoose';
-
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
 
 // Helper function to validate MongoDB ObjectId
 const validateId = (id: string) => {
@@ -23,7 +16,7 @@ const validateId = (id: string) => {
 };
 
 // GET /api/projects/[id] - Get a single project
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Validate ID format first
     const idValidation = validateId(params.id);
@@ -39,9 +32,27 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       }, { status: 404 });
     }
 
+    // Convert ObjectIds to strings for client components
+    const serializedProject = {
+      ...project,
+      _id: (project as any)._id.toString(),
+      technologies: (project as any).technologies?.map((tech: any) => ({
+        ...tech,
+        _id: tech._id.toString()
+      })),
+      repositories: (project as any).repositories?.map((repo: any) => ({
+        ...repo,
+        _id: repo._id.toString()
+      })),
+      demoUrls: (project as any).demoUrls?.map((demo: any) => ({
+        ...demo,
+        _id: demo._id.toString()
+      }))
+    };
+
     return NextResponse.json({
       success: true,
-      data: project
+      data: serializedProject
     });
   } catch (error) {
     return NextResponse.json({
@@ -71,12 +82,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     };
 
     const missingFields = Object.entries(requiredFields)
-      .filter(([key, label]) => {
+      .filter(([key]) => {
         if (key === 'technologies') return !body[key]?.length;
         if (key === 'repositories') return !body[key]?.length;
         return !body[key];
       })
-      .map(([_, label]) => label);
+      .map(([, label]) => label);
 
     if (missingFields.length > 0) {
       return NextResponse.json({
@@ -124,9 +135,27 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       { new: true, runValidators: true }
     ).lean({ virtuals: true });
 
+    // Convert ObjectIds to strings for client components
+    const serializedProject = {
+      ...updatedProject,
+      _id: (updatedProject as any)!._id.toString(),
+      technologies: (updatedProject as any)!.technologies?.map((tech: any) => ({
+        ...tech,
+        _id: tech._id.toString()
+      })),
+      repositories: (updatedProject as any)!.repositories?.map((repo: any) => ({
+        ...repo,
+        _id: repo._id.toString()
+      })),
+      demoUrls: (updatedProject as any)!.demoUrls?.map((demo: any) => ({
+        ...demo,
+        _id: demo._id.toString()
+      }))
+    };
+
     return NextResponse.json({
       success: true,
-      data: updatedProject,
+      data: serializedProject,
       message: 'Project updated successfully'
     });
   } catch (error) {
@@ -179,9 +208,27 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       { new: true, runValidators: true }
     ).lean({ virtuals: true });
 
+    // Convert ObjectIds to strings for client components
+    const serializedProject = {
+      ...updatedProject,
+      _id: (updatedProject as any)!._id.toString(),
+      technologies: (updatedProject as any)!.technologies?.map((tech: any) => ({
+        ...tech,
+        _id: tech._id.toString()
+      })),
+      repositories: (updatedProject as any)!.repositories?.map((repo: any) => ({
+        ...repo,
+        _id: repo._id.toString()
+      })),
+      demoUrls: (updatedProject as any)!.demoUrls?.map((demo: any) => ({
+        ...demo,
+        _id: demo._id.toString()
+      }))
+    };
+
     return NextResponse.json({
       success: true,
-      data: updatedProject,
+      data: serializedProject,
       message: 'Project updated successfully'
     });
   } catch (error) {
@@ -204,7 +251,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 }
 
 // DELETE /api/projects/[id] - Delete a project
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB();
 

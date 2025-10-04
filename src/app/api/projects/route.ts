@@ -48,12 +48,31 @@ export async function GET(request: NextRequest) {
     const projects = await Project.find(query)
       .sort(sortConfig)
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
+
+    // Convert ObjectIds to strings for client components
+    const serializedProjects = projects.map(project => ({
+      ...project,
+      _id: project._id.toString(),
+      technologies: project.technologies?.map(tech => ({
+        ...tech,
+        _id: tech._id.toString()
+      })),
+      repositories: project.repositories?.map(repo => ({
+        ...repo,
+        _id: repo._id.toString()
+      })),
+      demoUrls: project.demoUrls?.map(demo => ({
+        ...demo,
+        _id: demo._id.toString()
+      }))
+    }));
 
     return NextResponse.json({
       success: true,
       data: {
-        projects,
+        projects: serializedProjects,
         pagination: {
           total,
           page,
@@ -81,9 +100,27 @@ export async function POST(request: NextRequest) {
     await project.validate();
     await project.save();
 
+    // Convert ObjectId to string for client components
+    const serializedProject = {
+      ...project.toObject(),
+      _id: project._id.toString(),
+      technologies: project.technologies?.map(tech => ({
+        ...tech.toObject(),
+        _id: tech._id.toString()
+      })),
+      repositories: project.repositories?.map(repo => ({
+        ...repo.toObject(),
+        _id: repo._id.toString()
+      })),
+      demoUrls: project.demoUrls?.map(demo => ({
+        ...demo.toObject(),
+        _id: demo._id.toString()
+      }))
+    };
+
     return NextResponse.json({
       success: true,
-      data: project
+      data: serializedProject
     });
   } catch (error) {
     if (error instanceof Error && 'errors' in error) {
@@ -139,9 +176,27 @@ export async function PATCH(request: Request) {
 
     const updatedProjects = await Promise.all(updatePromises);
 
+    // Convert ObjectIds to strings for client components
+    const serializedProjects = updatedProjects.map(project => ({
+      ...project.toObject(),
+      _id: project._id.toString(),
+      technologies: project.technologies?.map(tech => ({
+        ...tech.toObject(),
+        _id: tech._id.toString()
+      })),
+      repositories: project.repositories?.map(repo => ({
+        ...repo.toObject(),
+        _id: repo._id.toString()
+      })),
+      demoUrls: project.demoUrls?.map(demo => ({
+        ...demo.toObject(),
+        _id: demo._id.toString()
+      }))
+    }));
+
     return NextResponse.json({
       success: true,
-      data: updatedProjects,
+      data: serializedProjects,
       message: 'Projects updated successfully'
     });
   } catch (error) {

@@ -59,7 +59,7 @@ export default function ProjectGrid({
       case 'title':
         return a.title.localeCompare(b.title);
       default:
-        return (b.order - a.order);
+        return (a.order - b.order);
     }
   });
 

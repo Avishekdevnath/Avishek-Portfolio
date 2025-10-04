@@ -99,6 +99,60 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleOrderChange = async (projectId: string, newOrder: number) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ order: newOrder })
+      });
+
+      if (response.ok) {
+        // Update local state optimistically
+        setProjects(prev => prev.map(p => 
+          p._id === projectId ? { ...p, order: newOrder } : p
+        ));
+      }
+    } catch (error) {
+      // Error updating order, revert the change
+      fetchProjects();
+    }
+  };
+
+  const handleAutoOrder = async () => {
+    if (!window.confirm('This will automatically set order numbers for all projects. Continue?')) {
+      return;
+    }
+
+    try {
+      // Sort projects by creation date and assign order numbers
+      const sortedProjects = [...projects].sort((a, b) => 
+        new Date(a.createdAt as string).getTime() - new Date(b.createdAt as string).getTime()
+      );
+
+      const updates = sortedProjects.map((project, index) => ({
+        id: project._id,
+        order: index
+      }));
+
+      const response = await fetch('/api/projects/bulk', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projects: updates })
+      });
+
+      if (response.ok) {
+        fetchProjects();
+      }
+    } catch (error) {
+      // Error updating orders
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
@@ -108,14 +162,22 @@ export default function ProjectsPage() {
   return (
     <div className="p-6 font-ui">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6">
         <h1 className="text-h2 text-gray-800">Projects</h1>
+        <div className="flex gap-3">
+          <button
+            onClick={handleAutoOrder}
+            className="bg-gray-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-600 transition-colors text-button weight-medium"
+          >
+            Auto Order
+          </button>
           <Link
             href="/dashboard/projects/new"
           className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 transition-colors text-button weight-medium"
           >
           <FaPlus className="icon-sm" /> New Project
           </Link>
+        </div>
         </div>
 
       {/* Filters */}
@@ -233,6 +295,7 @@ export default function ProjectsPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-table-header text-gray-600">Title</th>
                 <th className="px-6 py-3 text-left text-table-header text-gray-600">Category</th>
+                <th className="px-6 py-3 text-center text-table-header text-gray-600">Order</th>
                 <th className="px-6 py-3 text-left text-table-header text-gray-600">Technologies</th>
                 <th className="px-6 py-3 text-left text-table-header text-gray-600">Status</th>
                 <th className="px-6 py-3 text-center text-table-header text-gray-600">Featured</th>
@@ -242,13 +305,13 @@ export default function ProjectsPage() {
             <tbody className="divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500 text-table-cell">
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500 text-table-cell">
                     Loading...
                   </td>
                 </tr>
               ) : projects.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500 text-table-cell">
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500 text-table-cell">
                     No projects found
                   </td>
                 </tr>
@@ -267,6 +330,15 @@ export default function ProjectsPage() {
                       <span className="chip-muted">
                         {project.category}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <input
+                        type="number"
+                        value={project.order || 0}
+                        onChange={(e) => handleOrderChange(project._id, parseInt(e.target.value) || 0)}
+                        className="w-16 px-2 py-1 text-center text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        min="0"
+                      />
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         acc[category] = [];
       }
       acc[category].push({
-        _id: skill._id.toString(),
+        _id: (skill._id as any).toString(),
         name: skill.name,
         proficiency: skill.proficiency,
         icon: skill.icon,
@@ -93,9 +93,15 @@ export async function POST(request: Request) {
     revalidatePath('/');
     revalidatePath('/dashboard/skills');
 
+    // Convert ObjectId to string for client components
+    const serializedSkill = {
+      ...skill.toObject(),
+      _id: skill._id.toString()
+    };
+
     return NextResponse.json({
       success: true,
-      data: skill
+      data: serializedSkill
     });
   } catch (error) {
     return NextResponse.json({
@@ -128,9 +134,15 @@ export async function PATCH(request: Request) {
 
     const updatedSkills = await Promise.all(updatePromises);
 
+    // Convert ObjectIds to strings for client components
+    const serializedSkills = updatedSkills.map(skill => ({
+      ...skill!.toObject(),
+      _id: skill!._id.toString()
+    }));
+
     return NextResponse.json({
       success: true,
-      data: updatedSkills,
+      data: serializedSkills,
     });
   } catch (error) {
     return NextResponse.json(
