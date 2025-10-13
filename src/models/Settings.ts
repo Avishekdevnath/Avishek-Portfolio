@@ -19,6 +19,8 @@ export interface ISettings extends Document {
   bio: string;
   contactInfo: IContactInfo;
   socialLinks: ISocialLink[];
+  resumeUrl?: string;
+  portfolioUrl?: string;
   websiteSettings: {
     siteTitle: string;
     metaDescription: string;
@@ -82,6 +84,11 @@ const SettingsSchema = new Schema<ISettings>({
     type: [SocialLinkSchema],
     default: []
   },
+  resumeUrl: {
+    type: String,
+    default: '/assets/resume.pdf'
+  },
+  portfolioUrl: String,
   websiteSettings: {
     siteTitle: {
       type: String,

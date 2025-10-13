@@ -28,6 +28,8 @@ export default function SettingsPage() {
       responseTime: 'Within 24 hours'
     },
     socialLinks: [],
+    resumeUrl: '/assets/resume.pdf',
+    portfolioUrl: '',
     websiteSettings: {
       siteTitle: '',
       metaDescription: '',
@@ -307,6 +309,47 @@ export default function SettingsPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </div>
+
+      {/* Resume & Portfolio Links */}
+      <div className="bg-white rounded-xl shadow-sm mb-6">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Resume & Portfolio</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Resume URL
+              </label>
+              <input
+                type="text"
+                name="resumeUrl"
+                value={settings.resumeUrl || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="/assets/resume.pdf or https://..."
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Path to your resume file (e.g., /assets/resume.pdf) or external URL
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Portfolio URL
+              </label>
+              <input
+                type="url"
+                name="portfolioUrl"
+                value={settings.portfolioUrl || ''}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="https://yourportfolio.com"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Link to your external portfolio or personal website
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -128,7 +128,7 @@ function ExperienceCardComponent({
             <div>
               <div className={`flex items-center gap-2`}>
                 <h3 className="text-h4 weight-bold text-gray-900 line-clamp-2">
-                  {workExp.jobTitle || workExp.title}
+                  {workExp.level && workExp.jobTitle ? `${workExp.level} ${workExp.jobTitle}` : (workExp.jobTitle || workExp.title)}
                 </h3>
                 {workExp.featured && (
                   <FaStar className="text-yellow-400" title="Featured" />

@@ -11,6 +11,8 @@ export default function Hero() {
   // Settings state
   const [linkedinUrl, setLinkedinUrl] = useState("https://www.linkedin.com/in/avishek-devnath");
   const [githubUrl, setGithubUrl] = useState("https://github.com/Avishekdevnath");
+  const [resumeUrl, setResumeUrl] = useState("/assets/resume.pdf");
+  const [portfolioUrl, setPortfolioUrl] = useState("");
   
   // Typewriter effect states
   const [currentText, setCurrentText] = useState("");
@@ -41,6 +43,10 @@ export default function Hero() {
           
           if (linkedin) setLinkedinUrl(linkedin.url);
           if (github) setGithubUrl(github.url);
+          
+          // Extract resume and portfolio URLs
+          if (data.data.resumeUrl) setResumeUrl(data.data.resumeUrl);
+          if (data.data.portfolioUrl) setPortfolioUrl(data.data.portfolioUrl);
         }
       } catch (error) {
         console.error('Failed to fetch settings:', error);
@@ -77,17 +83,17 @@ export default function Hero() {
         <Header />
       </div>
       <section
-        className={`${styles.heroStyle} grid grid-cols-1 mt-0 pt-0 md:grid-cols-2 gap-2 md:gap-8 lg:gap-12 px-4 sm:px-6 lg:px-8 pb-2 min-h-screen items-center`}
+        className={`${styles.heroStyle} grid grid-cols-1 mt-0 pt-0 md:grid-cols-2 gap-6 md:gap-10 lg:gap-12 px-5 sm:px-7 lg:px-10 pb-2 min-h-screen items-center max-w-6xl mx-auto`}
         id="hero"
       >
         {/* Left Column: Image */}
         <div className="flex justify-center md:justify-end">
-          <div className="relative w-80 h-80 sm:w-80 sm:h-80 md:w-80 md:h-80 lg:w-80 lg:h-80 bg-gradient-to-b from-gray-50 to-white rounded-full border border-gray-300 shadow-inner p-2" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+          <div className="relative w-[340px] h-[340px] sm:w-[360px] sm:h-[360px] md:w-[400px] md:h-[400px] lg:w-[440px] lg:h-[440px] bg-gradient-to-b from-gray-50 to-white rounded-full border border-gray-300 shadow-inner p-2" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
             <Image
               src={profileImage}
               alt="Profile picture of Avishek Devnath"
               fill
-              sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, 320px"
+              sizes="(max-width: 640px) 340px, (max-width: 768px) 360px, (max-width: 1024px) 400px, 440px"
               quality={85}
               priority={true}
               className="rounded-full object-cover"
@@ -96,39 +102,40 @@ export default function Hero() {
         </div>
 
         {/* Right Column: Text, Buttons, Social Icons */}
-        <div className="flex flex-col justify-center items-center md:items-start text-center md:text-center ">
-          <div className="space-y-4">
-            <p className="text-caption text-gray-600">Hello, I’m</p>
-            <h1 className="text-h2 md:text-h1 weight-bold">
+        <div className="flex flex-col justify-center items-center md:items-start text-center md:text-center">
+          <div className="space-y-5">
+            <p className="text-lg md:text-xl text-gray-600">Hello, I'm</p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
               Avishek Devnath
             </h1>
-            <h2 className="text-h4 md:text-h3 weight-semibold text-gray-600">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-600">
               A Software Engineer
             </h2>
-            <div className="h-6 flex items-center justify-center md:justify-center">
-              <p className="text-body text-gray-500 flex items-center">
+            <div className="h-7 md:h-8 flex items-center justify-center md:justify-center">
+              <p className="text-base md:text-lg text-gray-500 flex items-center">
                 <span className="font-medium">{currentText}</span>
                 <span className="animate-pulse text-gray-400 ml-1">|</span>
               </p>
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col items-center justify-center sm:flex-row gap-3 w-full sm:w-auto">
+            <div className="flex flex-col items-center justify-center sm:flex-row gap-3 w-full sm:w-auto pt-2">
               <a
-                href="/assets/resume.pdf"
-                download
-                className="bg-white text-black border-2 border-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 w-full sm:w-auto text-center text-button"
+                href={resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-black border-2 border-black px-7 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 w-full sm:w-auto text-center text-base"
                 style={{
                   color: '#000000',
                   backgroundColor: '#ffffff',
                   border: '2px solid #000000'
                 }}
               >
-                Download CV
+                Resume
               </a>
               <a
                 href="/contact"
-                className="bg-black text-white border-2 border-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300 w-full sm:w-auto text-center text-button"
+                className="bg-black text-white border-2 border-black px-7 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300 w-full sm:w-auto text-center text-base"
                 style={{
                   color: '#ffffff',
                   backgroundColor: '#000000',
@@ -140,7 +147,7 @@ export default function Hero() {
             </div>
 
             {/* Social Icons */}
-            <div className="flex justify-center md:justify-center space-x-4">
+            <div className="flex justify-center md:justify-center space-x-5 pt-1">
               <a
                 href={linkedinUrl}
                 target="_blank"
@@ -148,7 +155,7 @@ export default function Hero() {
                 className="text-gray-600 hover:text-blue-600 transition-all duration-300 hover:scale-110"
                 aria-label="Visit Avishek Devnath's LinkedIn profile"
               >
-                <FaLinkedin size={24} />
+                <FaLinkedin size={28} />
               </a>
               <a
                 href={githubUrl}
@@ -157,7 +164,7 @@ export default function Hero() {
                 className="text-gray-600 hover:text-blue-600 transition-all duration-300 hover:scale-110"
                 aria-label="Visit Avishek Devnath's GitHub profile"
               >
-                <FaGithub size={24} />
+                <FaGithub size={28} />
               </a>
             </div>
           </div>
