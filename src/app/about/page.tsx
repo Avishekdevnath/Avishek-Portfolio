@@ -24,6 +24,7 @@ export default function About() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState("/assets/home/profile-img.jpg");
 
   // Scroll animation hooks
   const introAnimation = useScrollAnimation();
@@ -46,7 +47,23 @@ export default function About() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const profileImage = "/assets/home/profile-img.jpg";
+  // Fetch profile image from settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        
+        if (data.success && data.data?.profileImage) {
+          setProfileImage(data.data.profileImage);
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
 
   const fetchProjects = async () => {
     try {

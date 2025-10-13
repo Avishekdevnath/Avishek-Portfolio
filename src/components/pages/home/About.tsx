@@ -6,8 +6,25 @@ import { FaAward } from "react-icons/fa6";
 import { MdSchool } from "react-icons/md";
 
 export default function About() {
-  const profileImage = "/assets/home/profile-img.jpg";
+  const [profileImage, setProfileImage] = useState("/assets/home/profile-img.jpg");
   const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        
+        if (data.success && data.data?.profileImage) {
+          setProfileImage(data.data.profileImage);
+        }
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     setAnimate(true); // Trigger animations on mount

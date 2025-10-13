@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [settings, setSettings] = useState<Partial<ISettings>>({
     fullName: '',
     bio: '',
@@ -105,6 +106,69 @@ export default function SettingsPage() {
     });
   };
 
+  const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showToast({
+        title: 'Error',
+        description: 'Please select an image file',
+        status: 'error',
+        duration: 3000
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast({
+        title: 'Error',
+        description: 'Image size must be less than 5MB',
+        status: 'error',
+        duration: 3000
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSettings(prev => ({ ...prev, profileImage: data.url }));
+        showToast({
+          title: 'Success',
+          description: 'Profile picture uploaded successfully',
+          status: 'success',
+          duration: 3000
+        });
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+      showToast({
+        title: 'Error',
+        description: 'Failed to upload image. Please try again.',
+        status: 'error',
+        duration: 5000
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -164,7 +228,7 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Profile Settings</h2>
           <div className="space-y-4">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                 {settings.profileImage ? (
                   <img
                     src={settings.profileImage}
@@ -176,14 +240,28 @@ export default function SettingsPage() {
                 )}
               </div>
               <div>
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                <input
+                  type="file"
+                  id="profileImage"
+                  accept="image/*"
+                  onChange={handleProfileImageUpload}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="profileImage"
+                  className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  Change Photo
-                </button>
+                  {uploading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploading...
+                    </span>
+                  ) : (
+                    'Change Photo'
+                  )}
+                </label>
                 <p className="text-sm text-gray-500 mt-2">
-                  Recommended: Square JPG, PNG, or GIF, at least 500px
+                  Recommended: Square JPG, PNG, or GIF, at least 500px (Max 5MB)
                 </p>
               </div>
             </div>

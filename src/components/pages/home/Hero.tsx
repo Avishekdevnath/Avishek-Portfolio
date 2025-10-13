@@ -6,9 +6,8 @@ import Header from "@/components/shared/Header";
 import { useState, useEffect } from "react";
 
 export default function Hero() {
-  const profileImage = "/assets/home/profile-img.jpg";
-  
   // Settings state
+  const [profileImage, setProfileImage] = useState("/assets/home/profile-img.jpg");
   const [linkedinUrl, setLinkedinUrl] = useState("https://www.linkedin.com/in/avishek-devnath");
   const [githubUrl, setGithubUrl] = useState("https://github.com/Avishekdevnath");
   const [resumeUrl, setResumeUrl] = useState("/assets/resume.pdf");
@@ -47,6 +46,9 @@ export default function Hero() {
           // Extract resume and portfolio URLs
           if (data.data.resumeUrl) setResumeUrl(data.data.resumeUrl);
           if (data.data.portfolioUrl) setPortfolioUrl(data.data.portfolioUrl);
+          
+          // Extract profile image
+          if (data.data.profileImage) setProfileImage(data.data.profileImage);
         }
       } catch (error) {
         console.error('Failed to fetch settings:', error);

@@ -40,8 +40,8 @@ export async function POST(request: Request) {
 
     // Get the form data
     const formData = await request.formData();
-    const file = formData.get('file');
-    const folder = formData.get('folder') as string || 'portfolio/projects';
+    const file = formData.get('file') || formData.get('image');
+    const folder = formData.get('folder') as string || 'portfolio/profile';
     const oldPublicId = formData.get('oldPublicId') as string;
 
     if (!file) {
@@ -99,6 +99,7 @@ export async function POST(request: Request) {
     // Return the image details
     return NextResponse.json({
       success: true,
+      url: result.url,
       data: {
         url: result.url,
         public_id: result.public_id,
