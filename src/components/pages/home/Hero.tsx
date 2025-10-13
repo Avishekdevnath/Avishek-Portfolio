@@ -85,17 +85,17 @@ export default function Hero() {
         <Header />
       </div>
       <section
-        className={`${styles.heroStyle} grid grid-cols-1 mt-0 pt-0 md:grid-cols-2 gap-6 md:gap-10 lg:gap-12 px-5 sm:px-7 lg:px-10 pb-2 min-h-screen items-center max-w-6xl mx-auto`}
+        className={`${styles.heroStyle} grid grid-cols-1 mt-0 pt-0 md:grid-cols-2 gap-4 md:gap-8 lg:gap-10 px-4 sm:px-6 lg:px-8 pb-2 min-h-screen items-center max-w-5xl mx-auto`}
         id="hero"
       >
         {/* Left Column: Image */}
         <div className="flex justify-center md:justify-end">
-          <div className="relative w-[340px] h-[340px] sm:w-[360px] sm:h-[360px] md:w-[400px] md:h-[400px] lg:w-[440px] lg:h-[440px] bg-gradient-to-b from-gray-50 to-white rounded-full border border-gray-300 shadow-inner p-2" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+          <div className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-[340px] md:h-[340px] lg:w-[360px] lg:h-[360px] bg-gradient-to-b from-gray-50 to-white rounded-full border border-gray-300 shadow-inner p-2" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
             <Image
               src={profileImage}
               alt="Profile picture of Avishek Devnath"
               fill
-              sizes="(max-width: 640px) 340px, (max-width: 768px) 360px, (max-width: 1024px) 400px, 440px"
+              sizes="(max-width: 640px) 288px, (max-width: 768px) 320px, (max-width: 1024px) 340px, 360px"
               quality={85}
               priority={true}
               className="rounded-full object-cover"
@@ -105,16 +105,16 @@ export default function Hero() {
 
         {/* Right Column: Text, Buttons, Social Icons */}
         <div className="flex flex-col justify-center items-center md:items-start text-center md:text-center">
-          <div className="space-y-5">
-            <p className="text-lg md:text-xl text-gray-600">Hello, I'm</p>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
+          <div className="space-y-4">
+            <p className="text-base md:text-lg text-gray-600">Hello, I'm</p>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
               Avishek Devnath
             </h1>
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-600">
+            <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-gray-600">
               A Software Engineer
             </h2>
-            <div className="h-7 md:h-8 flex items-center justify-center md:justify-center">
-              <p className="text-base md:text-lg text-gray-500 flex items-center">
+            <div className="h-6 md:h-7 flex items-center justify-center md:justify-center">
+              <p className="text-sm md:text-base text-gray-500 flex items-center">
                 <span className="font-medium">{currentText}</span>
                 <span className="animate-pulse text-gray-400 ml-1">|</span>
               </p>
@@ -126,7 +126,7 @@ export default function Hero() {
                 href={resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white text-black border-2 border-black px-7 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 w-full sm:w-auto text-center text-base"
+                className="bg-white text-black border-2 border-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 w-full sm:w-auto text-center text-sm md:text-base"
                 style={{
                   color: '#000000',
                   backgroundColor: '#ffffff',
@@ -137,7 +137,7 @@ export default function Hero() {
               </a>
               <a
                 href="/contact"
-                className="bg-black text-white border-2 border-black px-7 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300 w-full sm:w-auto text-center text-base"
+                className="bg-black text-white border-2 border-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-300 w-full sm:w-auto text-center text-sm md:text-base"
                 style={{
                   color: '#ffffff',
                   backgroundColor: '#000000',
@@ -149,7 +149,7 @@ export default function Hero() {
             </div>
 
             {/* Social Icons */}
-            <div className="flex justify-center md:justify-center space-x-5 pt-1">
+            <div className="flex justify-center md:justify-center space-x-4 pt-1">
               <a
                 href={linkedinUrl}
                 target="_blank"
@@ -157,7 +157,7 @@ export default function Hero() {
                 className="text-gray-600 hover:text-blue-600 transition-all duration-300 hover:scale-110"
                 aria-label="Visit Avishek Devnath's LinkedIn profile"
               >
-                <FaLinkedin size={28} />
+                <FaLinkedin size={24} />
               </a>
               <a
                 href={githubUrl}
@@ -166,7 +166,7 @@ export default function Hero() {
                 className="text-gray-600 hover:text-blue-600 transition-all duration-300 hover:scale-110"
                 aria-label="Visit Avishek Devnath's GitHub profile"
               >
-                <FaGithub size={28} />
+                <FaGithub size={24} />
               </a>
             </div>
           </div>
