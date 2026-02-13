@@ -2,6 +2,44 @@ import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { isValidObjectId } from 'mongoose';
 
+const toIsoString = (value: unknown) => {
+  if (!value) return value;
+  const date = value instanceof Date ? value : new Date(value as string);
+  return Number.isNaN(date.getTime()) ? value : date.toISOString();
+};
+
+const serializeProject = (project: any) => {
+  if (!project) return project;
+
+  return {
+    ...project,
+    _id: project._id?.toString ? project._id.toString() : project._id,
+    technologies: (project.technologies || []).map((tech: any) => ({
+      name: tech.name,
+      icon: tech.icon
+    })),
+    repositories: (project.repositories || []).map((repo: any) => ({
+      name: repo.name,
+      url: repo.url,
+      type: repo.type
+    })),
+    demoUrls: (project.demoUrls || []).map((demo: any) => ({
+      name: demo.name,
+      url: demo.url,
+      type: demo.type
+    })),
+    additionalImages: (project.additionalImages || []).map((img: any) => ({
+      url: img.url,
+      publicId: img.publicId,
+      caption: img.caption,
+      altText: img.altText
+    })),
+    completionDate: toIsoString(project.completionDate),
+    createdAt: toIsoString(project.createdAt),
+    updatedAt: toIsoString(project.updatedAt)
+  };
+};
+
 // Type definitions for better type safety
 export interface ProjectQueryOptions {
   category?: string;
@@ -35,7 +73,7 @@ export async function getProjectById(id: string) {
     await connectDB();
     
     const project = await Project.findById(id).lean({ virtuals: true });
-    return project;
+    return serializeProject(project);
   } catch (error) {
     // Error fetching project by ID
     return null;
@@ -97,7 +135,7 @@ export async function getPublishedProjectById(id: string) {
     .lean({ virtuals: true })
     .maxTimeMS(10000); // 10 second timeout for individual queries
     
-    return project as any; // Type assertion to fix TypeScript issues
+    return serializeProject(project) as any; // Type assertion to fix TypeScript issues
   } catch (error) {
     // Error fetching published project by ID
     return null;
@@ -121,7 +159,7 @@ export async function listProjectIds(limit = 100) {
     .lean()
     .maxTimeMS(5000); // 5 second timeout for ID listing
     
-    return projects.map(project => project._id);
+    return projects.map(project => project._id?.toString ? project._id.toString() : project._id);
   } catch (error) {
     // Error fetching project IDs
     return [];
@@ -165,7 +203,7 @@ export async function getPublishedProjects(options: ProjectQueryOptions = {}) {
       .limit(limit)
       .lean({ virtuals: true });
     
-    return projects as any[]; // Type assertion to fix TypeScript issues
+    return projects.map(serializeProject) as any[]; // Type assertion to fix TypeScript issues
   } catch (error) {
     // Error fetching published projects
     return [];
@@ -196,7 +234,7 @@ export async function getRelatedProjects(
     .limit(limit)
     .lean({ virtuals: true });
     
-    return projects as any[]; // Type assertion to fix TypeScript issues
+    return projects.map(serializeProject) as any[]; // Type assertion to fix TypeScript issues
   } catch (error) {
     // Error fetching related projects
     return [];

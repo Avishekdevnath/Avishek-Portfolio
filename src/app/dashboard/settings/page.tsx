@@ -1,8 +1,8 @@
 "use client";
 
-import { User, Mail, Globe, Github, Linkedin, Twitter, Instagram, Youtube, Loader2 } from 'lucide-react';
+import { User, Mail, Globe, Github, Linkedin, Twitter, Instagram, Youtube, Loader2, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ISettings, ISocialLink, IContactInfo } from '@/models/Settings';
+import { ISettings, ISocialLink, IContactInfo, IOutreachSettings } from '@/models/Settings';
 import { useToast } from '@/context/ToastContext';
 
 const SOCIAL_PLATFORMS = [
@@ -35,6 +35,12 @@ export default function SettingsPage() {
       siteTitle: '',
       metaDescription: '',
       enableDarkMode: false
+    },
+    outreachSettings: {
+      defaultTone: 'professional',
+      defaultFollowUpGapDays: 7,
+      maxFollowUps: 2,
+      signatureSnippet: ''
     }
   });
 
@@ -66,8 +72,8 @@ export default function SettingsPage() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    section?: 'contactInfo' | 'websiteSettings'
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    section?: 'contactInfo' | 'websiteSettings' | 'outreachSettings'
   ) => {
     const { name, value, type } = e.target;
     
@@ -76,7 +82,7 @@ export default function SettingsPage() {
         return {
           ...prev,
           [section]: {
-            ...prev[section],
+            ...(prev[section] as object || {}),
             [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
           }
         };
@@ -433,7 +439,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Website Settings */}
-      <div className="bg-white rounded-xl shadow-sm">
+      <div className="bg-white rounded-xl shadow-sm mb-6">
         <div className="p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Website Settings</h2>
           <div className="space-y-4">
@@ -476,6 +482,92 @@ export default function SettingsPage() {
                 />
                 <span className="text-sm text-gray-700">Enable dark mode</span>
               </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Outreach Settings */}
+      <div className="bg-white rounded-xl shadow-sm mb-6">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Outreach Settings
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Configure default settings for your cold outreach workflow.
+          </p>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Default Tone
+                </label>
+                <select
+                  name="defaultTone"
+                  value={settings.outreachSettings?.defaultTone || 'professional'}
+                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                >
+                  <option value="professional">Professional</option>
+                  <option value="friendly">Friendly</option>
+                </select>
+                <p className="text-sm text-gray-500 mt-1">
+                  Default tone for AI-generated emails
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Default Follow-up Gap (days)
+                </label>
+                <input
+                  type="number"
+                  name="defaultFollowUpGapDays"
+                  value={settings.outreachSettings?.defaultFollowUpGapDays || 7}
+                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  min={1}
+                  max={30}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Days to wait before following up
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Max Follow-ups
+                </label>
+                <input
+                  type="number"
+                  name="maxFollowUps"
+                  value={settings.outreachSettings?.maxFollowUps || 2}
+                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  min={0}
+                  max={5}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Maximum follow-ups per email (ethical limit)
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Signature
+                </label>
+                <textarea
+                  name="signatureSnippet"
+                  value={settings.outreachSettings?.signatureSnippet || ''}
+                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                  placeholder="Best regards,&#10;John Doe&#10;Senior Developer&#10;https://johndoe.com"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Default signature appended to emails
+                </p>
+              </div>
             </div>
           </div>
         </div>

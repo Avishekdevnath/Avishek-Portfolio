@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, ExternalLink, LucideIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ExternalLink, LucideIcon } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
 
 export type NavCategory = 'Main' | 'Content' | 'Engagement' | 'System';
@@ -13,6 +13,13 @@ export interface NavItem {
   href: string;
   description: string;
   category: NavCategory;
+  children?: NavChildItem[];
+}
+
+export interface NavChildItem {
+  label: string;
+  href: string;
+  description?: string;
 }
 
 interface SidebarProps {
@@ -25,14 +32,56 @@ interface NavItemProps {
   item: NavItem;
   isActive: boolean;
   isOpen: boolean;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
 }
 
-const NavItemComponent = ({ item, isActive, isOpen }: NavItemProps) => {
+interface NavChildItemProps {
+  child: NavChildItem;
+  isActive: boolean;
+  isOpen: boolean;
+  depth?: number;
+}
+
+const NavChildItemComponent = ({ child, isActive, isOpen, depth = 0 }: NavChildItemProps) => {
+  return (
+    <Link
+      href={child.href}
+      className={`
+        group flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200
+        ${isActive
+          ? 'bg-blue-50 text-blue-700'
+          : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+        }
+        ${!isOpen ? 'justify-center' : ''}
+      `}
+      title={!isOpen && child.description ? child.description : undefined}
+      style={{ paddingLeft: isOpen ? `${12 + depth * 16}px` : undefined }}
+    >
+      {isOpen && (
+        <span className="text-sm font-medium truncate flex-1">
+          {child.label}
+        </span>
+      )}
+    </Link>
+  );
+};
+
+const NavItemComponent = ({ item, isActive, isOpen, isExpanded, onToggleExpand }: NavItemProps) => {
   const Icon = item.icon;
+  const hasChildren = item.children && item.children.length > 0;
+  
+  const handleClick = (e: React.MouseEvent) => {
+    if (hasChildren) {
+      e.preventDefault();
+      onToggleExpand();
+    }
+  };
   
   return (
     <Link
-      href={item.href}
+      href={hasChildren ? '#' : item.href}
+      onClick={handleClick}
       className={`
         group flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all duration-200
         ${isActive 
@@ -51,12 +100,18 @@ const NavItemComponent = ({ item, isActive, isOpen }: NavItemProps) => {
         `}
       />
       {isOpen && (
-        <span className="text-sm font-medium truncate flex-1">
-          {item.label}
-        </span>
-      )}
-      {isOpen && item.href.startsWith('http') && (
-        <ExternalLink size={14} className="text-gray-400" />
+        <>
+          <span className="text-sm font-medium truncate flex-1">
+            {item.label}
+          </span>
+          {hasChildren && (
+            isExpanded ? (
+              <ChevronUp size={16} className="text-gray-400" />
+            ) : (
+              <ChevronDown size={16} className="text-gray-400" />
+            )
+          )}
+        </>
       )}
     </Link>
   );
@@ -95,6 +150,24 @@ function SidebarSkeleton() {
 function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
   const pathname = usePathname();
   const [fullName, setFullName] = useState('Portfolio Admin');
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  // Auto-expand items when viewing their child pages
+  useEffect(() => {
+    const toExpand: Record<string, boolean> = {};
+    items.forEach(item => {
+      if (item.children && item.children.length > 0) {
+        const hasActiveChild = item.children.some(child => pathname.startsWith(child.href));
+        const isCurrentPath = pathname.startsWith(item.href);
+        if (hasActiveChild || isCurrentPath) {
+          toExpand[item.href] = true;
+        }
+      }
+    });
+    if (Object.keys(toExpand).length > 0) {
+      setExpandedItems(prev => ({ ...prev, ...toExpand }));
+    }
+  }, [pathname, items]);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -111,11 +184,22 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
     fetchSettings();
   }, []);
 
-  const isActive = (href: string): boolean => {
+  const isActive = (href: string, hasChildren?: boolean): boolean => {
     if (href === '/dashboard') {
       return pathname === href;
     }
+    // Parent items with children are only active when exactly on their href
+    if (hasChildren) {
+      return pathname === href;
+    }
     return pathname.startsWith(href);
+  };
+
+  const toggleExpand = (href: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [href]: !prev[href]
+    }));
   };
 
   const groupedItems = items.reduce<Record<NavCategory, NavItem[]>>((acc, item) => {
@@ -187,12 +271,29 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
             )}
             <div className="space-y-1">
               {categoryItems.map((item) => (
-                <NavItemComponent
-                  key={item.href}
-                  item={item}
-                  isActive={isActive(item.href)}
-                  isOpen={isOpen}
-                />
+                <div key={item.href}>
+                  <NavItemComponent
+                    item={item}
+                    isActive={isActive(item.href, !!item.children)}
+                    isOpen={isOpen}
+                    isExpanded={!!expandedItems[item.href]}
+                    onToggleExpand={() => toggleExpand(item.href)}
+                  />
+                  {/* Render child items */}
+                  {isOpen && item.children && item.children.length > 0 && expandedItems[item.href] && (
+                    <div className="mt-1 space-y-1">
+                      {item.children.map((child) => (
+                        <NavChildItemComponent
+                          key={child.href}
+                          child={child}
+                          isActive={isActive(child.href)}
+                          isOpen={isOpen}
+                          depth={1}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>

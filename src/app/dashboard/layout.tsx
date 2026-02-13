@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Code2,
   FileText,
+  Send,
   Mail,
   Settings,
   BookOpen,
@@ -31,6 +32,23 @@ const sidebarItems: NavItem[] = [
     href: '/dashboard',
     description: 'Dashboard overview and analytics',
     category: 'Main'
+  },
+  { 
+    icon: Send, 
+    label: 'Outreach', 
+    href: '/dashboard/outreach',
+    description: 'Cold outreach workflow',
+    category: 'Main',
+    children: [
+      { label: 'Overview', href: '/dashboard/outreach' },
+      { label: 'Companies', href: '/dashboard/outreach/companies' },
+      { label: 'Contacts', href: '/dashboard/outreach/contacts' },
+      { label: 'Templates', href: '/dashboard/outreach/templates' },
+      { label: 'AI Assistant', href: '/dashboard/outreach/ai' },
+      { label: 'Follow-ups', href: '/dashboard/outreach/follow-ups' },
+      { label: 'Log', href: '/dashboard/outreach/log' },
+      { label: 'Analytics', href: '/dashboard/outreach/analytics' },
+    ]
   },
   { 
     icon: Wrench, 
@@ -189,7 +207,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         /* Tablet: avoid sidebar overlay by giving main space for collapsed rail */
         @media (max-width: 1024px) {
           .dashboard-main {
-            margin-left: 72px;
+            margin-left: 0;
             padding: 16px;
           }
 

@@ -30,7 +30,6 @@ export default function Header() {
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Projects", href: "/projects" },
-    { name: "Blogs", href: "/blogs" },
     { name: "Tools", href: "https://aitoolbox-v1.vercel.app/" },
     { name: "Contact", href: "/contact" },
     { name: "Hire Me", href: "/hire-me" },
@@ -125,12 +124,12 @@ export default function Header() {
     //   </div>
     // </header>
     <header
-      className={`${styles.navStyle}   border mx-auto mt-8 z-50 shadow-md lg:max-w-[70%] md:max-w-[90%] sm:max-w-[95%] ${isOpen ? "rounded-lg" : "rounded-full"}`}
+      className={`${styles.navStyle}   border mx-auto mt-8 z-50 shadow-md lg:max-w-[75%] xl:max-w-[70%] md:max-w-[90%] sm:max-w-[95%] ${isOpen ? "rounded-lg" : "rounded-full"}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="flex justify-between items-center py-4">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-2">
+        <div className="flex justify-between items-center py-4 gap-4">
+          <Link href="/" className="flex items-center gap-2 xl:gap-3 hover:opacity-80 transition-opacity shrink-0">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 shrink-0">
               <Image
                 src={profileImage}
                 alt="Avishek Devnath"
@@ -139,23 +138,23 @@ export default function Header() {
                 className="object-cover"
               />
             </div>
-            <div className="text-2xl font-bold tracking-tight">
+            <div className="text-xl xl:text-2xl font-bold tracking-tight whitespace-nowrap">
               Avishek
             </div>
           </Link>
 
-          <nav className="hidden lg:flex space-x-8 flex-wrap">
+          <nav className="hidden lg:flex space-x-4 xl:space-x-6 2xl:space-x-8 flex-nowrap items-center">
             {navLinks.map((link) => (
               <div
                 key={link.name}
-                className={`px-3 py-1 ${link.name === "Hire Me"
+                className={`px-2 xl:px-3 py-1 shrink-0 ${link.name === "Hire Me"
                     ? `${styles.hireStyle} border-2 border-orange-400 rounded-full`
                     : ""
                   }`}
               >
                 <Link
                   href={link.href}
-                  className="text-lg font-medium hover:text-teal-400 transition-colors"
+                  className="text-base xl:text-lg font-medium hover:text-teal-400 transition-colors whitespace-nowrap"
                 >
                   {link.name}
                 </Link>

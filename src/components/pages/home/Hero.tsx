@@ -8,9 +8,9 @@ import { useState, useEffect } from "react";
 export default function Hero() {
   // Settings state
   const [profileImage, setProfileImage] = useState("/assets/home/profile-img.jpg");
-  const [linkedinUrl, setLinkedinUrl] = useState("https://www.linkedin.com/in/avishek-devnath");
+  const [linkedinUrl, setLinkedinUrl] = useState("https://www.linkedin.com/in/avishek-devnath/");
   const [githubUrl, setGithubUrl] = useState("https://github.com/Avishekdevnath");
-  const [resumeUrl, setResumeUrl] = useState("/assets/resume.pdf");
+  const [resumeUrl, setResumeUrl] = useState("https://drive.google.com/file/d/1Gn6SkgBT3oA7EVKMFJiM4boAASnwH8T5/view");
   const [portfolioUrl, setPortfolioUrl] = useState("");
   
   // Typewriter effect states
@@ -19,12 +19,11 @@ export default function Hero() {
   const [isDeleting, setIsDeleting] = useState(false);
   
   const typewriterTexts = [
-    "Building scalable solutions",
-    "Crafting innovative web apps",
-    "Optimizing user experiences",
-    "Creating robust APIs",
-    "Designing system architectures",
-    "Solving complex problems"
+    "Designing backend systems under real constraints",
+    "Owning system design from idea to production",
+    "Building backend-first architectures",
+    "Designing APIs, data models, and auth systems",
+    "Operating systems beyond initial delivery"
   ];
   
   // Fetch settings data
@@ -110,9 +109,12 @@ export default function Hero() {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
               Avishek Devnath
             </h1>
-            <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-gray-600">
-              A Software Engineer
+            <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-gray-700">
+              Backend Engineer - System Design Ownership
             </h2>
+            <p className="text-sm md:text-base text-gray-600 max-w-md">
+              Designing and operating backend systems with real users, real constraints, and long-term ownership.
+            </p>
             <div className="h-6 md:h-7 flex items-center justify-center md:justify-center">
               <p className="text-sm md:text-base text-gray-500 flex items-center">
                 <span className="font-medium">{currentText}</span>

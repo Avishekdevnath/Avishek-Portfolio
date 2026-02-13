@@ -90,7 +90,7 @@ export async function GET() {
       }
     ]) as [{ counts: any[], trending: BlogStatsResult[] }];
 
-    // Get project stats with active projects
+    // Get project stats (published/draft)
     const projectStats = await Project.aggregate([
       {
         $facet: {
@@ -99,14 +99,14 @@ export async function GET() {
               $group: {
                 _id: null,
                 total: { $sum: 1 },
-                active: {
+                published: {
                   $sum: {
-                    $cond: [{ $eq: ['$status', 'active'] }, 1, 0]
+                    $cond: [{ $eq: ['$status', 'published'] }, 1, 0]
                   }
                 },
-                completed: {
+                draft: {
                   $sum: {
-                    $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+                    $cond: [{ $eq: ['$status', 'draft'] }, 1, 0]
                   }
                 }
               }
@@ -114,7 +114,7 @@ export async function GET() {
           ],
           recent: [
             {
-              $match: { status: 'active' }
+              $match: { status: 'published' }
             },
             {
               $sort: { updatedAt: -1 }
@@ -267,8 +267,8 @@ export async function GET() {
       },
       projects: {
         total: projectStats[0]?.counts[0]?.total || 0,
-        active: projectStats[0]?.counts[0]?.active || 0,
-        completed: projectStats[0]?.counts[0]?.completed || 0,
+        published: projectStats[0]?.counts[0]?.published || 0,
+        draft: projectStats[0]?.counts[0]?.draft || 0,
         recent: projectStats[0]?.recent || []
       },
       messages: {
@@ -296,23 +296,5 @@ export async function GET() {
       { error: 'Failed to fetch dashboard stats' },
       { status: 500 }
     );
-  }
-}
-
-function formatTimeAgo(date: Date): string {
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) {
-    return `${days} day${days > 1 ? 's' : ''} ago`;
-  } else if (hours > 0) {
-    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-  } else if (minutes > 0) {
-    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-  } else {
-    return 'Just now';
   }
 }

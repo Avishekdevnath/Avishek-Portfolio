@@ -124,6 +124,46 @@ export async function sendNotificationEmail(data: {
   });
 }
 
+export async function sendOutreachEmail(data: {
+  to: string;
+  toName: string;
+  subject: string;
+  body: string;
+}) {
+  try {
+    const text = `Hi ${data.toName},
+
+${data.body}
+
+Best regards,
+${process.env.EMAIL_FROM_NAME || 'Portfolio Contact'}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <p>Hi ${data.toName},</p>
+        
+        <p>${data.body.replace(/\n/g, '<br>')}</p>
+        
+        <p>Best regards,<br>
+        ${process.env.EMAIL_FROM_NAME || 'Portfolio Contact'}</p>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: `"${process.env.EMAIL_FROM_NAME || 'Portfolio Contact'}" <${process.env.EMAIL_USER}>`,
+      to: data.to,
+      subject: data.subject,
+      text,
+      html,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 export async function sendReply(data: {
   to: string;
   name: string;

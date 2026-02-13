@@ -63,7 +63,13 @@ export default function About() {
             <div className="text-center lg:text-left">
               <h3 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-3">Avishek Devnath</h3>
               <p className="text-body-sm text-gray-600 leading-relaxed">
-                Hi, I'm Avishek Devnath! I am a CSE graduate from BGC Trust University and an MSc student at Dhaka University, specializing in MERN Stack development with experience in Docker, Kubernetes, and Django. As a Senior CS Instructor at Phitron, I've mentored students in C, C++, Python, DSA, SQL, and web development, and built open-source projects like Xerror and Py-OneSend. I am now seeking opportunities as a Software Engineer to build scalable, secure, and user-focused applications.
+                I'm Avishek Devnath, a backend-focused software engineer with hands-on experience designing, building, and maintaining systems under real operational constraints. My work centers on owning system design decisions across APIs, data models, authorization, and background processing, and evolving those systems as requirements and usage grow.
+              </p>
+              <p className="text-body-sm text-gray-600 leading-relaxed">
+                Alongside engineering work, I serve as a Senior CS Instructor at Phitron, where teaching sharpens my fundamentals and communication. My primary professional focus remains building and operating backend systems with real users, real trade-offs, and long-term ownership.
+              </p>
+              <p className="text-body-sm text-gray-600 leading-relaxed">
+                I have worked across internal and public-facing platforms, balancing scalability, security, and maintainability rather than optimizing for frameworks or short-term delivery.
               </p>
             </div>
 
@@ -77,7 +83,7 @@ export default function About() {
                   <h5 className="text-h5 weight-semibold text-gray-900">Experience</h5>
                 </div>
                 <p className="text-body-sm text-gray-600 leading-relaxed">
-                  3+ years as senior cs instructor and practicing full-stack developer
+                  3+ years as a practicing backend-focused engineer and Senior CS Instructor
                 </p>
               </div>
               

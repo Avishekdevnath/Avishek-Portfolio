@@ -13,6 +13,9 @@ interface ExperienceSectionProps {
   limit?: number;
   title?: string;
   subtitle?: string;
+  hideHeader?: boolean;
+  gridClassName?: string;
+  containerClassName?: string;
   className?: string;
 }
 
@@ -23,6 +26,9 @@ export default function ExperienceSection({
   limit,
   title,
   subtitle,
+  hideHeader = false,
+  gridClassName,
+  containerClassName = '',
   className = ''
 }: ExperienceSectionProps) {
   const [experiences, setExperiences] = useState<{
@@ -172,16 +178,18 @@ export default function ExperienceSection({
 
   return (
     <section className={`py-12 md:py-16 px-4 ${className}`}>
-      <div className="max-w-6xl mx-auto">
+      <div className={`max-w-6xl mx-auto ${containerClassName}`}>
         {/* Header */}
-        <header className="text-center mb-1 md:mb-2 font-ui">
-          <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-2">
-            {title || getDefaultTitle()}
-          </h2>
-          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto">
-            {subtitle || getDefaultSubtitle()}
-          </p>
-        </header>
+        {!hideHeader && (
+          <header className="text-center mb-1 md:mb-2 font-ui">
+            <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-2">
+              {title || getDefaultTitle()}
+            </h2>
+            <p className="text-body-sm text-gray-600 max-w-2xl mx-auto">
+              {subtitle || getDefaultSubtitle()}
+            </p>
+          </header>
+        )}
 
         {/* Work Experience Section */}
         {(type === 'both' || type === 'work') && hasWork && (
@@ -198,9 +206,9 @@ export default function ExperienceSection({
               </div>
             )}
             <div className={`grid gap-6 ${
-              variant === 'compact' 
+              gridClassName || (variant === 'compact' 
                 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                : 'grid-cols-1'
+                : 'grid-cols-1')
             }`}>
               {experiences.work.map((experience) => (
                 <ExperienceCard 
@@ -228,9 +236,9 @@ export default function ExperienceSection({
               </div>
             )}
             <div className={`grid gap-6 ${
-              variant === 'compact' 
+              gridClassName || (variant === 'compact' 
                 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                : 'grid-cols-1'
+                : 'grid-cols-1')
             }`}>
               {experiences.education.map((experience) => (
                 <ExperienceCard 

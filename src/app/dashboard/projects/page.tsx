@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FaPlus, FaEdit, FaTrash, FaEye, FaSearch, FaFilter, FaStar } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaEye, FaSearch, FaFilter, FaStar, FaGripVertical } from 'react-icons/fa';
 import { Project } from '@/types/dashboard';
 
 export default function ProjectsPage() {
@@ -14,6 +14,7 @@ export default function ProjectsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<string[]>([]);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -127,22 +128,19 @@ export default function ProjectsPage() {
     }
 
     try {
-      // Sort projects by creation date and assign order numbers
-      const sortedProjects = [...projects].sort((a, b) => 
+      // Sort projects by creation date and send ordered IDs
+      const sortedProjects = [...projects].sort((a, b) =>
         new Date(a.createdAt as string).getTime() - new Date(b.createdAt as string).getTime()
       );
 
-      const updates = sortedProjects.map((project, index) => ({
-        id: project._id,
-        order: index
-      }));
+      const projectIds = sortedProjects.map((project) => project._id);
 
-      const response = await fetch('/api/projects/bulk', {
-        method: 'PATCH',
+      const response = await fetch('/api/projects/reorder', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ projects: updates })
+        body: JSON.stringify({ projectIds })
       });
 
       if (response.ok) {
@@ -150,6 +148,50 @@ export default function ProjectsPage() {
       }
     } catch (error) {
       // Error updating orders
+    }
+  };
+
+  const handleDragStart = (projectId: string) => {
+    setDraggedId(projectId);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+  };
+
+  const handleDrop = async (targetId: string) => {
+    if (!draggedId || draggedId === targetId) return;
+
+    const currentList = [...projects];
+    const fromIndex = currentList.findIndex(p => p._id === draggedId);
+    const toIndex = currentList.findIndex(p => p._id === targetId);
+    if (fromIndex === -1 || toIndex === -1) return;
+
+    const [moved] = currentList.splice(fromIndex, 1);
+    currentList.splice(toIndex, 0, moved);
+
+    const reordered = currentList.map((project, index) => ({
+      ...project,
+      order: index
+    }));
+
+    setProjects(reordered);
+
+    try {
+      const projectIds = reordered.map(project => project._id);
+      const response = await fetch('/api/projects/reorder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projectIds })
+      });
+
+      if (!response.ok) {
+        fetchProjects();
+      }
+    } catch (error) {
+      fetchProjects();
     }
   };
 
@@ -293,6 +335,7 @@ export default function ProjectsPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-center text-table-header text-gray-600">Drag</th>
                 <th className="px-6 py-3 text-left text-table-header text-gray-600">Title</th>
                 <th className="px-6 py-3 text-left text-table-header text-gray-600">Category</th>
                 <th className="px-6 py-3 text-center text-table-header text-gray-600">Order</th>
@@ -317,7 +360,18 @@ export default function ProjectsPage() {
                 </tr>
               ) : (
                 projects.map((project) => (
-                  <tr key={project._id} className="hover:bg-gray-50 transition-colors">
+                  <tr
+                    key={project._id}
+                    className={`hover:bg-gray-50 transition-colors ${draggedId === project._id ? 'opacity-60' : ''}`}
+                    draggable
+                    onDragStart={() => handleDragStart(project._id)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(project._id)}
+                  >
+                    <td className="px-4 py-4 text-center text-gray-400">
+                      <FaGripVertical className="inline icon-sm cursor-move" />
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
                         <span className="weight-medium text-gray-900 text-table-cell">{project.title}</span>

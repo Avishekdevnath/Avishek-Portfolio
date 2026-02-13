@@ -12,6 +12,13 @@ export interface IContactInfo {
   responseTime: string;
 }
 
+export interface IOutreachSettings {
+  defaultTone: 'professional' | 'friendly';
+  defaultFollowUpGapDays: number;
+  maxFollowUps: number;
+  signatureSnippet?: string;
+}
+
 export interface ISettings extends Document {
   userId: string;
   profileImage?: string;
@@ -26,6 +33,7 @@ export interface ISettings extends Document {
     metaDescription: string;
     enableDarkMode: boolean;
   };
+  outreachSettings?: IOutreachSettings;
   updatedAt: Date;
 }
 
@@ -103,6 +111,29 @@ const SettingsSchema = new Schema<ISettings>({
     enableDarkMode: {
       type: Boolean,
       default: false
+    }
+  },
+  outreachSettings: {
+    defaultTone: {
+      type: String,
+      enum: ['professional', 'friendly'],
+      default: 'professional'
+    },
+    defaultFollowUpGapDays: {
+      type: Number,
+      default: 7,
+      min: 1,
+      max: 30
+    },
+    maxFollowUps: {
+      type: Number,
+      default: 2,
+      min: 0,
+      max: 5
+    },
+    signatureSnippet: {
+      type: String,
+      default: ''
     }
   }
 }, {
