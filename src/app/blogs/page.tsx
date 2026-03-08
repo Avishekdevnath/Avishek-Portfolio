@@ -350,7 +350,7 @@ export default function Blogs() {
               <h1 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
                 Blog Posts
               </h1>
-              <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed text-justify">
                 Explore my thoughts, tutorials, and insights on web development, technology, and software engineering. Use search and filters to quickly find articles by category, tags, or topic.
               </p>
             </div>

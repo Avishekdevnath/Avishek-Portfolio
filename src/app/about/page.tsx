@@ -113,7 +113,7 @@ export default function About() {
                 <h1 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-3">
                   Avishek <span className="text-gray-400">Devnath</span>
                 </h1>
-                <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed text-justify">
                   I design, ship, and maintain backend systems under real operational constraints—from APIs and data models to auth and background processing.
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center pt-4">
@@ -169,7 +169,7 @@ export default function About() {
                       <h2 className="text-h5 md:text-h4 weight-bold text-gray-900 mb-2">
                         What I build and own
                       </h2>
-                      <div className="text-body-sm text-gray-600 leading-relaxed space-y-3">
+                      <div className="text-body-sm text-gray-600 leading-relaxed space-y-3 text-justify">
                         <p>
                           Backend-first systems where the job is not just delivery, but ownership: architecture, trade-offs, and long-term maintainability.
                         </p>
@@ -214,7 +214,7 @@ export default function About() {
                       <FaUniversity className="text-blue-600" />
                       <h3 className="text-body font-semibold text-gray-900">Academic foundation</h3>
                     </div>
-                    <p className="text-body-sm text-gray-600 leading-relaxed">
+                    <p className="text-body-sm text-gray-600 leading-relaxed text-justify">
                       CSE graduate (BGC Trust University) and currently pursuing an MSc in CSE at the University of Dhaka, strengthening grounding in systems, security, and applied AI.
                     </p>
                   </div>

@@ -121,7 +121,7 @@ export default function HireMe() {
                             <h1 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
                                 Let's Build Something Amazing Together
                             </h1>
-                            <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                            <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed text-justify">
                                 Senior CS Instructor at <a href="https://phitron.io/about-us" target="_blank" rel="noopener noreferrer" style={{color: "#3B82F6", textDecoration: "none"}}>Phitron</a> & Full-Stack Developer with 500+ LeetCode problems solved, extensive teaching and mentoring experience, and proven track record in building scalable applications while guiding students through their programming journey.
                     </p>
                 </div>
@@ -178,7 +178,7 @@ export default function HireMe() {
                                         <h4 className="text-h5 weight-semibold text-gray-900 mb-3">
                                             {skill.title}
                                         </h4>
-                                        <p className="text-body-sm text-gray-600 leading-relaxed">{skill.description}</p>
+                                        <p className="text-body-sm text-gray-600 leading-relaxed text-justify">{skill.description}</p>
                                     </div>
                                 ))}
                             </div>
@@ -225,19 +225,19 @@ export default function HireMe() {
                         <div className="space-y-4">
                                 <details className="bg-gradient-to-b from-gray-50 to-white p-6 rounded-2xl border border-gray-300 shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
                                     <summary className="font-semibold text-gray-900 cursor-pointer text-h6">How soon can we start?</summary>
-                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed">I can typically start within 1–2 weeks depending on the project scope and current commitments. For urgent projects, we can discuss accelerated timelines.</p>
+                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed text-justify">I can typically start within 1–2 weeks depending on the project scope and current commitments. For urgent projects, we can discuss accelerated timelines.</p>
                                 </details>
                                 <details className="bg-gradient-to-b from-gray-50 to-white p-6 rounded-2xl border border-gray-300 shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
                                     <summary className="font-semibold text-gray-900 cursor-pointer text-h6">What's your communication style?</summary>
-                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed">Async-first with scheduled check-ins, crisp updates, and demo-driven milestones. I provide regular progress reports and maintain clear documentation throughout the project.</p>
+                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed text-justify">Async-first with scheduled check-ins, crisp updates, and demo-driven milestones. I provide regular progress reports and maintain clear documentation throughout the project.</p>
                             </details>
                                 <details className="bg-gradient-to-b from-gray-50 to-white p-6 rounded-2xl border border-gray-300 shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
                                     <summary className="font-semibold text-gray-900 cursor-pointer text-h6">Do you provide documentation and handover?</summary>
-                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed">Yes — comprehensive code walkthrough, README documentation, deployment guides, and handover notes are included. I also provide training sessions for your team.</p>
+                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed text-justify">Yes — comprehensive code walkthrough, README documentation, deployment guides, and handover notes are included. I also provide training sessions for your team.</p>
                             </details>
                                 <details className="bg-gradient-to-b from-gray-50 to-white p-6 rounded-2xl border border-gray-300 shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
                                     <summary className="font-semibold text-gray-900 cursor-pointer text-h6">What about mentoring and knowledge transfer?</summary>
-                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed">As a Senior CS Instructor at <a href="https://phitron.io/about-us" target="_blank" rel="noopener noreferrer" style={{color: "#3B82F6", textDecoration: "none"}}>Phitron</a>, I specialize in knowledge transfer and student mentorship. I provide detailed explanations, code reviews, and can conduct training sessions for your development team. My mentoring experience includes guiding students through complex programming concepts and career development.</p>
+                                    <p className="text-body-sm text-gray-600 mt-3 leading-relaxed text-justify">As a Senior CS Instructor at <a href="https://phitron.io/about-us" target="_blank" rel="noopener noreferrer" style={{color: "#3B82F6", textDecoration: "none"}}>Phitron</a>, I specialize in knowledge transfer and student mentorship. I provide detailed explanations, code reviews, and can conduct training sessions for your development team. My mentoring experience includes guiding students through complex programming concepts and career development.</p>
                             </details>
                         </div>
                     </div>

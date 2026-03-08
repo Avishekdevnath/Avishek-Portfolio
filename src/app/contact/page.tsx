@@ -140,7 +140,7 @@ export default function Contact() {
               <h1 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
                 Get in Touch
               </h1>
-              <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed text-justify">
                 Have a project in mind or just want to chat? I'd love to hear from you. Let's create something amazing together! Use the form below or connect with me through social media.
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function Contact() {
                   <h2 className="text-h5 weight-semibold text-gray-900 mb-5">
                     Let's Talk
                   </h2>
-                  <p className="text-body-sm text-gray-600 leading-relaxed mb-6">
+                  <p className="text-body-sm text-gray-600 leading-relaxed mb-6 text-justify">
                     I'm always open to discussing new opportunities, creative
                     projects, or just having a friendly conversation about
                     technology and development.

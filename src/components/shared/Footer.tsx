@@ -22,7 +22,7 @@ export default function Footer() {
   const email = settings?.contactInfo?.email;
 
   return (
-    <footer className="bg-gray-900 text-white py-12">
+    <footer className="bg-gray-900 text-white py-8 md:py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           {/* Brand and Description */}
@@ -30,7 +30,7 @@ export default function Footer() {
             <Link href="/" className="text-2xl font-bold text-white hover:text-orange-400 transition-colors">
               {settings?.websiteSettings?.title || 'Portfolio'}
             </Link>
-            <p className="mt-2 text-gray-400">
+            <p className="mt-2 text-gray-400 text-justify">
               {settings?.websiteSettings?.metaDescription || 'Full Stack Developer'}
             </p>
           </div>

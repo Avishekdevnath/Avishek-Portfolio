@@ -74,7 +74,7 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
                   {project.category}
                 </span>
               )}
-                <p className="text-body text-gray-700 leading-relaxed">
+                <p className="text-body text-gray-700 leading-relaxed text-justify">
                 {project.shortDescription}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">

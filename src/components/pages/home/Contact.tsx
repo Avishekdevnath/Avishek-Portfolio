@@ -131,7 +131,7 @@ export default function Contact() {
           <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
             Let's Work Together
           </h2>
-          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed text-justify">
             Have a project in mind or just want to chat? I'd love to hear from you.
             Let's create something amazing together!
           </p>
@@ -144,7 +144,7 @@ export default function Contact() {
               <h3 className="text-h5 weight-semibold text-gray-900 mb-3">
                 Contact Information
               </h3>
-              <p className="text-body-sm text-gray-600 mb-6 leading-relaxed">
+              <p className="text-body-sm text-gray-600 mb-6 leading-relaxed text-justify">
                 Feel free to reach out through any of these channels. I'm always excited
                 to connect and discuss new opportunities.
               </p>

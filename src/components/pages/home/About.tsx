@@ -52,7 +52,7 @@ export default function About() {
               <img
                 src={profileImage || "/placeholder.svg"}
                 alt="Avishek Devnath"
-                className="h-80 w-80 object-cover rounded-xl transform hover:scale-105 transition-transform duration-300"
+                className="h-52 w-52 sm:h-80 sm:w-80 object-cover rounded-xl transform hover:scale-105 transition-transform duration-300"
               />
             </div>
           </div>
@@ -62,13 +62,13 @@ export default function About() {
             {/* Name and Title */}
             <div className="text-center lg:text-left">
               <h3 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-3">Avishek Devnath</h3>
-              <p className="text-body-sm text-gray-600 leading-relaxed">
+              <p className="text-body-sm text-gray-600 leading-relaxed text-justify">
                 I'm Avishek Devnath, a backend-focused software engineer with hands-on experience designing, building, and maintaining systems under real operational constraints. My work centers on owning system design decisions across APIs, data models, authorization, and background processing, and evolving those systems as requirements and usage grow.
               </p>
-              <p className="text-body-sm text-gray-600 leading-relaxed">
+              <p className="text-body-sm text-gray-600 leading-relaxed text-justify">
                 Alongside engineering work, I serve as a Senior CS Instructor at Phitron, where teaching sharpens my fundamentals and communication. My primary professional focus remains building and operating backend systems with real users, real trade-offs, and long-term ownership.
               </p>
-              <p className="text-body-sm text-gray-600 leading-relaxed">
+              <p className="text-body-sm text-gray-600 leading-relaxed text-justify">
                 I have worked across internal and public-facing platforms, balancing scalability, security, and maintainability rather than optimizing for frameworks or short-term delivery.
               </p>
             </div>

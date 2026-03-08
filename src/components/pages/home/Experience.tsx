@@ -162,7 +162,7 @@ export default function Experience() {
                       />
                     </div>
                     {skill.description && (
-                      <p className="mt-2 text-body-sm text-gray-500 leading-relaxed">
+                      <p className="mt-2 text-body-sm text-gray-500 leading-relaxed text-justify">
                         {skill.description}
                       </p>
                     )}

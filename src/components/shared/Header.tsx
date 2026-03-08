@@ -124,10 +124,10 @@ export default function Header() {
     //   </div>
     // </header>
     <header
-      className={`${styles.navStyle}   border mx-auto mt-8 z-50 shadow-md lg:max-w-[75%] xl:max-w-[70%] md:max-w-[90%] sm:max-w-[95%] ${isOpen ? "rounded-lg" : "rounded-full"}`}
+      className={`${styles.navStyle}   border mx-auto mt-4 md:mt-8 z-50 shadow-md max-w-[90%] sm:max-w-[95%] md:max-w-[90%] lg:max-w-[75%] xl:max-w-[70%] ${isOpen ? "rounded-lg" : "rounded-full"}`}
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-2">
-        <div className="flex justify-between items-center py-4 gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-1 md:py-2">
+        <div className="flex justify-between items-center py-2 md:py-4 gap-4">
           <Link href="/" className="flex items-center gap-2 xl:gap-3 hover:opacity-80 transition-opacity shrink-0">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 shrink-0">
               <Image
@@ -165,7 +165,7 @@ export default function Header() {
           <div className="lg:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="focus:outline-none p-4 rounded-md hover:bg-gray-100 transition-colors relative z-10 pointer-events-auto"
+              className="focus:outline-none p-2 rounded-md hover:bg-gray-100 transition-colors relative z-10 pointer-events-auto"
               aria-label="Toggle menu"
             >
               <svg
@@ -206,7 +206,7 @@ export default function Header() {
               <li key={link.name}>
                 <Link
                   href={link.href}
-                  className={`block text-lg font-medium text-gray-800 hover:bg-gray-100 hover:text-teal-400 py-3 px-4 rounded-lg transition-colors ${link.name === "Hire Me"
+                  className={`block text-sm sm:text-base font-medium text-gray-800 hover:bg-gray-100 hover:text-teal-400 py-2 px-3 rounded-lg transition-colors ${link.name === "Hire Me"
                       ? `${styles.hireStyle} border-2 border-orange-400 rounded-full`
                       : ""
                     }`}
