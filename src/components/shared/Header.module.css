@@ -1,49 +1,119 @@
-/* src\components\shared\Header.module.css */
-.navStyle {
-  background-color: rgba(252, 248, 248, 0.95);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease-in-out;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* Nav surface (shared by capsule + mobile dropdown) */
+.navCapsule {
+  background: rgba(250, 248, 244, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.navStyle:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+/* Shadow states */
+.navDefault {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+.navDefault:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07), 0 8px 22px rgba(0, 0, 0, 0.09);
+}
+.navScrolled {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 10px 28px rgba(0, 0, 0, 0.1);
 }
 
-.hireStyle {
-  background-color: #FFEADE;
-  transition: all 0.3s ease;
+/* Hire Me – desktop */
+.hireMe {
   position: relative;
   overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 1.1rem;
+  border-radius: 9999px;
+  border: 2px solid #fb923c;
+  background: #ffeade;
+  color: #c2410c;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.25s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-
-.hireStyle:hover {
-  background-color: #FFE0CC;
+.hireMe:hover {
+  background: #ffe0cc;
+  box-shadow: 0 3px 10px rgba(251, 146, 60, 0.28);
   transform: translateY(-1px);
 }
-
-.hireStyle::after {
-  content: '';
+.hireMe::after {
+  content: "";
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 70%
   );
-  transition: 0.5s;
+  transform: translateX(-130%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+.hireMe:hover::after {
+  transform: translateX(130%);
 }
 
-.hireStyle:hover::after {
-  left: 100%;
+/* Hire Me – mobile */
+.mobileHire {
+  border-radius: 9999px;
+  border: 2px solid #fb923c;
+  background: #ffeade;
+  color: #c2410c;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 0.2rem;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.mobileHire:hover {
+  background: #ffe0cc;
+  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.22);
 }
 
+/* Burger — no display set here, let Tailwind lg:hidden control visibility */
+.burger {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.35rem;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.burger:hover { background: rgba(0, 0, 0, 0.05); }
+
+.burger span {
+  display: block;
+  height: 2px;
+  background: #4a3728;
+  border-radius: 2px;
+  transition: width 0.25s ease, transform 0.3s ease, opacity 0.25s ease;
+  transform-origin: left center;
+}
+.burger span:nth-child(1) { width: 20px; }
+.burger span:nth-child(2) { width: 15px; }
+.burger span:nth-child(3) { width: 11px; }
+
+.burgerOpen span:nth-child(1) { width: 20px; transform: rotate(45deg); }
+.burgerOpen span:nth-child(2) { opacity: 0; transform: translateX(6px); }
+.burgerOpen span:nth-child(3) { width: 20px; transform: rotate(-45deg); }
+
+/* Mobile dropdown – hidden state has no border/shadow artifact */
+.mobileNavHidden {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Tighter bg on mobile */
 @media (max-width: 1024px) {
-  .navStyle {
-    background-color: rgba(252, 248, 248, 0.98);
-  }
+  .navCapsule { background: rgba(250, 248, 244, 0.97); }
 }

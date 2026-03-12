@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const query: BaseQuery<ExperienceType> = {
       type: 'education'
     };
-    if (status) query.status = status as 'draft' | 'published';
+    if (status && status !== 'all') query.status = status as 'draft' | 'published';
 
     // Build sort config
     const sortConfig: SortConfig = {

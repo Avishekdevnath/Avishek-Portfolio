@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainScale-CRM — Avishek Devnath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f0ece3;--cream-dark:#e8e2d6;--cream-deeper:#ddd5c5;
+  --sand:#c9b99a;--warm-brown:#8b7355;--deep-brown:#4a3728;
+  --ink:#2a2118;--orange:#d4622a;--teal:#3a7d6e;
+  --blue:#2d5a8e;--white:#faf8f4;--muted:#8a7a6a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);padding:2rem 1.5rem 6rem;}
+
+.page{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem;}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{
+  display:flex;align-items:center;gap:.5rem;
+  font-family:'DM Mono',monospace;font-size:.65rem;
+  letter-spacing:.08em;color:var(--muted);
+  padding-bottom:.5rem;
+}
+.breadcrumb a{color:var(--muted);text-decoration:none;transition:color .2s;}
+.breadcrumb a:hover{color:var(--orange);}
+.breadcrumb svg{width:10px;height:10px;opacity:.5;}
+
+/* ── HERO CARD ── */
+.hero-card{
+  background:var(--white);border:1px solid var(--cream-deeper);
+  border-radius:1rem;overflow:hidden;
+  position:relative;
+}
+.hero-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--orange),#f5a87a);
+}
+
+.hero-inner{
+  display:grid;grid-template-columns:1fr 1.05fr;
+  gap:0;min-height:320px;
+}
+
+/* left */
+.hero-left{
+  padding:2.2rem 2rem 2rem;
+  display:flex;flex-direction:column;gap:1rem;
+  border-right:1px solid var(--cream-deeper);
+}
+
+.proj-cat-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;
+  text-transform:uppercase;padding:.22rem .75rem;
+  border-radius:2rem;border:1px solid var(--cream-deeper);
+  background:var(--cream-dark);color:var(--warm-brown);
+  width:fit-content;
+}
+
+.proj-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.7rem,4vw,2.6rem);font-weight:600;
+  line-height:1.1;color:var(--ink);
+}
+.proj-title em{font-style:italic;color:var(--warm-brown);}
+
+.proj-desc{
+  font-size:.88rem;line-height:1.8;color:var(--warm-brown);
+  font-weight:300;max-width:44ch;
+}
+
+/* quick tag chips */
+.chip-row{display:flex;flex-wrap:wrap;gap:.4rem;}
+.chip{
+  font-family:'DM Mono',monospace;font-size:.6rem;
+  letter-spacing:.03em;padding:.18rem .6rem;
+  border-radius:2rem;border:1px solid var(--cream-deeper);
+  background:var(--cream-dark);color:var(--warm-brown);
+}
+
+/* CTA buttons */
+.cta-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.25rem;}
+.btn-source{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.55rem 1.25rem;border-radius:2rem;
+  background:var(--ink);color:var(--white);
+  font-size:.84rem;font-weight:500;text-decoration:none;
+  border:1.5px solid var(--ink);
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.btn-source:hover{background:var(--deep-brown);border-color:var(--deep-brown);transform:translateY(-1px);box-shadow:0 6px 18px rgba(42,33,24,.2);}
+.btn-source::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.1) 50%,transparent 70%);transform:translateX(-130%);transition:transform .5s ease;pointer-events:none;}
+.btn-source:hover::after{transform:translateX(130%);}
+.btn-demo{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.55rem 1.25rem;border-radius:2rem;
+  background:transparent;color:var(--orange);
+  font-size:.84rem;font-weight:500;text-decoration:none;
+  border:1.5px solid var(--orange);
+  transition:all .25s;
+}
+.btn-demo:hover{background:rgba(212,98,42,.06);transform:translateY(-1px);}
+.btn-source svg,.btn-demo svg{width:14px;height:14px;flex-shrink:0;}
+
+/* right: screenshot */
+.hero-right{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--cream-deeper),var(--cream-dark));
+  min-height:300px;
+}
+.hero-right img{
+  width:100%;height:100%;object-fit:cover;
+  object-position:top left;display:block;
+}
+.screenshot-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:.75rem;
+  font-size:3.5rem;opacity:.12;
+}
+/* live badge */
+.live-badge{
+  position:absolute;bottom:1rem;right:1rem;
+  display:inline-flex;align-items:center;gap:.45rem;
+  background:rgba(250,248,244,.94);backdrop-filter:blur(10px);
+  border:1px solid rgba(58,125,110,.22);border-radius:2rem;
+  padding:.38rem .9rem;font-size:.72rem;font-weight:500;
+  box-shadow:0 3px 10px rgba(74,55,40,.1);
+}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#3ab07a;animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(58,176,122,.2)}50%{box-shadow:0 0 0 6px rgba(58,176,122,.07)}}
+
+/* ── SECTION CARD ── */
+.sec-card{
+  background:var(--white);border:1px solid var(--cream-deeper);
+  border-radius:.85rem;overflow:hidden;
+}
+.sec-head{
+  display:flex;align-items:center;gap:.75rem;
+  padding:1.2rem 1.6rem;
+  border-bottom:1px solid var(--cream-deeper);
+}
+.sec-icon{
+  width:32px;height:32px;border-radius:.45rem;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;flex-shrink:0;
+}
+.si-orange{background:rgba(212,98,42,.1);}
+.si-teal{background:rgba(58,125,110,.1);}
+.si-blue{background:rgba(45,90,142,.1);}
+.si-brown{background:rgba(74,55,40,.08);}
+.sec-title{
+  font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--ink);
+}
+.sec-body{padding:1.4rem 1.6rem;}
+
+/* about text */
+.about-text{font-size:.87rem;line-height:1.8;color:var(--warm-brown);font-weight:300;}
+.about-text strong{font-weight:600;color:var(--ink);}
+
+/* ── TECH GRID ── */
+.tech-grid{display:flex;flex-wrap:wrap;gap:.6rem;}
+.tech-item{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.4rem .9rem;border-radius:.5rem;
+  border:1px solid var(--cream-deeper);background:var(--cream-dark);
+  transition:all .2s;cursor:default;
+}
+.tech-item:hover{border-color:var(--sand);background:var(--cream-deeper);}
+.tech-item svg{width:13px;height:13px;color:var(--orange);flex-shrink:0;}
+.tech-name{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--ink);letter-spacing:.02em;}
+
+/* ── LINK ROWS ── */
+.link-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.6rem;gap:1rem;
+  border-bottom:1px solid var(--cream-deeper);
+  transition:background .2s;text-decoration:none;color:inherit;
+}
+.link-row:last-child{border-bottom:none;}
+.link-row:hover{background:rgba(240,236,227,.5);}
+.link-left{display:flex;align-items:center;gap:.85rem;}
+.link-icon{
+  width:36px;height:36px;border-radius:.5rem;
+  border:1px solid var(--cream-deeper);background:var(--cream-dark);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.link-icon svg{width:16px;height:16px;color:var(--warm-brown);}
+.link-label{font-size:.88rem;font-weight:500;color:var(--ink);}
+.link-sub{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.06em;margin-top:.18rem;}
+.link-right{display:flex;align-items:center;gap:.75rem;flex-shrink:0;}
+.status-pill{
+  font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:.2rem .65rem;border-radius:2rem;
+}
+.sp-live{background:rgba(58,176,122,.12);color:#2e8c5c;border:1px solid rgba(58,176,122,.25);}
+.sp-gh{background:rgba(74,55,40,.08);color:var(--warm-brown);border:1px solid var(--cream-deeper);}
+.ext-arrow{
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid var(--cream-deeper);background:var(--cream-dark);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.link-row:hover .ext-arrow{border-color:var(--sand);background:var(--cream-deeper);}
+.ext-arrow svg{width:12px;height:12px;color:var(--muted);}
+
+/* ── RELATED CARDS ── */
+.related-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;
+  padding:1.4rem 1.6rem;
+}
+.rel-card{
+  background:var(--cream-dark);border:1px solid var(--cream-deeper);
+  border-radius:.75rem;overflow:hidden;
+  text-decoration:none;color:inherit;
+  transition:all .3s;
+}
+.rel-card:hover{border-color:var(--sand);box-shadow:0 6px 18px rgba(74,55,40,.09);transform:translateY(-2px);}
+.rel-thumb{
+  height:110px;overflow:hidden;position:relative;
+  background:linear-gradient(135deg,#d0c8b8,var(--cream-deeper));
+}
+.rel-thumb-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:.14;}
+.rel-cat-badge{
+  position:absolute;bottom:.5rem;left:.5rem;
+  font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:.15rem .55rem;border-radius:2rem;
+  background:rgba(42,33,24,.7);color:rgba(255,255,255,.85);
+}
+.rel-body{padding:.9rem 1rem;}
+.rel-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:.35rem;line-height:1.2;transition:color .2s;}
+.rel-card:hover .rel-name{color:var(--orange);}
+.rel-desc{font-size:.76rem;color:var(--muted);line-height:1.6;font-weight:300;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.6rem;}
+.rel-tags{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;margin-bottom:.75rem;}
+.rel-tag{font-family:'DM Mono',monospace;font-size:.54rem;padding:.12rem .5rem;border-radius:2rem;border:1px solid var(--cream-deeper);background:var(--white);color:var(--warm-brown);}
+.rel-more{font-family:'DM Mono',monospace;font-size:.54rem;color:var(--muted);}
+.rel-footer{
+  display:flex;gap:.55rem;padding:.65rem 1rem;
+  border-top:1px solid var(--cream-deeper);
+}
+.rel-link{
+  display:inline-flex;align-items:center;gap:.28rem;
+  font-size:.72rem;font-weight:500;color:var(--muted);
+  text-decoration:none;transition:color .2s;
+}
+.rel-link:hover{color:var(--ink);}
+.rel-link svg{width:11px;height:11px;}
+.rel-sep{width:1px;background:var(--cream-deeper);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero-right{min-height:200px;border-right:none;border-top:1px solid var(--cream-deeper);}
+  .related-grid{grid-template-columns:1fr;}
+  .sec-body{padding:1.2rem;}
+}
+@media(max-width:500px){
+  .related-grid{grid-template-columns:1fr;}
+  .cta-row{flex-direction:column;}
+  .btn-source,.btn-demo{justify-content:center;}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb">
+    <a href="/projects">Projects</a>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span>BrainScale-CRM</span>
+  </nav>
+
+  <!-- ══ HERO CARD ══ -->
+  <div class="hero-card">
+    <div class="hero-inner">
+
+      <!-- left -->
+      <div class="hero-left">
+        <span class="proj-cat-badge">Web Development</span>
+
+        <h1 class="proj-title">BrainScale<em>-CRM</em></h1>
+
+        <p class="proj-desc">
+          A modern multi-tenant CRM for managing students and customers, with call workflows, follow-ups, and team collaboration built for real operational use.
+        </p>
+
+        <div class="chip-row">
+          <span class="chip">Next.js 16</span>
+          <span class="chip">Node.js</span>
+          <span class="chip">Prisma</span>
+          <span class="chip">MongoDB</span>
+          <span class="chip">OpenAPI</span>
+          <span class="chip">Tailwind</span>
+        </div>
+
+        <div class="cta-row">
+          <a href="#" class="btn-source">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2A10 10 0 002 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+            View Source
+          </a>
+          <a href="#" class="btn-demo">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            Live Demo
+          </a>
+        </div>
+      </div>
+
+      <!-- right: screenshot -->
+      <div class="hero-right">
+        <!-- swap with: <img src="/assets/projects/brainscale.png" alt="BrainScale-CRM"> -->
+        <div class="screenshot-placeholder">🏢</div>
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          Live
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ ABOUT ══ -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-icon si-orange">📋</div>
+      <span class="sec-title">About this Project</span>
+    </div>
+    <div class="sec-body">
+      <p class="about-text">
+        <strong>BrainScale CRM</strong> is a multi-tenant CRM for managing students and customers, call workflows, follow-ups, and team collaboration. It was designed to handle real operational constraints — multi-tenancy, role-based access, and background job processing — without sacrificing maintainability. The system design prioritizes long-term ownership over short-term delivery speed.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ TECHNOLOGIES ══ -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-icon si-blue">⚙️</div>
+      <span class="sec-title">Technologies</span>
+    </div>
+    <div class="sec-body">
+      <div class="tech-grid">
+        <div class="tech-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          <span class="tech-name">Next.js 16</span>
+        </div>
+        <div class="tech-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          <span class="tech-name">Node.js</span>
+        </div>
+        <div class="tech-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z"/></svg>
+          <span class="tech-name">Prisma</span>
+        </div>
+        <div class="tech-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z"/></svg>
+          <span class="tech-name">MongoDB</span>
+        </div>
+        <div class="tech-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span class="tech-name">OpenAPI</span>
+        </div>
+        <div class="tech-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          <span class="tech-name">Tailwind CSS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REPOSITORIES ══ -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-icon si-brown">🔗</div>
+      <span class="sec-title">Repositories</span>
+    </div>
+    <a href="#" class="link-row">
+      <div class="link-left">
+        <div class="link-icon">
+          <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2A10 10 0 002 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+        </div>
+        <div>
+          <div class="link-label">Git Repo</div>
+          <div class="link-sub">Github</div>
+        </div>
+      </div>
+      <div class="link-right">
+        <span class="status-pill sp-gh">Public</span>
+        <div class="ext-arrow">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ══ DEMO LINKS ══ -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-icon si-teal">🌐</div>
+      <span class="sec-title">Demo Links</span>
+    </div>
+    <a href="#" class="link-row">
+      <div class="link-left">
+        <div class="link-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+        </div>
+        <div>
+          <div class="link-label">Live Site</div>
+          <div class="link-sub">brainscale-crm.vercel.app</div>
+        </div>
+      </div>
+      <div class="link-right">
+        <span class="status-pill sp-live">Live</span>
+        <div class="ext-arrow">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ══ RELATED PROJECTS ══ -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-icon si-orange">✦</div>
+      <span class="sec-title">Related Projects</span>
+    </div>
+    <div class="related-grid">
+
+      <!-- sms-web -->
+      <div class="rel-card">
+        <div class="rel-thumb">
+          <div class="rel-thumb-inner">🏫</div>
+          <span class="rel-cat-badge">Web Development</span>
+        </div>
+        <div class="rel-body">
+          <div class="rel-name">sms-web</div>
+          <div class="rel-desc">A production-ready Student Management System with attendance tracking, grading, and RBAC.</div>
+          <div class="rel-tags">
+            <span class="rel-tag">Next.js 15</span>
+            <span class="rel-tag">JWT</span>
+            <span class="rel-tag">Tailwind</span>
+            <span class="rel-more">+2</span>
+          </div>
+        </div>
+        <div class="rel-footer">
+          <a href="#" class="rel-link">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2A10 10 0 002 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+            Code
+          </a>
+        </div>
+      </div>
+
+      <!-- Ai-Toolbox -->
+      <div class="rel-card">
+        <div class="rel-thumb">
+          <div class="rel-thumb-inner">🧰</div>
+          <span class="rel-cat-badge">Web Development</span>
+        </div>
+        <div class="rel-body">
+          <div class="rel-name">Ai-Toolbox</div>
+          <div class="rel-desc">A comprehensive AI tools platform built with Next.js 15, aggregating text, image, and code utilities.</div>
+          <div class="rel-tags">
+            <span class="rel-tag">Next.js 15</span>
+            <span class="rel-tag">React</span>
+            <span class="rel-tag">TypeScript</span>
+            <span class="rel-more">+1</span>
+          </div>
+        </div>
+        <div class="rel-footer">
+          <a href="#" class="rel-link">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2A10 10 0 002 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+            Code
+          </a>
+          <div class="rel-sep"></div>
+          <a href="#" class="rel-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            Demo
+          </a>
+        </div>
+      </div>
+
+      <!-- FoodMart -->
+      <div class="rel-card">
+        <div class="rel-thumb">
+          <div class="rel-thumb-inner">🛒</div>
+          <span class="rel-cat-badge">Web Development</span>
+        </div>
+        <div class="rel-body">
+          <div class="rel-name">FoodMart — Ecommerce</div>
+          <div class="rel-desc">A client-side e-commerce application built with Next.js, featuring cart, checkout, and product management.</div>
+          <div class="rel-tags">
+            <span class="rel-tag">Next.js</span>
+            <span class="rel-tag">React</span>
+            <span class="rel-tag">JavaScript</span>
+            <span class="rel-more">+2</span>
+          </div>
+        </div>
+        <div class="rel-footer">
+          <a href="#" class="rel-link">
+            <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2A10 10 0 002 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+            Code
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

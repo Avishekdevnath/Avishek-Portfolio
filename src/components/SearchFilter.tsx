@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Search, X, Filter, ArrowUpDown, LayoutGrid, List } from 'lucide-react';
+import React from 'react';
+import { X, LayoutGrid, List } from 'lucide-react';
 
 interface SearchFilterProps {
   searchTerm: string;
@@ -20,20 +20,10 @@ interface SearchFilterProps {
   isAdmin?: boolean;
   onClearFilters: () => void;
   activeFiltersCount: number;
+  categoryCounts: Record<string, number>;
+  totalCount: number;
+  filteredCount: number;
 }
-
-const CATEGORIES = [
-  'Web Application',
-  'Mobile App',
-  'Desktop App',
-  'API',
-  'Library',
-  'Tool',
-  'Game',
-  'Other'
-];
-
-const STATUS_OPTIONS = ['published', 'draft'];
 
 export default function SearchFilter({
   searchTerm,
@@ -51,222 +41,98 @@ export default function SearchFilter({
   setViewMode,
   isAdmin = false,
   onClearFilters,
-  activeFiltersCount
+  activeFiltersCount,
+  categoryCounts,
+  totalCount,
+  filteredCount
 }: SearchFilterProps) {
-  const [isFiltersVisible, setIsFiltersVisible] = useState(false);
+  const categories = Object.keys(categoryCounts).sort();
 
   return (
-    <div className="space-y-4 text-sm font-ui">
-      {/* Modern Search and Controls Bar */}
-      <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
-        <div className="flex flex-col lg:flex-row gap-2 items-start lg:items-center justify-between">
-          {/* Search Section */}
-          <div className="flex-1 w-full lg:w-auto">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full !pl-8 pr-8 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 transition-all duration-300"
-              />
-              {searchTerm && (
-                <button 
-                  className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400 hover:text-gray-600 transition-colors"
-                  onClick={() => setSearchTerm('')}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Controls Section */}
-          <div className="flex items-center gap-3 w-full lg:w-auto">
-            {/* Filter Toggle */}
+    <div className="space-y-0 font-body text-sm">
+      {/* Controls Bar */}
+      <div className="flex items-center gap-3 flex-wrap mb-4">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[180px] max-w-[300px]">
+          <input
+            type="text"
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full py-2 px-4 border-[1.5px] border-cream-deeper rounded-full bg-off-white font-mono text-[0.8rem] text-ink outline-none transition-all duration-200 placeholder:text-text-muted/60 placeholder:tracking-wide focus:border-sand focus:shadow-[0_0_0_3px_rgba(201,185,154,0.2)]"
+          />
+          {searchTerm && (
             <button
-              onClick={() => setIsFiltersVisible(!isFiltersVisible)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-all duration-300 ${
-                isFiltersVisible
-                  ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg ring-2 ring-blue-200'
-                  : activeFiltersCount > 0 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-ink transition-colors"
+              onClick={() => setSearchTerm('')}
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="flex gap-[0.4rem] flex-wrap">
+          <button
+            onClick={() => setSelectedCategory('')}
+            className={`inline-flex items-center gap-[0.35rem] py-[0.35rem] px-[0.82rem] rounded-full text-[0.8rem] font-medium cursor-pointer border-[1.5px] transition-all duration-200 whitespace-nowrap font-body ${
+              !selectedCategory
+                ? 'bg-ink text-off-white border-ink'
+                : 'border-cream-deeper bg-off-white text-text-muted hover:border-sand hover:text-ink'
+            }`}
+          >
+            All <span className="font-mono text-[0.58rem] opacity-60">{totalCount}</span>
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(selectedCategory === cat ? '' : cat)}
+              className={`inline-flex items-center gap-[0.35rem] py-[0.35rem] px-[0.82rem] rounded-full text-[0.8rem] font-medium cursor-pointer border-[1.5px] transition-all duration-200 whitespace-nowrap font-body ${
+                selectedCategory === cat
+                  ? 'bg-ink text-off-white border-ink'
+                  : 'border-cream-deeper bg-off-white text-text-muted hover:border-sand hover:text-ink'
               }`}
             >
-              <Filter className={`w-3.5 h-3.5 transition-all duration-300 ${
-                isFiltersVisible ? 'text-blue-600 drop-shadow-sm' : ''
-              }`} />
-              {activeFiltersCount > 0 && (
-                <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-bold rounded-full bg-blue-500 text-white">
-                  {activeFiltersCount}
-                </span>
-              )}
+              {cat.replace('Development', '').replace('Application', 'App').replace('Package', 'Pkg').trim()}
+              <span className="font-mono text-[0.58rem] opacity-60">{categoryCounts[cat]}</span>
             </button>
-            
-            {/* View Toggle */}
-            <div className="flex rounded-md border border-gray-300 overflow-hidden bg-white">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 transition-all duration-300 ${
-                  viewMode === 'grid'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                aria-label="Grid view"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 transition-all duration-300 ${
-                  viewMode === 'list'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                aria-label="List view"
-              >
-                <List className="w-3.5 h-3.5" />
-              </button>
-            </div>
+          ))}
+        </div>
+
+        {/* Right Controls */}
+        <div className="flex items-center gap-2.5 ml-auto">
+          {/* Result Count */}
+          <span className="font-mono text-[0.65rem] text-text-muted whitespace-nowrap">
+            Showing {filteredCount} project{filteredCount !== 1 ? 's' : ''}
+          </span>
+
+          {/* View Toggle */}
+          <div className="flex gap-[2px] bg-cream-dark rounded-lg p-[3px] border border-cream-deeper">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`w-[30px] h-[28px] border-none rounded-[0.35rem] cursor-pointer flex items-center justify-center transition-all duration-200 ${
+                viewMode === 'grid'
+                  ? 'bg-off-white text-ink shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                  : 'bg-transparent text-text-muted'
+              }`}
+              aria-label="Grid view"
+            >
+              <LayoutGrid className="w-[14px] h-[14px]" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`w-[30px] h-[28px] border-none rounded-[0.35rem] cursor-pointer flex items-center justify-center transition-all duration-200 ${
+                viewMode === 'list'
+                  ? 'bg-off-white text-ink shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                  : 'bg-transparent text-text-muted'
+              }`}
+              aria-label="List view"
+            >
+              <List className="w-[14px] h-[14px]" />
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Expanded Filters */}
-      {isFiltersVisible && (
-        <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm animate-fadeIn">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
-            {/* Category Filter */}
-            <div className="w-full">
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <Filter className="w-3.5 h-3.5 text-gray-400" />
-                </div>
-                <select
-                  id="category-filter"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className={`block w-full pl-8 pr-6 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none text-gray-900 transition-all duration-300 ${
-                    selectedCategory 
-                      ? 'bg-blue-50 border-blue-300 text-blue-900' 
-                      : 'bg-gray-50 border-gray-200'
-                  }`}
-                >
-                <option value="">All Categories</option>
-                {CATEGORIES.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Status Filter (Admin Only) */}
-            {isAdmin && (
-              <div className="w-full">
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                    <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
-                  </div>
-                  <select
-                    id="status-filter"
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    className={`block w-full pl-8 pr-6 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none text-gray-900 transition-all duration-300 ${
-                      selectedStatus 
-                        ? 'bg-blue-50 border-blue-300 text-blue-900' 
-                        : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                  <option value="">All Status</option>
-                  {STATUS_OPTIONS.map((status) => (
-                    <option key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Sort */}
-            <div className="w-full">
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
-                </div>
-                <select
-                  id="sort-filter"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className={`block w-full pl-8 pr-6 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none text-gray-900 transition-all duration-300 ${
-                    sortBy !== 'order' 
-                      ? 'bg-blue-50 border-blue-300 text-blue-900' 
-                      : 'bg-gray-50 border-gray-200'
-                  }`}
-                >
-                <option value="order">Default Order</option>
-                <option value="date">Completion Date</option>
-                <option value="title">Title</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Clear Filters */}
-            {activeFiltersCount > 0 && (
-              <div className="w-full flex justify-end">
-                <button
-                  onClick={onClearFilters}
-                  className="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-all duration-300"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Technology Pills */}
-          {allTechnologies.length > 0 && (
-            <div className="mt-3 col-span-full">
-              <div className="flex flex-wrap gap-1">
-                {allTechnologies.map(tech => (
-                  <button
-                    key={tech}
-                    onClick={() => setActiveTechFilter(activeTechFilter === tech ? '' : tech)}
-                    className={`px-2 py-1 rounded-sm text-xs font-medium transition-all duration-300 ${
-                      activeTechFilter === tech
-                        ? 'bg-blue-500 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                    }`}
-                  >
-                    {tech}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import ProjectDetails from '@/components/ProjectDetails';
+import PageReadyOnMount from '@/components/shared/PageReadyOnMount';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPublishedProjectById, listProjectIds } from '@/lib/projects';
@@ -87,5 +88,10 @@ export default function ProjectPage({ params }: Props) {
     notFound();
   }
 
-  return <ProjectDetails id={params.id} />;
+  return (
+    <>
+      <PageReadyOnMount />
+      <ProjectDetails id={params.id} />
+    </>
+  );
 }

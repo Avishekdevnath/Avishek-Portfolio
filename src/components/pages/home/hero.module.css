@@ -1,5 +1,116 @@
-/* /src/components/pages/home/hero.module.css */
-.heroStyle {
-  height: 70vh; /* Full viewport height */
-  /* background-color: green;  */
+/* ── BACKGROUND TEXTURE ── */
+.bgTexture {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 70%, rgba(196, 132, 26, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 85% 20%, rgba(58, 125, 110, 0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 60% at 50% 90%, rgba(212, 98, 42, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── SPINNING RING ── */
+.photoRing {
+  position: relative;
+  width: clamp(280px, 40vw, 420px);
+  aspect-ratio: 1;
+}
+.photoRing::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(196, 132, 26, 0.2);
+  animation: spinSlow 20s linear infinite;
+}
+.photoRing::after {
+  content: '';
+  position: absolute;
+  inset: -22px;
+  border-radius: 50%;
+  border: 1px dashed rgba(139, 115, 85, 0.15);
+  animation: spinSlow 35s linear infinite reverse;
+}
+@keyframes spinSlow {
+  to { transform: rotate(360deg); }
+}
+
+/* ── PHOTO CIRCLE ── */
+.photoCircle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(145deg, #ddd5c5, #c9b99a);
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 0 0 8px rgba(240, 236, 227, 0.8),
+    0 24px 56px rgba(74, 55, 40, 0.18),
+    0 8px 24px rgba(74, 55, 40, 0.12);
+  position: relative;
+  z-index: 2;
+}
+
+/* ── FADE-UP ANIMATION ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fadeUp1 { opacity: 0; animation: fadeUp 0.65s ease 0.1s forwards; }
+.fadeUp2 { opacity: 0; animation: fadeUp 0.65s ease 0.2s forwards; }
+.fadeUp3 { opacity: 0; animation: fadeUp 0.65s ease 0.3s forwards; }
+.fadeUp4 { opacity: 0; animation: fadeUp 0.65s ease 0.4s forwards; }
+.fadeUp5 { opacity: 0; animation: fadeUp 0.65s ease 0.5s forwards; }
+.fadeUp6 { opacity: 0; animation: fadeUp 0.65s ease 0.6s forwards; }
+.fadeUp7 { opacity: 0; animation: fadeUp 0.65s ease 0.7s forwards; }
+
+/* ── BLINK CURSOR ── */
+@keyframes blinkCursor {
+  50% { opacity: 0; }
+}
+.twCursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  background: #d4622a;
+  vertical-align: middle;
+  animation: blinkCursor 0.9s step-end infinite;
+}
+
+/* ── CONTACT BUTTON SHIMMER ── */
+.btnContact {
+  position: relative;
+  overflow: hidden;
+}
+.btnContact::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.12) 50%, transparent 70%);
+  transform: translateX(-130%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+.btnContact:hover::after {
+  transform: translateX(130%);
+}
+
+/* ── MARQUEE STRIP ── */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.stripInner {
+  display: flex;
+  gap: 2rem;
+  animation: marqueeScroll 28s linear infinite;
+  width: max-content;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .photoRing {
+    width: clamp(220px, 55vw, 300px);
+  }
 }

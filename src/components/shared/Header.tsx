@@ -1,224 +1,267 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useSettings } from "@/lib/swr";
 import styles from "./Header.module.css";
 
-export default function Header() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState("/assets/home/profile-img.jpg");
+const ExternalIcon = () => (
+  <svg
+    style={{ width: 9, height: 9, marginLeft: 3, verticalAlign: "middle", opacity: 0.45, flexShrink: 0 }}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2.5"
+      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+    />
+  </svg>
+);
 
+const navLinks = [
+  { name: "Home",     href: "/" },
+  { name: "About",    href: "/about" },
+  { name: "Projects", href: "/projects" },
+  { name: "Blog",     href: "/blogs" },
+  { name: "Tools",    href: "https://aitoolbox-v1.vercel.app/", external: true },
+  { name: "Contact",  href: "/contact" },
+];
+
+export default function Header() {
+  const [isOpen, setIsOpen]       = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
+  const { profileImage: fetchedImage } = useSettings();
+  const profileImage = fetchedImage || "/assets/home/profile-img.jpg";
+  const pathname = usePathname();
+  const navRef   = useRef<HTMLDivElement>(null);
+  const scrolledRef = useRef(false);
+
+  // scroll shrink — only setState when value actually changes
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await fetch('/api/settings');
-        const data = await response.json();
-        
-        if (data.success && data.data?.profileImage) {
-          setProfileImage(data.data.profileImage);
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const now = window.scrollY > 20;
+        if (now !== scrolledRef.current) {
+          scrolledRef.current = now;
+          setScrolled(now);
         }
-      } catch (error) {
-        console.error('Failed to fetch settings:', error);
-      }
+      });
     };
-    
-    fetchSettings();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Projects", href: "/projects" },
-    { name: "Tools", href: "https://aitoolbox-v1.vercel.app/" },
-    { name: "Contact", href: "/contact" },
-    { name: "Hire Me", href: "/hire-me" },
-  ];
+  // close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // close on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  // close on route change
+  useEffect(() => { setIsOpen(false); }, [pathname]);
+
+  const isActive = useCallback((href: string) => {
+    if (href.startsWith("http")) return false;
+    return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  }, [pathname]);
 
   return (
-    // <header
-    //   className={`${styles.navStyle} rounded-full border m-8 sticky top-0 z-50 shadow-md mx-auto lg:max-w-[70%] md:max-w-[90%] sm:max-w-[95%]`}
-    // >
-    //   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    //     <div className="flex justify-between items-center py-4">
-    //       {/* Logo/Name */}
-    //       <div className="text-2xl font-bold tracking-tight shrink-0">
-    //         <Link href="/" className="hover:text-teal-400 transition-colors">
-    //           Avishek
-    //         </Link>
-    //       </div>
-
-    //       {/* Desktop Navigation */}
-    //       <nav className="hidden lg:flex space-x-8 flex-wrap">
-    //         {navLinks.map((link) => (
-    //           <div
-    //             key={link.name}
-    //             className={`px-3 py-1 ${
-    //               link.name === "Hire Me"
-    //                 ? `${styles.hireStyle} border-2 border-orange-400 rounded-full`
-    //                 : ""
-    //             }`}
-    //           >
-    //             <Link
-    //               href={link.href}
-    //               className="text-lg font-medium hover:text-teal-400 transition-colors"
-    //             >
-    //               {link.name}
-    //             </Link>
-    //           </div>
-    //         ))}
-    //       </nav>
-
-    //       {/* Mobile Menu Button */}
-    //       <div className="lg:hidden">
-    //         <button
-    //           onClick={() => setIsOpen(!isOpen)}
-    //           className="focus:outline-none p-2"
-    //           aria-label="Toggle menu"
-    //         >
-    //           <svg
-    //             className="w-6 h-6"
-    //             fill="none"
-    //             stroke="currentColor"
-    //             viewBox="0 0 24 24"
-    //             xmlns="http://www.w3.org/2000/svg"
-    //           >
-    //             {isOpen ? (
-    //               <path
-    //                 strokeLinecap="round"
-    //                 strokeLinejoin="round"
-    //                 strokeWidth="2"
-    //                 d="M6 18L18 6M6 6l12 12"
-    //               />
-    //             ) : (
-    //               <path
-    //                 strokeLinecap="round"
-    //                 strokeLinejoin="round"
-    //                 strokeWidth="2"
-    //                 d="M4 6h16M4 12h16m-7 6h7"
-    //               />
-    //             )}
-    //           </svg>
-    //         </button>
-    //       </div>
-    //     </div>
-
-    //     {/* Mobile Navigation */}
-    //     {isOpen && (
-    //       <nav className="lg:hidden bg-gray-800 py-4 px-4">
-    //         <ul className="flex flex-col space-y-4 text-center">
-    //           {navLinks.map((link) => (
-    //             <li key={link.name}>
-    //               <Link
-    //                 href={link.href}
-    //                 className="text-lg font-medium text-white hover:text-teal-400 transition-colors"
-    //                 onClick={() => setIsOpen(false)}
-    //               >
-    //                 {link.name}
-    //               </Link>
-    //             </li>
-    //           ))}
-    //         </ul>
-    //       </nav>
-    //     )}
-    //   </div>
-    // </header>
-    <header
-      className={`${styles.navStyle}   border mx-auto mt-4 md:mt-8 z-50 shadow-md max-w-[90%] sm:max-w-[95%] md:max-w-[90%] lg:max-w-[75%] xl:max-w-[70%] ${isOpen ? "rounded-lg" : "rounded-full"}`}
+    <div
+      ref={navRef}
+      className="sticky top-0 z-[100] flex flex-col items-center"
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-1 md:py-2">
-        <div className="flex justify-between items-center py-2 md:py-4 gap-4">
-          <Link href="/" className="flex items-center gap-2 xl:gap-3 hover:opacity-80 transition-opacity shrink-0">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 shrink-0">
+      {/* Capsule bar */}
+      <header
+        className={`
+          ${styles.navCapsule}
+          w-[92%] sm:w-[88%] md:w-[82%] lg:w-[78%] xl:w-[72%]
+          ${isOpen ? "rounded-[1.4rem]" : "rounded-full"}
+          border border-cream-deeper/70
+          transition-[box-shadow,transform,border-radius] duration-300
+          ${scrolled
+            ? `${styles.navScrolled} translate-y-2`
+            : `${styles.navDefault} translate-y-4 md:translate-y-5`
+          }
+        `}
+      >
+        <div
+          className={`
+            flex items-center justify-between gap-4
+            px-4 sm:px-5
+            transition-[padding-top,padding-bottom] duration-300
+            ${scrolled ? "py-[0.4rem]" : "py-[0.55rem]"}
+          `}
+        >
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+            <div
+              className="
+                w-[36px] h-[36px] rounded-full overflow-hidden shrink-0
+                border-2 border-cream-dark
+                group-hover:border-orange-400
+                transition-colors duration-200
+                bg-gradient-to-br from-cream-dark to-sand
+              "
+            >
               <Image
                 src={profileImage}
                 alt="Avishek Devnath"
-                fill
-                sizes="40px"
-                className="object-cover"
+                width={36}
+                height={36}
+                className="w-full h-full object-cover"
+                priority
               />
             </div>
-            <div className="text-xl xl:text-2xl font-bold tracking-tight whitespace-nowrap">
+            <span
+              className="
+                text-[1.05rem] font-bold tracking-tight whitespace-nowrap
+                text-ink group-hover:text-orange-600
+                transition-colors duration-200
+              "
+            >
               Avishek
-            </div>
+            </span>
           </Link>
 
-          <nav className="hidden lg:flex space-x-4 xl:space-x-6 2xl:space-x-8 flex-nowrap items-center">
-            {navLinks.map((link) => (
-              <div
-                key={link.name}
-                className={`px-2 xl:px-3 py-1 shrink-0 ${link.name === "Hire Me"
-                    ? `${styles.hireStyle} border-2 border-orange-400 rounded-full`
-                    : ""
-                  }`}
-              >
-                <Link
-                  href={link.href}
-                  className="text-base xl:text-lg font-medium hover:text-teal-400 transition-colors whitespace-nowrap"
-                >
-                  {link.name}
-                </Link>
-              </div>
-            ))}
-          </nav>
+          {/* Desktop nav */}
+          <nav aria-label="Main navigation" className="hidden lg:block">
+            <ul className="flex items-center gap-0.5 list-none m-0 p-0">
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      aria-current={active ? "page" : undefined}
+                      className={`
+                        relative flex items-center
+                        px-[0.8rem] py-[0.4rem] rounded-full
+                        text-[0.86rem] font-medium whitespace-nowrap
+                        transition-colors duration-200
+                        ${active
+                          ? "text-orange-600 bg-orange-600/[0.07]"
+                          : "text-deep-brown hover:text-orange-600 hover:bg-orange-600/[0.06]"
+                        }
+                      `}
+                    >
+                      {link.name}
+                      {link.external && <ExternalIcon />}
+                      {active && (
+                        <span className="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full bg-orange-400" />
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
 
-          <div className="lg:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="focus:outline-none p-2 rounded-md hover:bg-gray-100 transition-colors relative z-10 pointer-events-auto"
-              aria-label="Toggle menu"
-            >
-              <svg
-                className="w-6 h-6 transition-transform duration-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {isOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16m-7 6h7"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <nav
-          className={`lg:hidden transition-all duration-300 ease-in-out ${isOpen
-              ? "max-h-screen opacity-100 py-4 px-4"
-              : "max-h-0 opacity-0 py-0 px-4"
-            } ${styles.navStyle} border-t border-gray-200 shadow-md`}
-        >
-          <ul className="flex flex-col space-y-2">
-            {navLinks.map((link) => (
-              <li key={link.name}>
-                <Link
-                  href={link.href}
-                  className={`block text-sm sm:text-base font-medium text-gray-800 hover:bg-gray-100 hover:text-teal-400 py-2 px-3 rounded-lg transition-colors ${link.name === "Hire Me"
-                      ? `${styles.hireStyle} border-2 border-orange-400 rounded-full`
-                      : ""
-                    }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.name}
+              {/* Hire Me */}
+              <li>
+                <Link href="/hire-me" className={`${styles.hireMe} ml-1`}>
+                  Hire Me
                 </Link>
               </li>
-            ))}
+            </ul>
+          </nav>
+
+          {/* Burger */}
+          <button
+            onClick={() => setIsOpen((v) => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={isOpen}
+            className={`${styles.burger} ${isOpen ? styles.burgerOpen : ""} flex lg:hidden`}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+
+        {/* Mobile dropdown — inside header for correct semantics */}
+        <nav
+          aria-label="Mobile navigation"
+          className={`
+            lg:hidden
+            overflow-hidden rounded-b-[1.1rem]
+            transition-[max-height,opacity] duration-300 ease-in-out
+            ${isOpen
+              ? "max-h-[420px] opacity-100"
+              : `max-h-0 opacity-0 ${styles.mobileNavHidden}`
+            }
+          `}
+        >
+          <ul className="flex flex-col gap-0.5 p-[0.65rem] list-none m-0 border-t border-cream-deeper/50">
+            {navLinks.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    onClick={() => setIsOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={`
+                      flex items-center justify-between
+                      py-[0.6rem] px-4 rounded-xl
+                      text-[0.88rem] font-medium
+                      transition-colors duration-200
+                      ${active
+                        ? "bg-orange-600/[0.07] text-orange-600"
+                        : "text-deep-brown hover:bg-orange-600/[0.06] hover:text-orange-600"
+                      }
+                    `}
+                  >
+                    <span className="flex items-center gap-1">
+                      {link.name}
+                      {link.external && <ExternalIcon />}
+                    </span>
+                    {active && (
+                      <span className="w-[6px] h-[6px] rounded-full bg-orange-400 shrink-0" />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+
+            {/* Mobile Hire Me */}
+            <li>
+              <Link
+                href="/hire-me"
+                onClick={() => setIsOpen(false)}
+                className={`${styles.mobileHire} flex items-center justify-center py-[0.6rem] px-4`}
+              >
+                Hire Me
+              </Link>
+            </li>
           </ul>
         </nav>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }

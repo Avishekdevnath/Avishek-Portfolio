@@ -28,274 +28,233 @@ export default function Contact() {
     subject: MessageCategory.GENERAL,
     message: "",
   });
-
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const formRef = useRef<HTMLFormElement>(null);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (!formData.message.trim()) {
-      newErrors.message = "Message is required";
-    } else if (formData.message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters";
-    }
-
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    else if (formData.name.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Please enter a valid email address";
+    if (!formData.message.trim()) newErrors.message = "Message is required";
+    else if (formData.message.trim().length < 10) newErrors.message = "Message must be at least 10 characters";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof FormErrors]) setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     setIsSubmitting(true);
     setSubmitStatus("idle");
-
     try {
       const response = await fetch('/api/messages', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
-      }
-
+      if (!response.ok) throw new Error(data.error || 'Failed to send message');
       setSubmitStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        subject: MessageCategory.GENERAL,
-        message: "",
-      });
-
-      // Scroll to top of form
+      setFormData({ name: "", email: "", subject: MessageCategory.GENERAL, message: "" });
       formRef.current?.scrollIntoView({ behavior: 'smooth' });
-
-      // Reset form after 5 seconds
-      setTimeout(() => {
-        setSubmitStatus("idle");
-      }, 5000);
-    } catch (error) {
-      console.error("Error sending message:", error);
+      setTimeout(() => setSubmitStatus("idle"), 5000);
+    } catch {
       setSubmitStatus("error");
-      
-      // Reset error state after 5 seconds
-      setTimeout(() => {
-        setSubmitStatus("idle");
-      }, 5000);
+      setTimeout(() => setSubmitStatus("idle"), 5000);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const inputBase = "block w-full py-2.5 text-[0.88rem] font-body bg-cream border rounded-md transition-colors duration-200 focus:outline-none focus:ring-1 placeholder:text-text-muted/50 text-ink";
+  const inputPadLeft = "!pl-10 pr-3";
+  const inputNormal = "border-cream-deeper focus:border-accent-orange focus:ring-accent-orange";
+  const inputError  = "border-accent-orange/60 focus:border-accent-orange focus:ring-accent-orange";
+
   return (
-    <section id="contact" className="py-16 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
-      <div className="max-w-7xl mx-auto px-4">
+    <section id="contact" className="py-20 px-4 bg-cream">
+      <div className="max-w-[1100px] mx-auto">
+
+        {/* ── Section header ── */}
         <div className="text-center mb-12">
-          <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Get in Touch</h4>
-          <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
-            Let's Work Together
+          <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+            <span className="w-8 h-px bg-accent-orange opacity-60" />
+            Get in Touch
+            <span className="w-8 h-px bg-accent-orange opacity-60" />
+          </p>
+          <h2
+            className="font-heading font-light text-ink mb-3 leading-none"
+            style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+          >
+            Let&apos;s Work Together
           </h2>
-          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed text-justify">
-            Have a project in mind or just want to chat? I'd love to hear from you.
-            Let's create something amazing together!
+          <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
+            Have a project in mind or just want to chat? I&apos;d love to hear from you.
           </p>
         </div>
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-h5 weight-semibold text-gray-900 mb-3">
-                Contact Information
-              </h3>
-              <p className="text-body-sm text-gray-600 mb-6 leading-relaxed text-justify">
-                Feel free to reach out through any of these channels. I'm always excited
-                to connect and discuss new opportunities.
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6">
 
-            {/* Contact Info */}
-            <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 shadow-inner p-8" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
+          {/* ── Left: contact info + social ── */}
+          <div className="flex flex-col gap-5">
+
+            {/* Contact info card */}
+            <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-7 py-6 hover:border-sand hover:shadow-md transition-all duration-300 overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-orange rounded-l-[0.9rem]" />
+              <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-accent-orange mb-1 flex items-center gap-2">
+                <span className="w-4 h-px bg-accent-orange" />
+                Contact Information
+              </p>
+              <p className="font-body text-[0.83rem] text-text-muted font-light mb-6 leading-[1.65] text-justify">
+                Feel free to reach out through any of these channels.
+              </p>
               <ContactInfo />
             </div>
 
-            {/* Social Links */}
-            <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 shadow-inner p-8" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-              <h3 className="text-h5 weight-semibold text-gray-900 mb-5">Connect With Me</h3>
+            {/* Social links card */}
+            <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-7 py-6 hover:border-sand hover:shadow-md transition-all duration-300 overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-teal rounded-l-[0.9rem]" />
+              <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-accent-teal mb-4 flex items-center gap-2">
+                <span className="w-4 h-px bg-accent-teal" />
+                Connect With Me
+              </p>
               <SocialLinks showLabels />
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 shadow-inner p-8" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-            <h3 className="text-h5 weight-semibold text-gray-900 mb-5">Send a Message</h3>
-            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+          {/* ── Right: form ── */}
+          <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-7 py-7 hover:border-sand hover:shadow-md transition-all duration-300 overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-blue rounded-l-[0.9rem]" />
+
+            <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-accent-blue mb-6 flex items-center gap-2">
+              <span className="w-4 h-px bg-accent-blue" />
+              Send a Message
+            </p>
+
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
+
+              {/* Name */}
               <div>
-                <label className="block text-gray-700 text-caption mb-2">
+                <label className="block font-mono text-[0.65rem] tracking-[0.08em] uppercase text-warm-brown mb-1.5">
                   Your Name
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <User className="h-4 w-4 text-gray-400" />
-                  </div>
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className={`block w-full !pl-12 pr-3 py-2.5 text-sm border ${
-                      errors.name ? "border-red-500" : "border-gray-300"
-                    } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                    placeholder="John Doe"
+                    placeholder="Avishek Devnath"
+                    className={`${inputBase} ${inputPadLeft} ${errors.name ? inputError : inputNormal}`}
                   />
                 </div>
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                )}
+                {errors.name && <p className="mt-1 font-body text-[0.75rem] text-accent-orange">{errors.name}</p>}
               </div>
 
+              {/* Email */}
               <div>
-                <label className="block text-gray-700 text-caption mb-2">
+                <label className="block font-mono text-[0.65rem] tracking-[0.08em] text-warm-brown mb-1.5">
                   Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                  </div>
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className={`block w-full !pl-12 pr-3 py-2.5 text-sm border ${
-                      errors.email ? "border-red-500" : "border-gray-300"
-                    } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                    placeholder="john@example.com"
+                    placeholder="you@example.com"
+                    className={`${inputBase} ${inputPadLeft} ${errors.email ? inputError : inputNormal}`}
                   />
                 </div>
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                )}
+                {errors.email && <p className="mt-1 font-body text-[0.75rem] text-accent-orange">{errors.email}</p>}
               </div>
 
+              {/* Subject */}
               <div>
-                <label className="block text-gray-700 text-caption mb-2">
+                <label className="block font-mono text-[0.65rem] tracking-[0.08em] uppercase text-warm-brown mb-1.5">
                   Subject
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <MessageSquare className="h-4 w-4 text-gray-400" />
-                  </div>
+                  <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
                   <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
-                    className={`block w-full !pl-12 pr-3 py-2.5 text-sm border ${
-                      errors.subject ? "border-red-500" : "border-gray-300"
-                    } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                    className={`${inputBase} ${inputPadLeft} ${errors.subject ? inputError : inputNormal} appearance-none cursor-pointer`}
                   >
-                    {Object.values(MessageCategory).map((category) => (
-                      <option key={category} value={category}>
-                        {category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()}
+                    {Object.values(MessageCategory).map(cat => (
+                      <option key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
                       </option>
                     ))}
                   </select>
                 </div>
-                {errors.subject && (
-                  <p className="mt-1 text-sm text-red-500">{errors.subject}</p>
-                )}
               </div>
 
+              {/* Message */}
               <div>
-                <label className="block text-gray-700 text-caption mb-2">
+                <label className="block font-mono text-[0.65rem] tracking-[0.08em] uppercase text-warm-brown mb-1.5">
                   Message
                 </label>
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}
-                  rows={6}
-                  className={`block w-full px-3 py-2.5 text-sm border ${
-                    errors.message ? "border-red-500" : "border-gray-300"
-                  } bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                  placeholder="Tell me about your project, ideas, or questions..."
+                  rows={5}
+                  placeholder="Tell me about your project, ideas, or questions…"
+                  className={`${inputBase} px-3 resize-none ${errors.message ? inputError : inputNormal}`}
                 />
-                {errors.message && (
-                  <p className="mt-1 text-sm text-red-500">{errors.message}</p>
-                )}
+                {errors.message && <p className="mt-1 font-body text-[0.75rem] text-accent-orange">{errors.message}</p>}
               </div>
 
+              {/* Submit */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-button shadow-lg border border-blue-500
-                  ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}
-                  transition-all duration-300`}
+                className={`w-full flex items-center justify-center gap-2.5 font-body bg-ink text-off-white px-6 py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-ink transition-all duration-250
+                  ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-accent-orange hover:border-accent-orange'}`}
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Sending...</span>
+                    <div className="w-4 h-4 border-2 border-off-white/30 border-t-off-white rounded-full animate-spin" />
+                    Sending…
                   </>
                 ) : (
                   <>
-                    <Send className="h-5 w-5" />
-                    <span>Send Message</span>
+                    <Send className="w-4 h-4" />
+                    Send Message
                   </>
                 )}
               </button>
 
+              {/* Status messages */}
               {submitStatus === "success" && (
-                <div className="mt-4 p-4 bg-gradient-to-b from-green-50 to-white border border-green-200 rounded-xl shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <p className="text-green-700 font-medium">Message sent successfully! I'll get back to you soon.</p>
-                  </div>
+                <div className="flex items-center gap-3 bg-accent-teal/8 border border-accent-teal/25 rounded-lg px-4 py-3">
+                  <span className="w-2 h-2 rounded-full bg-accent-teal shrink-0" />
+                  <p className="font-body text-[0.83rem] text-accent-teal font-medium">
+                    Message sent! I&apos;ll get back to you within 24 hours.
+                  </p>
                 </div>
               )}
 
               {submitStatus === "error" && (
-                <div className="mt-4 p-4 bg-gradient-to-b from-red-50 to-white border border-red-200 rounded-xl shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <p className="text-red-700 font-medium">Failed to send message. Please try again.</p>
-                  </div>
+                <div className="flex items-center gap-3 bg-accent-orange/8 border border-accent-orange/25 rounded-lg px-4 py-3">
+                  <span className="w-2 h-2 rounded-full bg-accent-orange shrink-0" />
+                  <p className="font-body text-[0.83rem] text-accent-orange font-medium">
+                    Failed to send. Please try again or email me directly.
+                  </p>
                 </div>
               )}
             </form>

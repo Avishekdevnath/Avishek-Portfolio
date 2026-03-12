@@ -70,6 +70,35 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
+// PATCH /api/experience/education/[id] - Partially update an education entry
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await connectToDatabase();
+
+    const body = await request.json();
+
+    if (body.startDate) body.startDate = new Date(body.startDate);
+    if (body.endDate) body.endDate = new Date(body.endDate);
+
+    const education = await Education.findByIdAndUpdate(
+      params.id,
+      body,
+      { new: true, runValidators: true }
+    );
+
+    if (!education) {
+      return NextResponse.json({ success: false, error: 'Education entry not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: education, message: 'Education entry updated successfully' });
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update education entry'
+    });
+  }
+}
+
 // DELETE /api/experience/education/[id] - Delete an education entry
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {

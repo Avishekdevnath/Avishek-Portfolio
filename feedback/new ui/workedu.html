@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experience & Education</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#f0ece3; --cream-dark:#e8e2d6; --cream-deeper:#ddd5c5;
+  --sand:#c9b99a; --warm-brown:#8b7355; --deep-brown:#4a3728;
+  --ink:#2a2118; --accent-orange:#d4622a; --accent-teal:#3a7d6e;
+  --accent-blue:#2d5a8e; --white:#faf8f4; --text-muted:#8a7a6a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;padding:5rem 1.5rem;display:flex;align-items:flex-start;justify-content:center}
+
+/* ── SECTION WRAPPER ── */
+.exp-section{ width:100%; max-width:1100px; }
+
+/* ── HEADER ── */
+.exp-header{ text-align:center; margin-bottom:4rem; }
+.exp-eyebrow{
+  font-family:'DM Mono',monospace; font-size:.7rem; letter-spacing:.25em;
+  text-transform:uppercase; color:var(--accent-orange); margin-bottom:.8rem;
+  display:flex; align-items:center; justify-content:center; gap:.7rem;
+}
+.exp-eyebrow::before,.exp-eyebrow::after{ content:''; width:2rem; height:1px; background:var(--accent-orange); opacity:.6; }
+.exp-title{
+  font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem,5vw,3.5rem);
+  font-weight:300; color:var(--ink); line-height:1.05; margin-bottom:.9rem;
+}
+.exp-title em{ font-style:italic; color:var(--warm-brown); }
+.exp-sub{ font-size:.9rem; color:var(--text-muted); max-width:55ch; margin:0 auto; line-height:1.7; font-weight:300; }
+
+/* ── TWO-COLUMN LAYOUT ── */
+.exp-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start;
+}
+
+/* ── COLUMN HEADER ── */
+.col-header{
+  display:flex; align-items:center; gap:.85rem;
+  padding:1rem 1.4rem; margin-bottom:1.2rem;
+  background:var(--white); border:1px solid var(--cream-deeper);
+  border-radius:.65rem;
+}
+.col-icon{
+  width:38px; height:38px; border-radius:.5rem;
+  display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;
+}
+.col-icon.work{ background:rgba(212,98,42,.1); }
+.col-icon.edu { background:rgba(58,125,110,.1); }
+.col-header-text h3{
+  font-family:'Cormorant Garamond',serif; font-size:1.2rem; font-weight:600; color:var(--ink); line-height:1;
+}
+.col-header-text p{
+  font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--text-muted); margin-top:.2rem;
+}
+
+/* ── CARDS ── */
+.cards{ display:flex; flex-direction:column; gap:1rem; }
+
+.card{
+  background:var(--white); border:1px solid var(--cream-deeper);
+  border-radius:.75rem; overflow:hidden; transition:all .3s;
+  position:relative;
+}
+.card::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--cream-deeper); border-radius:3px 0 0 3px; transition:background .3s;
+}
+.card:hover{ border-color:var(--sand); box-shadow:0 8px 28px rgba(74,55,40,.09); transform:translateY(-2px); }
+.card.work:hover::before,.card.work.expanded::before{ background:var(--accent-orange); }
+.card.edu:hover::before,.card.edu.expanded::before  { background:var(--accent-teal); }
+
+/* ── CARD HEADER ── */
+.card-head{ padding:1.4rem 1.6rem; cursor:pointer; }
+.card-top{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:.9rem;
+}
+.card-title-group{ flex:1; min-width:0; }
+.card-title{
+  font-family:'Cormorant Garamond',serif; font-size:1.2rem; font-weight:600;
+  color:var(--ink); line-height:1.2; margin-bottom:.28rem;
+  display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+}
+.card-star{ font-size:.85rem; }
+.card-org{
+  font-size:.8rem; color:var(--text-muted); font-weight:300;
+  display:flex; align-items:center; gap:.35rem;
+}
+.card-org-icon{ font-size:.75rem; }
+.card-toggle{
+  width:30px; height:30px; border-radius:50%; border:1px solid var(--cream-deeper);
+  background:var(--cream); display:flex; align-items:center; justify-content:center;
+  font-size:.7rem; color:var(--warm-brown); flex-shrink:0; transition:all .3s; cursor:pointer;
+}
+.card.expanded .card-toggle{ background:var(--ink); color:var(--white); border-color:var(--ink); transform:rotate(180deg); }
+
+/* ── META ROW ── */
+.card-meta{
+  display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:.85rem;
+}
+.meta-item{
+  display:flex; align-items:center; gap:.3rem;
+  font-family:'DM Mono',monospace; font-size:.63rem; letter-spacing:.04em;
+  color:var(--text-muted); background:var(--cream); border:1px solid var(--cream-deeper);
+  padding:.22rem .65rem; border-radius:2rem;
+}
+.meta-icon{ font-size:.7rem; }
+.meta-item.present{ color:var(--accent-teal); background:rgba(58,125,110,.06); border-color:rgba(58,125,110,.2); }
+
+/* ── TECH TAGS ── */
+.card-tags{ display:flex; flex-wrap:wrap; gap:.4rem; }
+.tag{
+  font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.04em;
+  padding:.2rem .6rem; border-radius:2rem; border:1px solid var(--cream-deeper);
+  color:var(--warm-brown); background:var(--cream-dark); transition:all .2s; cursor:default;
+}
+.tag:hover{ border-color:var(--sand); color:var(--ink); }
+.tag.orange{ background:rgba(212,98,42,.08); color:var(--accent-orange); border-color:rgba(212,98,42,.2); }
+.tag.teal  { background:rgba(58,125,110,.08); color:var(--accent-teal);   border-color:rgba(58,125,110,.2); }
+.tag.blue  { background:rgba(45,90,142,.08);  color:var(--accent-blue);   border-color:rgba(45,90,142,.2); }
+
+/* ── EXPANDABLE BODY ── */
+.card-body{
+  display:none; padding:0 1.6rem 1.4rem;
+  border-top:1px solid var(--cream-deeper); padding-top:1.2rem;
+  animation:slideDown .25s ease;
+}
+.card.expanded .card-body{ display:block; }
+@keyframes slideDown{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+.card-desc{
+  font-size:.86rem; line-height:1.75; color:var(--warm-brown);
+  font-weight:300; margin-bottom:1.2rem;
+}
+
+/* ── ACHIEVEMENTS ── */
+.achievements{ display:flex; flex-direction:column; gap:.5rem; margin-bottom:1.2rem; }
+.ach-item{
+  display:flex; align-items:flex-start; gap:.7rem;
+  font-size:.83rem; line-height:1.6; color:var(--ink); font-weight:300;
+  background:rgba(58,125,110,.04); border:1px solid rgba(58,125,110,.12);
+  border-radius:.5rem; padding:.65rem .9rem;
+}
+.ach-dot{
+  width:16px; height:16px; border-radius:50%; background:rgba(58,125,110,.12);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:.15rem;
+  font-size:.6rem;
+}
+.card.work .ach-item{ background:rgba(212,98,42,.04); border-color:rgba(212,98,42,.12); }
+.card.work .ach-dot { background:rgba(212,98,42,.12); }
+
+/* ── VISIT BTN ── */
+.visit-btn{
+  display:inline-flex; align-items:center; gap:.45rem;
+  font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.07em; text-transform:uppercase;
+  padding:.45rem 1rem; border:1px solid var(--cream-deeper); border-radius:.4rem;
+  color:var(--warm-brown); background:var(--cream); text-decoration:none; cursor:pointer;
+  transition:all .2s;
+}
+.visit-btn:hover{ border-color:var(--accent-orange); color:var(--accent-orange); }
+
+/* ── FIELD BADGE (for edu) ── */
+.field-badge{
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-size:.8rem; font-weight:500; color:var(--accent-teal);
+  background:rgba(58,125,110,.07); border:1px solid rgba(58,125,110,.18);
+  border-radius:.4rem; padding:.4rem .85rem; margin-bottom:.85rem;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .exp-grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<section class="exp-section">
+
+  <!-- HEADER -->
+  <div class="exp-header">
+    <p class="exp-eyebrow">Professional Journey</p>
+    <h2 class="exp-title">Work Experience &amp; <em>Education</em></h2>
+    <p class="exp-sub">My professional journey and academic background across backend engineering and system building.</p>
+  </div>
+
+  <!-- GRID -->
+  <div class="exp-grid">
+
+    <!-- ══ WORK COLUMN ══ -->
+    <div>
+      <div class="col-header">
+        <div class="col-icon work">💼</div>
+        <div class="col-header-text">
+          <h3>Work Experience</h3>
+          <p>Professional Career Journey</p>
+        </div>
+      </div>
+
+      <div class="cards">
+
+        <!-- Card 1: Programming Hero (latest - present) -->
+        <div class="card work expanded" id="card-ph">
+          <div class="card-head" onclick="toggleCard('card-ph')">
+            <div class="card-top">
+              <div class="card-title-group">
+                <div class="card-title">Senior CS Instructor <span class="card-star">⭐</span></div>
+                <div class="card-org"><span class="card-org-icon">🎓</span> Programming Hero</div>
+              </div>
+              <div class="card-toggle">▾</div>
+            </div>
+            <div class="card-meta">
+              <span class="meta-item"><span class="meta-icon">📍</span>Dhaka, Bangladesh</span>
+              <span class="meta-item present"><span class="meta-icon">📅</span>Mar 2022 — Present</span>
+              <span class="meta-item"><span class="meta-icon">💼</span>Full Time</span>
+            </div>
+            <div class="card-tags">
+              <span class="tag orange">React</span>
+              <span class="tag">Node.js</span>
+              <span class="tag">Express.js</span>
+              <span class="tag teal">MongoDB</span>
+              <span class="tag">JavaScript</span>
+              <span class="tag teal">Python</span>
+              <span class="tag">Next.js</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-desc">Led and delivered comprehensive computer science instruction for over 10,000 students at Phitron. Developed and maintained curriculum covering data structures, algorithms, web development (MERN stack), and AI integrations. Mentored students, conducted code reviews, and organized programming workshops and hackathons.</p>
+            <div class="achievements">
+              <div class="ach-item"><div class="ach-dot">✓</div>Achieved a 95% student satisfaction rate through interactive teaching and mentorship.</div>
+              <div class="ach-item"><div class="ach-dot">✓</div>Developed and launched a Student Management System used by 10k+ students, improving attendance tracking and engagement metrics by 40%.</div>
+              <div class="ach-item"><div class="ach-dot">✓</div>Guided students to achieve 500+ problems solved, with many progressing to job offers.</div>
+              <div class="ach-item"><div class="ach-dot">✓</div>Mentored 1000+ students throughout their journey with Phitron course.</div>
+            </div>
+            <a class="visit-btn">↗ Visit Website</a>
+          </div>
+        </div>
+
+        <!-- Card 2: DS Legends -->
+        <div class="card work" id="card-ds">
+          <div class="card-head" onclick="toggleCard('card-ds')">
+            <div class="card-top">
+              <div class="card-title-group">
+                <div class="card-title">Junior Full Stack MERN Developer <span class="card-star">⭐</span></div>
+                <div class="card-org"><span class="card-org-icon">🏢</span> DS Legends</div>
+              </div>
+              <div class="card-toggle">▾</div>
+            </div>
+            <div class="card-meta">
+              <span class="meta-item"><span class="meta-icon">📍</span>Singapore (Remote)</span>
+              <span class="meta-item"><span class="meta-icon">📅</span>Feb 2022 — Mar 2022</span>
+              <span class="meta-item"><span class="meta-icon">💼</span>Full Time</span>
+            </div>
+            <div class="card-tags">
+              <span class="tag orange">React</span>
+              <span class="tag">Node.js</span>
+              <span class="tag">HTML</span>
+              <span class="tag">CSS</span>
+              <span class="tag">JavaScript</span>
+              <span class="tag">Bootstrap</span>
+              <span class="tag">Tailwind</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-desc">Built and deployed complete websites and blockchain system integrations using the MERN stack. Collaborated with a remote team on Singapore-based product development.</p>
+            <div class="achievements">
+              <div class="ach-item"><div class="ach-dot">✓</div>Developed the frontend sells page in 1 week and made it deployable.</div>
+              <div class="ach-item"><div class="ach-dot">✓</div>Made Fully Responsible Frontend across breakpoints and devices.</div>
+            </div>
+            <a class="visit-btn">↗ Visit Website</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ EDUCATION COLUMN ══ -->
+    <div>
+      <div class="col-header">
+        <div class="col-icon edu">🎓</div>
+        <div class="col-header-text">
+          <h3>Education</h3>
+          <p>Academic Background</p>
+        </div>
+      </div>
+
+      <div class="cards">
+
+        <!-- Card 1: MSc -->
+        <div class="card edu expanded" id="card-msc">
+          <div class="card-head" onclick="toggleCard('card-msc')">
+            <div class="card-top">
+              <div class="card-title-group">
+                <div class="card-title">Master of Science <span class="card-star">⭐</span></div>
+                <div class="card-org"><span class="card-org-icon">🏛️</span> University of Dhaka</div>
+              </div>
+              <div class="card-toggle">▾</div>
+            </div>
+            <div class="card-meta">
+              <span class="meta-item teal" style="background:rgba(58,125,110,.06);border-color:rgba(58,125,110,.2);color:var(--accent-teal)">
+                <span class="meta-icon">📚</span>Computer Science &amp; Engineering
+              </span>
+            </div>
+            <div class="card-meta" style="margin-top:.5rem">
+              <span class="meta-item"><span class="meta-icon">📍</span>Dhaka, Bangladesh</span>
+              <span class="meta-item present"><span class="meta-icon">📅</span>Jul 2024 — Present</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-desc">Currently pursuing an M.Sc. in Computer Science &amp; Engineering from the University of Dhaka. Deepening expertise in advanced algorithms, machine learning, distributed systems, and software architecture. Actively engaged in research and coursework that aligns with modern AI-driven web and full-stack development.</p>
+            <div class="card-tags" style="margin-top:.5rem">
+              <span class="tag teal">AI / ML</span>
+              <span class="tag blue">Algorithms</span>
+              <span class="tag">Distributed Systems</span>
+              <span class="tag">Research</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: BSc -->
+        <div class="card edu" id="card-bsc">
+          <div class="card-head" onclick="toggleCard('card-bsc')">
+            <div class="card-top">
+              <div class="card-title-group">
+                <div class="card-title">Bachelor of Science <span class="card-star">⭐</span></div>
+                <div class="card-org"><span class="card-org-icon">🎓</span> BGC Trust University Bangladesh</div>
+              </div>
+              <div class="card-toggle">▾</div>
+            </div>
+            <div class="card-meta">
+              <span class="meta-item teal" style="background:rgba(58,125,110,.06);border-color:rgba(58,125,110,.2);color:var(--accent-teal)">
+                <span class="meta-icon">📚</span>Computer Science &amp; Engineering
+              </span>
+            </div>
+            <div class="card-meta" style="margin-top:.5rem">
+              <span class="meta-item"><span class="meta-icon">📍</span>Chittagong, Bangladesh</span>
+              <span class="meta-item"><span class="meta-icon">📅</span>Jan 2020 — Feb 2024</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-desc">During my studies at BGC Trust University Bangladesh, I pursued a Bachelor of Science in Computer Science &amp; Engineering. I worked on several projects, including a web development portfolio and a research project on machine learning algorithms. My academic achievements include consistently high performance in coursework and practical assignments.</p>
+            <div class="card-tags" style="margin-top:.5rem">
+              <span class="tag">C++</span>
+              <span class="tag">Data Structures</span>
+              <span class="tag">Networks</span>
+              <span class="tag blue">Web Dev</span>
+              <span class="tag teal">ML Research</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</section>
+
+<script>
+function toggleCard(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('expanded');
+}
+</script>
+</body>
+</html>

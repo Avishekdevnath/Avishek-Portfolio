@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Section</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#f0ece3; --cream-dark:#e8e2d6; --cream-deeper:#ddd5c5;
+  --sand:#c9b99a; --warm-brown:#8b7355; --deep-brown:#4a3728;
+  --ink:#2a2118; --accent-orange:#d4622a; --accent-teal:#3a7d6e;
+  --accent-blue:#2d5a8e; --white:#faf8f4; --text-muted:#8a7a6a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--cream);
+  color:var(--ink);min-height:100vh;padding:5rem 1.5rem;
+  display:flex;align-items:flex-start;justify-content:center;
+}
+
+/* ── WRAPPER ── */
+.about-section{ width:100%; max-width:1100px; }
+
+/* ── HERO TOP ── */
+.hero-top{
+  text-align:center; margin-bottom:3.5rem;
+  display:flex; flex-direction:column; align-items:center; gap:1.2rem;
+}
+.role-badge{
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--warm-brown);
+  background:var(--white); border:1px solid var(--cream-deeper);
+  padding:.45rem 1.1rem; border-radius:2rem;
+  box-shadow:0 2px 8px rgba(74,55,40,.06);
+}
+.role-badge::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--accent-orange); }
+
+.hero-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3rem,7vw,5.5rem); font-weight:300;
+  line-height:1; color:var(--ink);
+}
+.hero-name em{ font-style:italic; color:var(--warm-brown); }
+
+.hero-bio{
+  font-size:.97rem; line-height:1.75; color:var(--warm-brown);
+  max-width:58ch; font-weight:300;
+}
+
+/* ── CTA BUTTONS ── */
+.hero-ctas{ display:flex; gap:.75rem; flex-wrap:wrap; justify-content:center; }
+.btn-primary{
+  background:var(--ink); color:var(--white);
+  padding:.75rem 1.8rem; border-radius:.4rem;
+  font-size:.83rem; font-weight:500; letter-spacing:.03em;
+  border:1.5px solid var(--ink); cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all .25s;
+  text-decoration:none; display:inline-block;
+}
+.btn-primary:hover{ background:var(--accent-orange); border-color:var(--accent-orange); }
+.btn-outline{
+  background:transparent; color:var(--ink);
+  padding:.75rem 1.8rem; border-radius:.4rem;
+  font-size:.83rem; font-weight:500; letter-spacing:.03em;
+  border:1.5px solid var(--sand); cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all .25s;
+  text-decoration:none; display:inline-block;
+}
+.btn-outline:hover{ border-color:var(--ink); }
+
+/* ── MAIN GRID ── */
+.main-grid{
+  display:grid; grid-template-columns:1.15fr 1fr;
+  gap:1.25rem; margin-bottom:1.25rem; align-items:start;
+}
+
+/* ── PROFILE CARD ── */
+.profile-card{
+  background:var(--white); border:1px solid var(--cream-deeper);
+  border-radius:.9rem; padding:2rem 2rem 2rem;
+  display:flex; gap:1.8rem; align-items:flex-start;
+  transition:all .3s; position:relative; overflow:hidden;
+}
+.profile-card::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--accent-orange); border-radius:3px 0 0 3px;
+}
+.profile-card:hover{ border-color:var(--sand); box-shadow:0 8px 28px rgba(74,55,40,.09); }
+
+.profile-avatar{
+  width:96px; height:96px; border-radius:50%; flex-shrink:0;
+  border:3px solid var(--cream-deeper);
+  background:linear-gradient(135deg,var(--cream-deeper),var(--sand));
+  overflow:hidden; display:flex; align-items:center; justify-content:center;
+  transition:border-color .3s;
+}
+.profile-card:hover .profile-avatar{ border-color:var(--sand); }
+.profile-avatar img{ width:100%; height:100%; object-fit:cover; }
+.avatar-placeholder{ font-size:2.8rem; opacity:.35; }
+
+.profile-body{ flex:1; min-width:0; }
+.profile-label{
+  font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent-orange); margin-bottom:.55rem;
+  display:flex; align-items:center; gap:.5rem;
+}
+.profile-label::before{ content:''; width:1rem; height:1px; background:var(--accent-orange); }
+.profile-heading{
+  font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:600;
+  color:var(--ink); margin-bottom:.85rem; line-height:1.2;
+}
+.profile-text{
+  font-size:.86rem; line-height:1.75; color:var(--warm-brown);
+  font-weight:300; margin-bottom:.7rem;
+}
+.profile-text:last-child{ margin-bottom:0; }
+
+/* ── RIGHT COLUMN ── */
+.right-col{ display:flex; flex-direction:column; gap:1.25rem; }
+
+/* ── INFO CARD ── */
+.info-card{
+  background:var(--white); border:1px solid var(--cream-deeper);
+  border-radius:.9rem; padding:1.5rem 1.6rem;
+  transition:all .3s; position:relative; overflow:hidden;
+}
+.info-card::before{
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  border-radius:3px 0 0 3px; transition:background .3s;
+}
+.info-card.teal::before{ background:var(--accent-teal); }
+.info-card.blue::before{ background:var(--accent-blue); }
+.info-card:hover{ border-color:var(--sand); box-shadow:0 6px 20px rgba(74,55,40,.08); transform:translateX(3px); }
+
+.info-card-head{
+  display:flex; align-items:center; gap:.8rem; margin-bottom:1.1rem;
+}
+.info-icon{
+  width:34px; height:34px; border-radius:.5rem;
+  display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0;
+}
+.info-icon.teal{ background:rgba(58,125,110,.1); }
+.info-icon.blue{ background:rgba(45,90,142,.1); }
+.info-card-title{
+  font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:600; color:var(--ink);
+}
+
+.info-list{ display:flex; flex-direction:column; gap:.5rem; }
+.info-list-item{
+  display:flex; align-items:center; gap:.65rem;
+  font-size:.84rem; color:var(--warm-brown); font-weight:300; line-height:1.5;
+}
+.info-list-item::before{
+  content:''; width:4px; height:4px; border-radius:50%;
+  background:var(--sand); flex-shrink:0;
+}
+
+.info-desc{
+  font-size:.85rem; line-height:1.7; color:var(--warm-brown); font-weight:300;
+}
+
+/* ── STATS ROW ── */
+.stats-row{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-bottom:1.25rem;
+}
+.stat-card{
+  background:var(--white); border:1px solid var(--cream-deeper);
+  border-radius:.9rem; padding:1.3rem 1.4rem;
+  transition:all .3s; text-align:center;
+}
+.stat-card:hover{ border-color:var(--sand); box-shadow:0 6px 20px rgba(74,55,40,.08); transform:translateY(-3px); }
+.stat-num{
+  font-family:'Cormorant Garamond',serif; font-size:2.4rem; font-weight:600;
+  line-height:1; color:var(--ink); margin-bottom:.3rem;
+}
+.stat-lbl{
+  font-family:'DM Mono',monospace; font-size:.62rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--text-muted);
+}
+
+/* ── PILLARS ROW ── */
+.pillars-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; }
+.pillar-card{
+  background:var(--white); border:1px solid var(--cream-deeper);
+  border-radius:.9rem; padding:1.4rem 1.2rem;
+  transition:all .3s; display:flex; flex-direction:column; gap:.65rem;
+  cursor:default;
+}
+.pillar-card:hover{
+  border-color:var(--sand); box-shadow:0 6px 20px rgba(74,55,40,.08); transform:translateY(-3px);
+}
+.pillar-icon-wrap{
+  width:38px; height:38px; border-radius:.5rem;
+  display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+}
+.p-orange{ background:rgba(212,98,42,.1); }
+.p-blue  { background:rgba(45,90,142,.1); }
+.p-teal  { background:rgba(58,125,110,.1); }
+.p-amber { background:rgba(196,132,26,.1); }
+.pillar-name{
+  font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:600; color:var(--ink);
+}
+.pillar-desc{
+  font-size:.78rem; color:var(--text-muted); line-height:1.55; font-weight:300;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .main-grid{ grid-template-columns:1fr; }
+  .pillars-row{ grid-template-columns:1fr 1fr; }
+}
+@media(max-width:600px){
+  .stats-row{ grid-template-columns:1fr 1fr; }
+  .pillars-row{ grid-template-columns:1fr 1fr; }
+  .profile-card{ flex-direction:column; align-items:center; text-align:center; }
+  .profile-label{ justify-content:center; }
+}
+</style>
+</head>
+<body>
+<section class="about-section">
+
+  <!-- ── HERO TOP ── -->
+  <div class="hero-top">
+    <span class="role-badge">Backend Engineer · System Design Ownership</span>
+
+    <h1 class="hero-name">Avishek <em>Devnath</em></h1>
+
+    <p class="hero-bio">I design, ship, and maintain backend systems under real operational constraints — from APIs and data models to auth and background processing.</p>
+
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#">View Experience</a>
+      <a class="btn-outline" href="#">See Skills</a>
+      <a class="btn-outline" href="#">Browse Projects</a>
+    </div>
+  </div>
+
+  <!-- ── MAIN GRID: Profile + Right Cards ── -->
+  <div class="main-grid">
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="profile-avatar">
+        <!-- Replace src with actual photo -->
+        <span class="avatar-placeholder">👤</span>
+      </div>
+      <div class="profile-body">
+        <p class="profile-label">What I build and own</p>
+        <h2 class="profile-heading">Backend-first systems, owned end-to-end</h2>
+        <p class="profile-text">Backend-first systems where the job is not just delivery, but ownership: architecture, trade-offs, and long-term maintainability.</p>
+        <p class="profile-text">I've worked on internal and public-facing platforms such as a multi-tenant CRM, a role-based student management system, and an offline, consent-based biometric system.</p>
+        <p class="profile-text">Alongside engineering work, I serve as a Senior CS Instructor at Phitron. Teaching sharpens fundamentals and communication; engineering remains my primary focus.</p>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-col">
+
+      <!-- System Ownership -->
+      <div class="info-card teal">
+        <div class="info-card-head">
+          <div class="info-icon teal">💼</div>
+          <span class="info-card-title">System ownership</span>
+        </div>
+        <div class="info-list">
+          <div class="info-list-item">API design, contracts, and versioning</div>
+          <div class="info-list-item">Data modeling, migrations, and integrity</div>
+          <div class="info-list-item">Auth, RBAC, and secure workflows</div>
+          <div class="info-list-item">Background processing and async jobs</div>
+          <div class="info-list-item">Operational reliability and debugging</div>
+        </div>
+      </div>
+
+      <!-- Academic Foundation -->
+      <div class="info-card blue">
+        <div class="info-card-head">
+          <div class="info-icon blue">🏛️</div>
+          <span class="info-card-title">Academic foundation</span>
+        </div>
+        <p class="info-desc">CSE graduate (BGC Trust University) and currently pursuing an MSc in CSE at the University of Dhaka, strengthening grounding in systems, security, and applied AI.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── STATS ROW ── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num">3+</div>
+      <div class="stat-lbl">Years Building</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">10k+</div>
+      <div class="stat-lbl">Students Taught</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">500+</div>
+      <div class="stat-lbl">DSA Problems</div>
+    </div>
+  </div>
+
+  <!-- ── PILLARS ROW ── -->
+  <div class="pillars-row">
+    <div class="pillar-card">
+      <div class="pillar-icon-wrap p-orange">🏗️</div>
+      <div class="pillar-name">Architecture</div>
+      <div class="pillar-desc">Designing systems for maintainability, not just delivery.</div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-icon-wrap p-blue">🗄️</div>
+      <div class="pillar-name">Database Design</div>
+      <div class="pillar-desc">Relational modeling, migrations, and data integrity at scale.</div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-icon-wrap p-teal">🔐</div>
+      <div class="pillar-name">Security</div>
+      <div class="pillar-desc">Auth, RBAC, and secure workflows built from the ground up.</div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-icon-wrap p-amber">🎓</div>
+      <div class="pillar-name">Teaching</div>
+      <div class="pillar-desc">Mentoring 10,000+ students in DSA and backend engineering.</div>
+    </div>
+  </div>
+
+</section>
+</body>
+</html>

@@ -1,294 +1,235 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaGithub, FaGitlab, FaBitbucket, FaExternalLinkAlt } from "react-icons/fa";
+import { useProjects } from "@/lib/swr";
 
-interface Repository {
-    url: string;
-    type: string;
-    label: string;
-    name?: string;
-}
+const CARD_ACCENTS = [
+  'bg-accent-orange',
+  'bg-accent-teal',
+  'bg-accent-blue',
+  'bg-[#c4841a]',
+];
 
-interface Project {
-    _id: string;
-    title: string;
-    description: string;
-    shortDescription: string;
-    image: string;
-    repositories: Repository[];
-    demoUrls: Repository[];
-    technologies: { name: string; icon?: string }[];
-    category: string;
-    featured: boolean;
-    status: 'published' | 'draft';
-    order: number;
-    completionDate: string;
-    createdAt: string;
-    updatedAt: string;
-    additionalImages?: string[]; // Added for additional images
-}
-
-interface ProjectsResponse {
-    success: boolean;
-    data: {
-        projects: Project[];
-        pagination: {
-            total: number;
-            page: number;
-            limit: number;
-            pages: number;
-        };
-    };
+function RepoIcon({ type }: { type: string }) {
+  switch (type.toLowerCase()) {
+    case 'github':    return <FaGithub className="w-3.5 h-3.5" />;
+    case 'gitlab':    return <FaGitlab className="w-3.5 h-3.5" />;
+    case 'bitbucket': return <FaBitbucket className="w-3.5 h-3.5" />;
+    default:          return <FaExternalLinkAlt className="w-3 h-3" />;
+  }
 }
 
 export default function Projects() {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const { projects: allProjects, isLoading, error } = useProjects('published');
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const response = await fetch('/api/projects');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch projects');
-                }
-                const data: ProjectsResponse = await response.json();
-                
-                if (!data.success || !data.data?.projects) {
-                    throw new Error('Invalid data format received');
-                }
-                
-                // Only show published projects
-                const publishedProjects = data.data.projects
-                    .filter(project => project.status === 'published')
-                    // Show featured projects first
-                    .sort((a, b) => {
-                        if (a.featured && !b.featured) return -1;
-                        if (!a.featured && b.featured) return 1;
-                        return a.order - b.order;
-                    });
-                
-                setProjects(publishedProjects);
-            } catch (err) {
-                console.error('Error fetching projects:', err);
-                setError(err instanceof Error ? err.message : 'Failed to load projects');
-            } finally {
-                setLoading(false);
-            }
-        };
+  // featured first, then by order
+  const projects = [...allProjects].sort((a: any, b: any) => {
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
 
-        fetchProjects();
-    }, []);
-
-    const getRepositoryIcon = (type: string) => {
-        switch (type.toLowerCase()) {
-            case 'github':
-                return <FaGithub className="w-4 h-4" />;
-            case 'gitlab':
-                return <FaGitlab className="w-4 h-4" />;
-            case 'bitbucket':
-                return <FaBitbucket className="w-4 h-4" />;
-            default:
-                return <FaExternalLinkAlt className="w-3.5 h-3.5" />;
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="py-20 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
-                <div className="text-center mb-10">
-                    <div className="h-6 w-40 bg-gray-200 rounded mx-auto mb-2 animate-pulse" />
-                    <div className="h-8 w-56 bg-gray-200 rounded mx-auto mb-3 animate-pulse" />
-                    <div className="h-4 w-80 bg-gray-200 rounded mx-auto animate-pulse" />
-                </div>
-                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {Array.from({ length: 6 }).map((_, idx) => (
-                        <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden">
-                            <div className="aspect-video bg-gray-200 animate-pulse" />
-                            <div className="p-5 space-y-3">
-                                <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse" />
-                                <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
-                                <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen flex items-center justify-center text-red-600">
-                {error}
-            </div>
-        );
-    }
-
+  /* ── Loading skeleton ── */
+  if (isLoading) {
     return (
-        <div className="py-20 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
-            <div className="max-w-7xl mx-auto">
-                {/* Header Section */}
-                <div className="text-center mb-12">
-                    <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">My Recent Work</h4>
-                    <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">Featured Projects</h2>
-                    <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                        Explore a selection of my recent projects showcasing my technical skills and creative problem-solving abilities.
-                    </p>
+      <section className="py-20 px-4 bg-cream">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="text-center mb-12 space-y-3">
+            <div className="h-3 w-28 bg-cream-deeper rounded-full mx-auto animate-pulse" />
+            <div className="h-9 w-52 bg-cream-deeper rounded mx-auto animate-pulse" />
+            <div className="h-4 w-72 bg-cream-deeper rounded mx-auto animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-off-white border border-cream-deeper rounded-[0.9rem] overflow-hidden animate-pulse">
+                <div className="h-44 bg-cream-deeper" />
+                <div className="p-5 space-y-3">
+                  <div className="h-5 bg-cream-deeper rounded w-3/4" />
+                  <div className="h-3 bg-cream-deeper rounded w-full" />
+                  <div className="h-3 bg-cream-deeper rounded w-5/6" />
+                  <div className="flex gap-2 pt-1">
+                    <div className="h-5 w-16 bg-cream-deeper rounded-full" />
+                    <div className="h-5 w-14 bg-cream-deeper rounded-full" />
+                  </div>
                 </div>
-
-                {/* Projects Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr">
-                    {projects.length > 0 ? (
-                        projects.slice(0, 6).map((project) => (
-                            <div
-                                key={project._id}
-                                className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-gray-50 to-white border border-gray-300 shadow-inner transition-all duration-300 hover:shadow-lg h-full flex flex-col animate-fadeIn"
-                                style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}
-                            >
-                                {/* Featured Badge */}
-                                {project.featured && (
-                                    <div className="absolute left-3 top-3 z-10 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-blue-500">
-                                        Featured
-                                    </div>
-                                )}
-
-                                {/* Project Image with Overlay */}
-                                <div className="relative h-52 w-full overflow-hidden flex-shrink-0">
-                                    <Image
-                                        src={project.image || '/placeholder-project.svg'}
-                                        alt={project.title}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    />
-                                    
-                                    {/* Gradient Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-70" />
-                                    
-                                    {/* Category Badge */}
-                                    <div className="absolute bottom-3 left-3 z-10">
-                                        <span className="rounded-full bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-gray-800 border border-gray-200">
-                                            {project.category}
-                                        </span>
-                                    </div>
-                                    
-                                    {/* Additional Images Indicator */}
-                                    {project.additionalImages && project.additionalImages.length > 0 && (
-                                        <div className="absolute bottom-3 right-3 z-10">
-                                            <span className="rounded-full bg-white/90 backdrop-blur-sm px-2 py-1 text-xs font-medium text-gray-800 flex items-center gap-1">
-                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                                                </svg>
-                                                {project.additionalImages.length}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Project Info */}
-                                <div className="p-5 flex flex-col flex-grow">
-                                    <Link href={`/projects/${project._id}`} className="group-hover:text-blue-600 transition-colors">
-                                        <h3 className="text-h5 weight-semibold text-gray-900 line-clamp-2 mb-1.5 group-hover:text-blue-600 transition-colors">
-                                            {project.title}
-                                        </h3>
-                                    </Link>
-
-                                    {/* Description */}
-                                    <div className="mb-5 flex-grow">
-                                        <p className="text-gray-600 text-body-sm leading-relaxed line-clamp-3">
-                                            {project.shortDescription}
-                                        </p>
-                                    </div>
-
-                                    {/* Technologies */}
-                                    <div className="mb-5">
-                                        <div className="flex flex-wrap gap-2">
-                                            {project.technologies.slice(0, 3).map((tech, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="rounded-full bg-white border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 shadow-sm"
-                                                >
-                                                    {tech.name}
-                                                </span>
-                                            ))}
-                                            {project.technologies.length > 3 && (
-                                                <span className="rounded-full bg-gray-100 border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700">
-                                                    +{project.technologies.length - 3}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Links */}
-                                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto text-sm">
-                                        {project.repositories.length > 0 && (
-                                            <a
-                                                href={project.repositories[0].url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
-                                            >
-                                                {getRepositoryIcon(project.repositories[0].type)}
-                                                <span className="text-button font-medium">Code</span>
-                                            </a>
-                                        )}
-                                        
-                                        {project.demoUrls.length > 0 && (
-                                            <a
-                                                href={project.demoUrls[0].url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors group"
-                                            >
-                                                <span className="text-button font-medium">Live Demo</span>
-                                                <FaExternalLinkAlt className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                                            </a>
-                                        )}
-                                        
-                                        <Link
-                                            href={`/projects/${project._id}`}
-                                            className="text-button font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                                        >
-                                            View Details
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="col-span-3 flex flex-col items-center justify-center text-center py-16">
-                            <div className="bg-gray-100 rounded-full p-6 mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Projects Available</h3>
-                            <p className="text-gray-600 max-w-md">
-                                There are no published projects available at the moment. Please check back later.
-                            </p>
-                        </div>
-                    )}
-                </div>
-                
-                {projects.length > 6 && (
-                    <div className="mt-12 text-center">
-                        <Link 
-                            href="/projects" 
-                            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg border border-blue-500"
-                        >
-                            View All Projects
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                        </Link>
-                    </div>
-                )}
-            </div>
+              </div>
+            ))}
+          </div>
         </div>
+      </section>
     );
+  }
+
+  /* ── Error state ── */
+  if (error) {
+    return (
+      <section className="py-20 px-4 bg-cream flex justify-center">
+        <div className="bg-off-white border border-cream-deeper text-warm-brown px-6 py-4 rounded-xl font-body text-[0.88rem]">
+          Failed to load projects.
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-20 px-4 bg-cream">
+      <div className="max-w-[1100px] mx-auto">
+
+        {/* ── Section header ── */}
+        <div className="text-center mb-12">
+          <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+            <span className="w-8 h-px bg-accent-orange opacity-60" />
+            Shipped &amp; Maintained
+            <span className="w-8 h-px bg-accent-orange opacity-60" />
+          </p>
+          <h2
+            className="font-heading font-light text-ink mb-3 leading-none"
+            style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+          >
+            Featured Projects
+          </h2>
+          <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light">
+            Selected systems where I owned backend architecture, data lifecycle, and reliability.
+          </p>
+        </div>
+
+        {/* ── Grid ── */}
+        {projects.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {projects.slice(0, 6).map((project: any, idx: number) => {
+                const accent = project.featured
+                  ? CARD_ACCENTS[0]
+                  : CARD_ACCENTS[(idx % (CARD_ACCENTS.length - 1)) + 1];
+
+                return (
+                  <div
+                    key={project._id}
+                    className="group relative bg-off-white border border-cream-deeper rounded-[0.9rem] overflow-hidden flex flex-col hover:border-sand hover:shadow-lg transition-all duration-300"
+                  >
+                    {/* Left accent bar */}
+                    <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${accent} z-10 rounded-l-[0.9rem]`} />
+
+                    {/* Image */}
+                    <div className="relative h-44 w-full overflow-hidden flex-shrink-0">
+                      <Image
+                        src={project.image || '/placeholder-project.svg'}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-ink/50 to-transparent" />
+
+                      {/* Featured badge */}
+                      {project.featured && (
+                        <div className="absolute top-3 right-3 z-10 bg-accent-orange text-off-white font-mono text-[0.58rem] tracking-[0.12em] uppercase px-2.5 py-1 rounded-full shadow-sm">
+                          Featured
+                        </div>
+                      )}
+
+                      {/* Category pill */}
+                      {project.category && (
+                        <div className="absolute bottom-3 left-5 z-10">
+                          <span className="font-mono text-[0.58rem] tracking-[0.12em] uppercase text-cream/90 bg-ink/40 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/10">
+                            {project.category}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="pl-6 pr-5 pt-5 pb-5 flex flex-col flex-grow">
+                      <Link href={`/projects/${project._id}`}>
+                        <h3 className="font-heading text-[1.12rem] font-semibold text-ink leading-snug mb-2 group-hover:text-accent-orange transition-colors duration-200 line-clamp-2">
+                          {project.title}
+                        </h3>
+                      </Link>
+
+                      <p className="font-body text-[0.83rem] text-text-muted leading-[1.7] font-light line-clamp-3 mb-4 flex-grow">
+                        {project.shortDescription || project.description}
+                      </p>
+
+                      {/* Tech pills */}
+                      {project.technologies?.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {project.technologies.slice(0, 3).map((tech: any, i: number) => (
+                            <span
+                              key={i}
+                              className="font-mono text-[0.6rem] tracking-[0.06em] text-warm-brown bg-cream border border-cream-deeper px-2.5 py-1 rounded-full"
+                            >
+                              {tech.name || tech}
+                            </span>
+                          ))}
+                          {project.technologies.length > 3 && (
+                            <span className="font-mono text-[0.6rem] tracking-[0.06em] text-text-muted bg-cream border border-cream-deeper px-2.5 py-1 rounded-full">
+                              +{project.technologies.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Links */}
+                      <div className="flex items-center gap-4 pt-3.5 border-t border-cream-deeper">
+                        {project.repositories?.[0] && (
+                          <a
+                            href={project.repositories[0].url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 font-mono text-[0.63rem] tracking-[0.06em] uppercase text-warm-brown hover:text-ink transition-colors duration-200"
+                          >
+                            <RepoIcon type={project.repositories[0].type} />
+                            Code
+                          </a>
+                        )}
+                        {project.demoUrls?.[0] && (
+                          <a
+                            href={project.demoUrls[0].url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 font-mono text-[0.63rem] tracking-[0.06em] uppercase text-warm-brown hover:text-ink transition-colors duration-200"
+                          >
+                            <FaExternalLinkAlt className="w-3 h-3" />
+                            Demo
+                          </a>
+                        )}
+                        <Link
+                          href={`/projects/${project._id}`}
+                          className="ml-auto font-mono text-[0.63rem] tracking-[0.06em] uppercase text-accent-orange hover:text-ink transition-colors duration-200 flex items-center gap-1"
+                        >
+                          Details →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* View All */}
+            {projects.length > 6 && (
+              <div className="mt-10 text-center">
+                <Link
+                  href="/projects"
+                  className="inline-flex items-center gap-2.5 font-body bg-ink text-off-white px-7 py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-ink hover:bg-accent-orange hover:border-accent-orange transition-all duration-250"
+                >
+                  View All Projects →
+                </Link>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="text-[2rem] opacity-[0.2] mb-3">🔍</div>
+            <p className="font-body text-[0.88rem] text-text-muted font-light">
+              No projects available at the moment.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }

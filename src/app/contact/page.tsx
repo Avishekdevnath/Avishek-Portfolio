@@ -8,6 +8,7 @@ import { useToast } from "@/context/ToastContext";
 import { Send, User, Mail, MessageSquare } from "lucide-react";
 import ContactInfo from "@/components/shared/ContactInfo";
 import SocialLinks from "@/components/shared/SocialLinks";
+import PageReadyOnMount from "@/components/shared/PageReadyOnMount";
 
 interface FormData {
   name: string;
@@ -25,286 +26,253 @@ interface FormErrors {
 
 export default function Contact() {
   const { showToast } = useToast();
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
-
+  const [formData, setFormData] = useState<FormData>({ name: "", email: "", subject: "", message: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const formRef = useRef<HTMLFormElement>(null);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (!formData.subject.trim()) {
-      newErrors.subject = "Subject is required";
-    } else if (formData.subject.trim().length < 5) {
-      newErrors.subject = "Subject must be at least 5 characters";
-    }
-
-    if (!formData.message.trim()) {
-      newErrors.message = "Message is required";
-    } else if (formData.message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters";
-    }
-
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    else if (formData.name.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Please enter a valid email address";
+    if (!formData.subject.trim()) newErrors.subject = "Subject is required";
+    else if (formData.subject.trim().length < 5) newErrors.subject = "Subject must be at least 5 characters";
+    if (!formData.message.trim()) newErrors.message = "Message is required";
+    else if (formData.message.trim().length < 10) newErrors.message = "Message must be at least 10 characters";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof FormErrors]) setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     setIsSubmitting(true);
     setSubmitStatus("idle");
-
     try {
       const response = await fetch('/api/messages', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
-
       if (data.success) {
         setSubmitStatus("success");
         setFormData({ name: "", email: "", subject: "", message: "" });
-        showToast({
-          title: "Message sent successfully!",
-          description: "I'll get back to you as soon as possible.",
-          status: "success",
-          duration: 5000
-        });
+        showToast({ title: "Message sent!", description: "I'll get back to you within 24 hours.", status: "success", duration: 5000 });
       } else {
         throw new Error(data.error || 'Failed to send message');
       }
     } catch (error) {
       setSubmitStatus("error");
-      showToast({
-        title: "Error sending message",
-        description: error instanceof Error ? error.message : "Please try again later",
-        status: "error",
-        duration: 5000
-      });
+      showToast({ title: "Failed to send", description: error instanceof Error ? error.message : "Please try again later", status: "error", duration: 5000 });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const inputBase = "block w-full py-2.5 text-[0.88rem] font-body bg-cream border rounded-md transition-colors duration-200 focus:outline-none focus:ring-1 placeholder:text-text-muted/50 text-ink";
+  const inputNormal = "border-cream-deeper focus:border-accent-orange focus:ring-accent-orange";
+  const inputError  = "border-accent-orange/60 focus:border-accent-orange focus:ring-accent-orange";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
+    <div className="min-h-screen bg-cream font-body">
+      <PageReadyOnMount />
       <div className="pt-6">
         <Header />
       </div>
 
-      <main className="relative">
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-7xl mx-auto">
-            {/* Page Title */}
-            <div className="text-center mb-12">
-              <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Let's Connect</h4>
-              <h1 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">
-                Get in Touch
-              </h1>
-              <p className="text-body-sm text-gray-600 max-w-3xl mx-auto leading-relaxed text-justify">
-                Have a project in mind or just want to chat? I'd love to hear from you. Let's create something amazing together! Use the form below or connect with me through social media.
-              </p>
+      <main>
+        <div className="max-w-[1100px] mx-auto px-4 py-16">
+
+          {/* ── Page header ── */}
+          <div className="text-center mb-12">
+            <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+              <span className="w-8 h-px bg-accent-orange opacity-60" />
+              Let&apos;s Connect
+              <span className="w-8 h-px bg-accent-orange opacity-60" />
+            </p>
+            <h1
+              className="font-heading font-light text-ink mb-3 leading-none"
+              style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+            >
+              Get in Touch
+            </h1>
+            <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
+              Have a project in mind or just want to chat? I&apos;d love to hear from you.
+              Use the form below or reach me through any of the channels listed.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr] gap-6">
+
+            {/* ── Left col ── */}
+            <div className="flex flex-col gap-5">
+
+              {/* Intro blurb */}
+              <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-7 py-6 overflow-hidden hover:border-sand hover:shadow-md transition-all duration-300">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-orange rounded-l-[0.9rem]" />
+                <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-accent-orange mb-1 flex items-center gap-2">
+                  <span className="w-4 h-px bg-accent-orange" />
+                  Let&apos;s Talk
+                </p>
+                <p className="font-body text-[0.86rem] text-warm-brown font-light leading-[1.75] mt-3 text-justify">
+                  I&apos;m always open to discussing new opportunities, creative projects, or
+                  just having a friendly conversation about technology and development.
+                </p>
+              </div>
+
+              {/* Contact info */}
+              <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-7 py-6 overflow-hidden hover:border-sand hover:shadow-md transition-all duration-300">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-teal rounded-l-[0.9rem]" />
+                <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-accent-teal mb-5 flex items-center gap-2">
+                  <span className="w-4 h-px bg-accent-teal" />
+                  Contact Information
+                </p>
+                <ContactInfo />
+              </div>
+
+              {/* Social links */}
+              <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-7 py-6 overflow-hidden hover:border-sand hover:shadow-md transition-all duration-300">
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-blue rounded-l-[0.9rem]" />
+                <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-accent-blue mb-5 flex items-center gap-2">
+                  <span className="w-4 h-px bg-accent-blue" />
+                  Connect With Me
+                </p>
+                <SocialLinks showLabels />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Contact Information */}
-              <div className="space-y-8">
+            {/* ── Right col: form ── */}
+            <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-7 py-7 overflow-hidden hover:border-sand hover:shadow-md transition-all duration-300">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#c4841a] rounded-l-[0.9rem]" />
+
+              <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-[#c4841a] mb-6 flex items-center gap-2">
+                <span className="w-4 h-px bg-[#c4841a]" />
+                Send a Message
+              </p>
+
+              <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
+
+                {/* Name */}
                 <div>
-                  <h2 className="text-h5 weight-semibold text-gray-900 mb-5">
-                    Let's Talk
-                  </h2>
-                  <p className="text-body-sm text-gray-600 leading-relaxed mb-6 text-justify">
-                    I'm always open to discussing new opportunities, creative
-                    projects, or just having a friendly conversation about
-                    technology and development.
-                  </p>
-                </div>
-
-                {/* Contact Info Cards */}
-                <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 p-8 shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-                  <ContactInfo />
-                </div>
-
-                {/* Social Links */}
-                <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 p-8 shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-                  <h3 className="text-h5 weight-semibold text-gray-900 mb-5">Connect With Me</h3>
-                  <SocialLinks showLabels />
-                </div>
-              </div>
-
-              {/* Contact Form */}
-              <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl border border-gray-300 p-8 shadow-inner" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-                <h2 className="text-h5 weight-semibold text-gray-900 mb-6">Send a Message</h2>
-                <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label className="block text-gray-700 text-caption mb-2 font-medium">
-                      Your Name
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <User className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className={`block w-full !pl-10 pr-3 py-2.5 text-sm border ${
-                          errors.name ? "border-red-500 bg-red-50" : "border-gray-300 bg-white"
-                        } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300`}
-                        placeholder="John Doe"
-                      />
-                    </div>
-                    {errors.name && (
-                      <p className="mt-1 text-xs text-red-500">{errors.name}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700 text-caption mb-2 font-medium">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Mail className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className={`block w-full !pl-10 pr-3 py-2.5 text-sm border ${
-                          errors.email ? "border-red-500 bg-red-50" : "border-gray-300 bg-white"
-                        } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300`}
-                        placeholder="john@example.com"
-                      />
-                    </div>
-                    {errors.email && (
-                      <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700 text-caption mb-2 font-medium">
-                      Subject
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <MessageSquare className="h-4 w-4 text-gray-400" />
-                      </div>
-                      <input
-                        type="text"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        className={`block w-full !pl-10 pr-3 py-2.5 text-sm border ${
-                          errors.subject ? "border-red-500 bg-red-50" : "border-gray-300 bg-white"
-                        } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300`}
-                        placeholder="What's this about?"
-                      />
-                    </div>
-                    {errors.subject && (
-                      <p className="mt-1 text-xs text-red-500">{errors.subject}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700 text-caption mb-2 font-medium">
-                      Message
-                    </label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
+                  <label className="block font-mono text-[0.65rem] tracking-[0.08em] uppercase text-warm-brown mb-1.5">
+                    Your Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
                       onChange={handleInputChange}
-                      rows={6}
-                      className={`block w-full px-3 py-2.5 text-sm border ${
-                        errors.message ? "border-red-500 bg-red-50" : "border-gray-300 bg-white"
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300`}
-                      placeholder="Tell me about your project, ideas, or questions..."
+                      placeholder="Avishek Devnath"
+                      className={`${inputBase} !pl-10 pr-3 ${errors.name ? inputError : inputNormal}`}
                     />
-                    {errors.message && (
-                      <p className="mt-1 text-xs text-red-500">{errors.message}</p>
-                    )}
                   </div>
+                  {errors.name && <p className="mt-1 font-body text-[0.75rem] text-accent-orange">{errors.name}</p>}
+                </div>
 
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-button shadow-lg border border-blue-500
-                      ${isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}
-                      transition-all duration-300`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Sending...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4" />
-                        <span>Send Message</span>
-                      </>
-                    )}
-                  </button>
+                {/* Email */}
+                <div>
+                  <label className="block font-mono text-[0.65rem] tracking-[0.08em] text-warm-brown mb-1.5">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="you@example.com"
+                      className={`${inputBase} !pl-10 pr-3 ${errors.email ? inputError : inputNormal}`}
+                    />
+                  </div>
+                  {errors.email && <p className="mt-1 font-body text-[0.75rem] text-accent-orange">{errors.email}</p>}
+                </div>
 
-                  {submitStatus === "success" && (
-                    <div className="mt-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl shadow-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium">Message sent successfully! I'll get back to you soon.</span>
-                      </div>
-                    </div>
+                {/* Subject */}
+                <div>
+                  <label className="block font-mono text-[0.65rem] tracking-[0.08em] uppercase text-warm-brown mb-1.5">
+                    Subject
+                  </label>
+                  <div className="relative">
+                    <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                    <input
+                      type="text"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      placeholder="What's this about?"
+                      className={`${inputBase} !pl-10 pr-3 ${errors.subject ? inputError : inputNormal}`}
+                    />
+                  </div>
+                  {errors.subject && <p className="mt-1 font-body text-[0.75rem] text-accent-orange">{errors.subject}</p>}
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block font-mono text-[0.65rem] tracking-[0.08em] uppercase text-warm-brown mb-1.5">
+                    Message
+                  </label>
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    rows={6}
+                    placeholder="Tell me about your project, ideas, or questions…"
+                    className={`${inputBase} px-3 resize-none ${errors.message ? inputError : inputNormal}`}
+                  />
+                  {errors.message && <p className="mt-1 font-body text-[0.75rem] text-accent-orange">{errors.message}</p>}
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full flex items-center justify-center gap-2.5 font-body bg-ink text-off-white px-6 py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-ink transition-all duration-250
+                    ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-accent-orange hover:border-accent-orange'}`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-off-white/30 border-t-off-white rounded-full animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Message
+                    </>
                   )}
+                </button>
 
-                  {submitStatus === "error" && (
-                    <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl shadow-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span className="text-sm font-medium">Failed to send message. Please try again.</span>
-                      </div>
-                    </div>
-                  )}
-                </form>
-              </div>
+                {/* Status */}
+                {submitStatus === "success" && (
+                  <div className="flex items-center gap-3 bg-accent-teal/8 border border-accent-teal/25 rounded-lg px-4 py-3">
+                    <span className="w-2 h-2 rounded-full bg-accent-teal shrink-0" />
+                    <p className="font-body text-[0.83rem] text-accent-teal font-medium">
+                      Message sent! I&apos;ll get back to you within 24 hours.
+                    </p>
+                  </div>
+                )}
+                {submitStatus === "error" && (
+                  <div className="flex items-center gap-3 bg-accent-orange/8 border border-accent-orange/25 rounded-lg px-4 py-3">
+                    <span className="w-2 h-2 rounded-full bg-accent-orange shrink-0" />
+                    <p className="font-body text-[0.83rem] text-accent-orange font-medium">
+                      Failed to send. Please try again or email me directly.
+                    </p>
+                  </div>
+                )}
+              </form>
             </div>
           </div>
         </div>

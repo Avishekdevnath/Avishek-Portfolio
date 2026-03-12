@@ -1,19 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ExternalLink, Globe, Code } from "lucide-react";
+import { Code } from "lucide-react";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
-import ProjectCard from '@/components/ProjectCard';
 import RichTextViewer from '@/components/shared/RichTextViewer';
-import { FaGithub, FaGitlab, FaBitbucket, FaGlobe } from 'react-icons/fa';
+import { FaGithub, FaGitlab, FaBitbucket, FaGlobe, FaExternalLinkAlt, FaArrowRight } from 'react-icons/fa';
 import { getPublishedProjectById, getRelatedProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-// Dynamically import ProjectLightbox to avoid SSR issues
 const ProjectLightbox = dynamic(() => import('./ProjectLightbox'), {
   ssr: false,
-  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 gap-4">Loading images...</div>
+  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-text-muted text-sm">Loading images...</div>
 });
 import { Technology, Repository, DemoURL } from '@/models/Project';
 
@@ -21,313 +19,441 @@ interface ProjectDetailsProps {
   id: string;
 }
 
+// Map categories to accent gradient
+const getAccentGradient = (category: string): string => {
+  const lower = category.toLowerCase();
+  if (lower.includes('web') || lower.includes('frontend') || lower.includes('fullstack'))
+    return 'bg-gradient-to-r from-accent-orange to-[#f5a87a]';
+  if (lower.includes('npm') || lower.includes('api') || lower.includes('library') || lower.includes('tool'))
+    return 'bg-gradient-to-r from-accent-teal to-[#6ab8ae]';
+  if (lower.includes('python') || lower.includes('data') || lower.includes('devops'))
+    return 'bg-gradient-to-r from-deep-brown to-warm-brown';
+  if (lower.includes('machine') || lower.includes('ml') || lower.includes('ai'))
+    return 'bg-gradient-to-r from-[#7c3aed] to-[#a855f7]';
+  if (lower.includes('mobile'))
+    return 'bg-gradient-to-r from-accent-blue to-[#6a9fd8]';
+  return 'bg-gradient-to-r from-accent-orange to-[#f5a87a]';
+};
+
 export default async function ProjectDetails({ id }: ProjectDetailsProps) {
-  // Get project data directly from database (no HTTP calls)
   const project = await getPublishedProjectById(id);
-  
+
   if (!project) {
     notFound();
   }
 
-  // Get related projects
-  const related = project.category 
+  const related = project.category
     ? await getRelatedProjects(project.category, project._id, 3)
     : [];
 
-  // kept for potential future use (e.g., timeline/metadata)
-
   const getRepositoryIcon = (type: string) => {
     switch (type) {
-      case 'github':
-        return <FaGithub className="w-4 h-4" />;
-      case 'gitlab':
-        return <FaGitlab className="w-4 h-4" />;
-      case 'bitbucket':
-        return <FaBitbucket className="w-4 h-4" />;
-      default:
-        return <FaGlobe className="w-4 h-4" />;
+      case 'github': return <FaGithub className="w-4 h-4" />;
+      case 'gitlab': return <FaGitlab className="w-4 h-4" />;
+      case 'bitbucket': return <FaBitbucket className="w-4 h-4" />;
+      default: return <FaGlobe className="w-4 h-4" />;
     }
   };
 
+  const getRepoTypeLabel = (type: string) => {
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  };
 
   const mainRepo = project.repositories?.[0];
   const mainDemo = project.demoUrls?.[0];
+  const accentClass = getAccentGradient(project.category);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 font-ui">
+    <div className="min-h-screen bg-cream font-body">
+      <div className="pt-6">
         <Header />
+      </div>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="relative z-10 mx-4 mb-6 bg-white rounded-xl p-6 border border-black shadow-sm box-border overflow-visible">
+      <main className="max-w-[1200px] mx-auto px-6 flex flex-col gap-5">
 
-        {/* Project Header - Two Column Layout */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* Left Column - Project Details */}
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-h2 font-bold text-gray-900 leading-tight mb-3">
-                  {project?.title}
-                </h1>
-              {project?.category && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-700 ring-1 ring-gray-200 mb-4">
-                  {project.category}
-                </span>
-              )}
-                <p className="text-body text-gray-700 leading-relaxed text-justify">
+        {/* Back to Projects */}
+        <nav className="flex items-center gap-2 font-mono text-[0.65rem] tracking-[0.08em] text-text-muted pt-14 pb-2">
+          <Link href="/projects" className="text-text-muted no-underline hover:text-accent-orange transition-colors flex items-center gap-2 group">
+            <svg className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-[3px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Projects
+          </Link>
+        </nav>
+
+        {/* Hero Card */}
+        <div className="relative bg-off-white border border-cream-deeper rounded-2xl overflow-hidden">
+          {/* Accent bar */}
+          <div className={`absolute top-0 left-0 right-0 h-[3px] ${accentClass}`} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] min-h-[360px]">
+            {/* Left - Project Info */}
+            <div className="p-[2.2rem_2rem_2rem] flex flex-col gap-4 border-r-0 lg:border-r border-cream-deeper">
+              {/* Category Badge */}
+              <span className="inline-flex items-center gap-[0.4rem] font-mono text-[0.6rem] tracking-[0.12em] uppercase py-[0.22rem] px-3 rounded-full border border-cream-deeper bg-cream-dark text-warm-brown w-fit">
+                {project.category}
+              </span>
+
+              {/* Title */}
+              <h1 className="font-heading text-[clamp(1.7rem,4vw,2.6rem)] font-semibold leading-[1.1] text-ink">
+                {project.title}
+              </h1>
+
+              {/* Short Description */}
+              <p className="text-[0.88rem] leading-[1.8] text-warm-brown font-light max-w-[44ch]">
                 {project.shortDescription}
               </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {project?.technologies?.slice(0, 6).map((tech: Technology, idx: number) => (
-                  <span key={idx} className="inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-[11px] font-medium text-gray-700 ring-1 ring-gray-200">
-                    {tech.name}
-                  </span>
-                ))}
-                {project?.technologies && project.technologies.length > 6 && (
-                  <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-700">
-                    +{project.technologies.length - 6}
-                  </span>
-                )}
-              </div>
-              </div>
-              
-              {/* Project Meta (removed per UX refinement) */}
-        
-              {/* Primary Actions */}
-              <div className="flex flex-wrap gap-2">
-                  {mainRepo && (
-                    <a
-                      href={mainRepo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors duration-200 text-sm focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
-                    aria-label={`View source on ${mainRepo.type}`}
-                    >
-                      {getRepositoryIcon(mainRepo.type)}
-                    <span>View Source</span>
-                    </a>
+
+              {/* Tech Chips */}
+              {project.technologies?.length > 0 && (
+                <div className="flex flex-wrap gap-[0.4rem]">
+                  {project.technologies.slice(0, 6).map((tech: Technology, idx: number) => (
+                    <span key={idx} className="font-mono text-[0.6rem] tracking-[0.03em] py-[0.18rem] px-[0.6rem] rounded-full border border-cream-deeper bg-cream-dark text-warm-brown">
+                      {tech.name}
+                    </span>
+                  ))}
+                  {project.technologies.length > 6 && (
+                    <span className="font-mono text-[0.6rem] text-text-muted py-[0.18rem] px-[0.4rem]">
+                      +{project.technologies.length - 6}
+                    </span>
                   )}
-                  {mainDemo && (
-                    <a
-                      href={mainDemo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
-                    aria-label="Open live demo in new tab"
+                </div>
+              )}
+
+              {/* CTA Buttons */}
+              <div className="flex gap-3 flex-wrap mt-1">
+                {mainRepo && (
+                  <a
+                    href={mainRepo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/btn relative inline-flex items-center gap-2 py-[0.55rem] px-5 rounded-full bg-ink text-off-white text-[0.84rem] font-medium no-underline border-[1.5px] border-ink overflow-hidden transition-all duration-250 hover:bg-deep-brown hover:border-deep-brown hover:-translate-y-px hover:shadow-[0_6px_18px_rgba(42,33,24,0.2)]"
                   >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Live Demo</span>
+                    {getRepositoryIcon(mainRepo.type)}
+                    View Source
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[130%] group-hover/btn:translate-x-[130%] transition-transform duration-500 pointer-events-none" />
+                  </a>
+                )}
+                {mainDemo && (
+                  <a
+                    href={mainDemo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 py-[0.55rem] px-5 rounded-full bg-transparent text-accent-orange text-[0.84rem] font-medium no-underline border-[1.5px] border-accent-orange transition-all duration-250 hover:bg-accent-orange/[0.06] hover:-translate-y-px"
+                  >
+                    <FaExternalLinkAlt className="w-[14px] h-[14px]" />
+                    Live Demo
                   </a>
                 )}
               </div>
+            </div>
 
-                {/* Technologies */}
-              {project?.technologies && project.technologies.length > 0 && (
-                <div>
-                  <h3 className="text-h6 font-semibold text-gray-900 mb-3">Technologies</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {(() => {
-                      const maxTech = 6;
-                      const techs = project.technologies || [];
-                      const visible = techs.slice(0, maxTech);
-                      const overflow = techs.length - visible.length;
-                      return (
-                        <>
-                          {visible.map((tech: Technology, index: number) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg ring-1 ring-gray-200 transition-colors duration-200 hover:bg-white"
-                            >
-                              {tech.icon ? (
-                                <img 
-                                  src={tech.icon} 
-                                  alt={`${tech.name} icon`}
-                                  className="w-4 h-4 object-contain"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                />
-                              ) : (
-                                <Code className="w-4 h-4 text-blue-500" />
-                              )}
-                              <span className="text-xs font-medium text-gray-700">{tech.name}</span>
-                            </div>
-                          ))}
-                          {overflow > 0 && (
-                            <span className="inline-flex items-center rounded-full bg-gray-50 ring-1 ring-gray-200 px-3 py-2 text-xs font-medium text-gray-700">+{overflow}</span>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
+            {/* Right - Screenshot */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-cream-deeper to-cream-dark min-h-[240px] lg:min-h-[360px]">
+              {project.image ? (
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className="object-contain object-center p-2 lg:p-3"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 55vw"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[3.5rem] opacity-[0.12]">
+                  📁
+                </div>
+              )}
+              {/* Live Badge */}
+              {mainDemo && (
+                <div className="absolute bottom-4 right-4 inline-flex items-center gap-[0.45rem] bg-off-white/95 backdrop-blur-[10px] border border-accent-teal/20 rounded-full py-[0.38rem] px-[0.9rem] text-[0.72rem] font-medium shadow-[0_3px_10px_rgba(74,55,40,0.1)]">
+                  <span className="w-[7px] h-[7px] rounded-full bg-[#3ab07a] animate-pulse-dot" />
+                  Live
                 </div>
               )}
             </div>
-
-            {/* Right Column - Project Image */}
-            {project?.image && (
-              <div className="relative">
-                <div className="rounded-2xl p-[2px] bg-black shadow-md">
-                  <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden bg-white ring-1 ring-gray-200">
-                  <Image
-                    src={project.image}
-                    alt={project?.title || 'Project Image'}
-                    fill
-                    className="object-cover transition-transform duration-500 hover:scale-105"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-40 hover:opacity-60 transition-opacity duration-300"></div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Project Description */}
-          <div className="mb-8">
-          <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
-            <h2 className="text-h5 font-semibold text-gray-900 mb-6">About this Project</h2>
-            <div className="prose prose-sm prose-compact max-w-none font-prose">
-            <RichTextViewer
-              html={project?.description || ''}
-              lineSpacing={'10'}
-              className="
-                prose-headings:text-gray-900 prose-headings:font-bold
-                prose-headings:scroll-mt-24
-                prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm prose-h1:my-1 prose-h2:my-1 prose-h3:my-1 prose-h4:my-0 prose-headings:leading-tight
-                prose-p:text-gray-700 prose-p:text-base prose-p:leading-relaxed prose-p:my-2
-                prose-a:text-blue-600 prose-a:underline-offset-2 hover:prose-a:underline
-                prose-img:rounded-xl prose-img:shadow-md prose-img:my-3
-                prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:bg-gray-50 prose-blockquote:p-2 prose-blockquote:my-1 prose-blockquote:text-xs
-                prose-ul:my-1 prose-ol:my-1
-                prose-li:my-0.5 prose-li:text-base list-disc list-outside pl-5
-                prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-[12px]
-                prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-3 prose-pre:rounded-xl prose-pre:my-2 prose-pre:text-[12px]
-                prose-strong:text-gray-900 prose-strong:font-semibold
-                prose-em:text-gray-700
-                prose-hr:border-gray-200 prose-hr:my-1
-              "
-            />
+        {/* About this Project */}
+        {project.description && (
+          <div className="bg-off-white border border-cream-deeper rounded-[0.85rem] overflow-hidden">
+            <div className="flex items-center gap-3 px-[1.6rem] py-[1.2rem] border-b border-cream-deeper">
+              <div className="w-8 h-8 rounded-[0.45rem] flex items-center justify-center text-[0.9rem] bg-accent-orange/10">
+                📋
+              </div>
+              <span className="font-heading text-[1.1rem] font-semibold text-ink">About this Project</span>
+            </div>
+            <div className="px-[1.6rem] py-[1.4rem]">
+              <div className="prose prose-sm prose-compact max-w-none">
+                <RichTextViewer
+                  html={project.description}
+                  lineSpacing={'10'}
+                  className="
+                    prose-headings:text-ink prose-headings:font-bold prose-headings:scroll-mt-24
+                    prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h4:text-sm
+                    prose-p:text-warm-brown prose-p:text-[0.87rem] prose-p:leading-[1.8] prose-p:font-light prose-p:my-2
+                    prose-strong:text-ink prose-strong:font-semibold
+                    prose-a:text-accent-blue prose-a:underline-offset-2 hover:prose-a:underline
+                    prose-img:rounded-xl prose-img:shadow-md prose-img:my-3
+                    prose-blockquote:border-l-4 prose-blockquote:border-cream-deeper prose-blockquote:bg-cream-dark prose-blockquote:p-2 prose-blockquote:my-1 prose-blockquote:text-xs
+                    prose-ul:my-1 prose-ol:my-1
+                    prose-li:my-0.5 prose-li:text-[0.87rem] prose-li:text-warm-brown list-disc list-outside pl-5
+                    prose-code:bg-cream-dark prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-[12px]
+                    prose-pre:bg-ink prose-pre:text-off-white prose-pre:p-3 prose-pre:rounded-xl prose-pre:my-2 prose-pre:text-[12px]
+                    prose-em:text-warm-brown
+                    prose-hr:border-cream-deeper prose-hr:my-1
+                  "
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
+        {/* Technologies */}
+        {project.technologies?.length > 0 && (
+          <div className="bg-off-white border border-cream-deeper rounded-[0.85rem] overflow-hidden">
+            <div className="flex items-center gap-3 px-[1.6rem] py-[1.2rem] border-b border-cream-deeper">
+              <div className="w-8 h-8 rounded-[0.45rem] flex items-center justify-center text-[0.9rem] bg-accent-blue/10">
+                ⚙️
+              </div>
+              <span className="font-heading text-[1.1rem] font-semibold text-ink">Technologies</span>
+            </div>
+            <div className="px-[1.6rem] py-[1.4rem]">
+              <div className="flex flex-wrap gap-[0.6rem]">
+                {project.technologies.map((tech: Technology, idx: number) => (
+                  <div
+                    key={idx}
+                    className="inline-flex items-center gap-2 py-[0.4rem] px-[0.9rem] rounded-lg border border-cream-deeper bg-cream-dark transition-all duration-200 hover:border-sand hover:bg-cream-deeper cursor-default"
+                  >
+                    {tech.icon ? (
+                      <img
+                        src={tech.icon}
+                        alt={`${tech.name} icon`}
+                        className="w-[13px] h-[13px] object-contain"
+                        onError={(e: any) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <Code className="w-[13px] h-[13px] text-accent-orange flex-shrink-0" />
+                    )}
+                    <span className="font-mono text-[0.72rem] text-ink tracking-[0.02em]">{tech.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Repositories */}
-                {project.repositories?.length > 0 && (
-                  <div className="mb-8">
-            <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
-              <h3 className="text-h5 font-semibold text-gray-900 mb-4">Repositories</h3>
-              <div className="space-y-3">
-                      {project.repositories.map((repo: Repository, index: number) => (
-                        <a
-                          key={`repo-${index}`}
-                          href={repo.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                    className="flex items-center p-4 bg-white rounded-lg ring-1 ring-gray-200 hover:bg-gray-50 transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
-                        >
-                    <div className="mr-3 text-gray-600 group-hover:text-blue-600 transition-colors">
-                            {getRepositoryIcon(repo.type)}
-                          </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                        {repo.name || `${repo.type.charAt(0).toUpperCase() + repo.type.slice(1)} Repository`}
-                            </div>
-                      <div className="text-xs text-gray-500 capitalize">{repo.type}</div>
-                          </div>
-                    <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                        </a>
-                      ))}
+        {project.repositories?.length > 0 && (
+          <div className="bg-off-white border border-cream-deeper rounded-[0.85rem] overflow-hidden">
+            <div className="flex items-center gap-3 px-[1.6rem] py-[1.2rem] border-b border-cream-deeper">
+              <div className="w-8 h-8 rounded-[0.45rem] flex items-center justify-center text-[0.9rem] bg-deep-brown/[0.08]">
+                🔗
               </div>
+              <span className="font-heading text-[1.1rem] font-semibold text-ink">Repositories</span>
+            </div>
+            <div>
+              {project.repositories.map((repo: Repository, index: number) => (
+                <a
+                  key={`repo-${index}`}
+                  href={repo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-[1.6rem] py-4 gap-4 border-b border-cream-deeper last:border-b-0 transition-colors duration-200 no-underline text-inherit hover:bg-cream/50 group/link"
+                >
+                  <div className="flex items-center gap-[0.85rem]">
+                    <div className="w-9 h-9 rounded-lg border border-cream-deeper bg-cream-dark flex items-center justify-center flex-shrink-0">
+                      <span className="text-warm-brown">{getRepositoryIcon(repo.type)}</span>
+                    </div>
+                    <div>
+                      <div className="text-[0.88rem] font-medium text-ink">
+                        {repo.name || `${getRepoTypeLabel(repo.type)} Repository`}
+                      </div>
+                      <div className="font-mono text-[0.6rem] text-text-muted tracking-[0.06em] mt-[0.18rem]">
+                        {getRepoTypeLabel(repo.type)}
+                      </div>
                     </div>
                   </div>
-                )}
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className="font-mono text-[0.58rem] tracking-[0.1em] uppercase py-[0.2rem] px-[0.65rem] rounded-full bg-deep-brown/[0.08] text-warm-brown border border-cream-deeper">
+                      Public
+                    </span>
+                    <div className="w-7 h-7 rounded-full border border-cream-deeper bg-cream-dark flex items-center justify-center transition-all duration-200 group-hover/link:border-sand group-hover/link:bg-cream-deeper">
+                      <FaExternalLinkAlt className="w-3 h-3 text-text-muted" />
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Demo Links */}
-                {project.demoUrls?.length > 0 && (
-                  <div className="mb-8">
-            <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
-              <h3 className="text-h5 font-semibold text-gray-900 mb-4">Demo Links</h3>
-              <div className="space-y-3">
-                {project.demoUrls.map((demo: DemoURL, index: number) => {
-                  const getDemoBadgeColor = (type: string) => {
-                    switch (type) {
-                      case 'live': return 'bg-green-50 text-green-800 ring-1 ring-green-200';
-                      case 'staging': return 'bg-yellow-50 text-yellow-800 ring-1 ring-yellow-200';
-                      case 'demo': return 'bg-blue-50 text-blue-800 ring-1 ring-blue-200';
-                      case 'documentation': return 'bg-purple-50 text-purple-800 ring-1 ring-purple-200';
-                      default: return 'bg-gray-50 text-gray-800 ring-1 ring-gray-200';
-                    }
-                  };
-                  
-                  return (
-                        <a
-                          key={`demo-${index}`}
-                          href={demo.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                      className="flex items-center p-4 bg-white rounded-lg ring-1 ring-gray-200 hover:bg-gray-50 transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500"
-                      aria-label={`Open ${demo.type} link in new tab`}
-                    >
-                      <Globe className="w-4 h-4 mr-3 text-gray-600 group-hover:text-green-600 transition-colors" />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900 group-hover:text-green-600 transition-colors">
-                          {demo.name || `${demo.type.charAt(0).toUpperCase() + demo.type.slice(1)} Demo`}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${getDemoBadgeColor(demo.type)}`}>
-                            {demo.type.charAt(0).toUpperCase() + demo.type.slice(1)}
-                          </span>
-                            </div>
-                          </div>
-                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-green-600 transition-colors" />
-                        </a>
-                  );
-                })}
+        {project.demoUrls?.length > 0 && (
+          <div className="bg-off-white border border-cream-deeper rounded-[0.85rem] overflow-hidden">
+            <div className="flex items-center gap-3 px-[1.6rem] py-[1.2rem] border-b border-cream-deeper">
+              <div className="w-8 h-8 rounded-[0.45rem] flex items-center justify-center text-[0.9rem] bg-accent-teal/10">
+                🌐
               </div>
+              <span className="font-heading text-[1.1rem] font-semibold text-ink">Demo Links</span>
+            </div>
+            <div>
+              {project.demoUrls.map((demo: DemoURL, index: number) => {
+                const isLive = demo.type === 'live';
+                return (
+                  <a
+                    key={`demo-${index}`}
+                    href={demo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between px-[1.6rem] py-4 gap-4 border-b border-cream-deeper last:border-b-0 transition-colors duration-200 no-underline text-inherit hover:bg-cream/50 group/link"
+                  >
+                    <div className="flex items-center gap-[0.85rem]">
+                      <div className="w-9 h-9 rounded-lg border border-cream-deeper bg-cream-dark flex items-center justify-center flex-shrink-0">
+                        <FaGlobe className="w-4 h-4 text-warm-brown" />
+                      </div>
+                      <div>
+                        <div className="text-[0.88rem] font-medium text-ink">
+                          {demo.name || `${demo.type.charAt(0).toUpperCase() + demo.type.slice(1)} Site`}
+                        </div>
+                        <div className="font-mono text-[0.6rem] text-text-muted tracking-[0.06em] mt-[0.18rem]">
+                          {demo.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className={`font-mono text-[0.58rem] tracking-[0.1em] uppercase py-[0.2rem] px-[0.65rem] rounded-full border ${
+                        isLive
+                          ? 'bg-[#3ab07a]/[0.12] text-[#2e8c5c] border-[#3ab07a]/25'
+                          : 'bg-accent-blue/10 text-accent-blue border-accent-blue/25'
+                      }`}>
+                        {demo.type.charAt(0).toUpperCase() + demo.type.slice(1)}
+                      </span>
+                      <div className="w-7 h-7 rounded-full border border-cream-deeper bg-cream-dark flex items-center justify-center transition-all duration-200 group-hover/link:border-sand group-hover/link:bg-cream-deeper">
+                        <FaExternalLinkAlt className="w-3 h-3 text-text-muted" />
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Additional Images Gallery */}
         {project.additionalImages && project.additionalImages.length > 0 && (
-          <div className="mb-8">
-            <div className="bg-white rounded-xl p-6 border border-black shadow-sm">
-              <h3 className="text-h5 font-semibold text-gray-900 mb-6">Project Gallery</h3>
+          <div className="bg-off-white border border-cream-deeper rounded-[0.85rem] overflow-hidden">
+            <div className="flex items-center gap-3 px-[1.6rem] py-[1.2rem] border-b border-cream-deeper">
+              <div className="w-8 h-8 rounded-[0.45rem] flex items-center justify-center text-[0.9rem] bg-accent-blue/10">
+                🖼️
+              </div>
+              <span className="font-heading text-[1.1rem] font-semibold text-ink">Project Gallery</span>
+            </div>
+            <div className="px-[1.6rem] py-[1.4rem]">
               <ProjectLightbox images={project.additionalImages} />
             </div>
           </div>
         )}
 
         {/* Related Projects */}
-        {related.length > 0 ? (
-          <div className="mt-12">
-            <div className="bg-white rounded-xl p-6 ring-1 ring-gray-200 shadow-sm">
-              <h2 className="text-h4 font-semibold text-gray-900 mb-6">Related Projects</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {related.map(p => (
-                  <ProjectCard key={p._id} project={p} />
-                ))}
+        {related.length > 0 && (
+          <div className="bg-off-white border border-cream-deeper rounded-[0.85rem] overflow-hidden">
+            <div className="flex items-center gap-3 px-[1.6rem] py-[1.2rem] border-b border-cream-deeper">
+              <div className="w-8 h-8 rounded-[0.45rem] flex items-center justify-center text-[0.9rem] bg-accent-orange/10">
+                ✦
               </div>
-          </div>
-        </div>
-        ) : (
-          <div className="mt-12">
-            <div className="bg-white rounded-xl p-6 ring-1 ring-gray-200 shadow-sm text-center text-gray-600">
-              <h2 className="text-h5 font-semibold text-gray-900 mb-2">Related Projects</h2>
-              <p className="text-sm">No related projects found. Explore more on the projects page.</p>
-              <Link href="/projects" className="inline-flex items-center mt-3 text-blue-600 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 ring-offset-2 ring-blue-500 rounded-md px-2 py-1">
-                Browse Projects
-              </Link>
+              <span className="font-heading text-[1.1rem] font-semibold text-ink">Related Projects</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-[1.4rem_1.6rem]">
+              {related.map(p => {
+                const relMainRepo = p.repositories?.[0];
+                const relMainDemo = p.demoUrls?.[0];
+                return (
+                  <Link
+                    key={p._id}
+                    href={`/projects/${p._id}`}
+                    className="group/rel bg-cream-dark border border-cream-deeper rounded-[0.75rem] overflow-hidden no-underline text-inherit transition-all duration-300 hover:border-sand hover:shadow-[0_6px_18px_rgba(74,55,40,0.09)] hover:-translate-y-[2px]"
+                  >
+                    {/* Thumbnail */}
+                    <div className="h-[110px] overflow-hidden relative bg-gradient-to-br from-[#d0c8b8] to-cream-deeper">
+                      {p.image ? (
+                        <Image
+                          src={p.image}
+                          alt={p.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[2rem] opacity-[0.14]">
+                          📁
+                        </div>
+                      )}
+                      <span className="absolute bottom-2 left-2 font-mono text-[0.52rem] tracking-[0.08em] uppercase py-[0.15rem] px-[0.55rem] rounded-full bg-ink/70 text-white/85">
+                        {p.category}
+                      </span>
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-[0.9rem_1rem]">
+                      <div className="font-heading text-[1rem] font-semibold text-ink mb-[0.35rem] leading-[1.2] group-hover/rel:text-accent-orange transition-colors duration-200">
+                        {p.title}
+                      </div>
+                      <div className="text-[0.76rem] text-text-muted leading-[1.6] font-light line-clamp-2 mb-[0.6rem]">
+                        {p.shortDescription}
+                      </div>
+                      <div className="flex flex-wrap gap-[0.3rem] items-center mb-3">
+                        {p.technologies?.slice(0, 3).map((tech: Technology, i: number) => (
+                          <span key={i} className="font-mono text-[0.54rem] py-[0.12rem] px-[0.5rem] rounded-full border border-cream-deeper bg-off-white text-warm-brown">
+                            {tech.name}
+                          </span>
+                        ))}
+                        {p.technologies && p.technologies.length > 3 && (
+                          <span className="font-mono text-[0.54rem] text-text-muted">
+                            +{p.technologies.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex gap-[0.55rem] px-4 py-[0.65rem] border-t border-cream-deeper">
+                      {relMainRepo && (
+                        <span className="inline-flex items-center gap-[0.28rem] text-[0.72rem] font-medium text-text-muted">
+                          <FaGithub className="w-[11px] h-[11px]" /> Code
+                        </span>
+                      )}
+                      {relMainRepo && relMainDemo && (
+                        <div className="w-px bg-cream-deeper" />
+                      )}
+                      {relMainDemo && (
+                        <span className="inline-flex items-center gap-[0.28rem] text-[0.72rem] font-medium text-text-muted">
+                          <FaExternalLinkAlt className="w-[11px] h-[11px]" /> Demo
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
-        </div>
+
+        {/* No Related Projects */}
+        {related.length === 0 && (
+          <div className="bg-off-white border border-cream-deeper rounded-[0.85rem] overflow-hidden text-center py-8 px-6">
+            <span className="font-heading text-[1.1rem] font-semibold text-ink block mb-2">Related Projects</span>
+            <p className="text-[0.85rem] text-text-muted font-light mb-3">No related projects found.</p>
+            <Link href="/projects" className="inline-flex items-center gap-1 text-accent-orange text-[0.84rem] font-medium no-underline hover:underline">
+              Browse Projects <FaArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+        )}
+
       </main>
 
       <Footer />
     </div>
   );
-} 
+}

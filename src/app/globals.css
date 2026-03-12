@@ -7,6 +7,20 @@
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 255, 255, 255;
+
+  /* New Design Tokens — Warm Editorial Palette */
+  --cream: #f0ece3;
+  --cream-dark: #e8e2d6;
+  --cream-deeper: #ddd5c5;
+  --sand: #c9b99a;
+  --warm-brown: #8b7355;
+  --deep-brown: #4a3728;
+  --ink: #2a2118;
+  --accent-orange: #d4622a;
+  --accent-teal: #3a7d6e;
+  --accent-blue: #2d5a8e;
+  --off-white: #faf8f4;
+  --text-muted: #8a7a6a;
 }
 
 @layer base {

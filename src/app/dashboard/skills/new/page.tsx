@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/context/ToastContext';
 
 const skillLevels = [
@@ -35,6 +35,7 @@ const skillTypes = [
 
 export default function NewSkillPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,6 +45,13 @@ export default function NewSkillPage() {
     type: '',
     order: 0,
   });
+
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat) {
+      setFormData(prev => ({ ...prev, category: cat }));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

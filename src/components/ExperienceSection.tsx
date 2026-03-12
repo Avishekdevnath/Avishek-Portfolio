@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import ExperienceCard from './ExperienceCard';
-import LoadingScreen from './shared/LoadingScreen';
-import { FaBriefcase, FaGraduationCap } from 'react-icons/fa';
 import { IWorkExperience, IEducation, ExperienceType, ExperienceListApiResponse } from '@/types/experience';
 
 interface ExperienceSectionProps {
@@ -133,9 +131,9 @@ export default function ExperienceSection({
   }, [type, showFeaturedOnly, limit]);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center py-12">
-      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
-      <p className="text-gray-600">Loading experiences...</p>
+    <div className="flex items-center justify-center py-12 gap-3">
+      <div className="w-4 h-4 border-2 border-cream-deeper border-t-accent-orange rounded-full animate-spin" />
+      <p className="font-mono text-[0.65rem] tracking-[0.1em] uppercase text-text-muted">Loading…</p>
     </div>
   );
 
@@ -143,8 +141,8 @@ export default function ExperienceSection({
     console.error('❌ ExperienceSection: Rendering error state:', error);
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">Unable to load experiences</p>
-        <p className="text-gray-600 text-sm">Please make sure MongoDB is properly configured</p>
+        <p className="font-body text-[0.83rem] text-accent-orange mb-1">Unable to load experiences</p>
+        <p className="font-mono text-[0.65rem] tracking-[0.06em] text-text-muted">Please make sure MongoDB is properly configured</p>
       </div>
     );
   }
@@ -158,8 +156,7 @@ export default function ExperienceSection({
   if (!hasExperiences) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">No experiences found</p>
-        <p className="text-gray-500 text-sm mt-2">Add some experiences in the dashboard</p>
+        <p className="font-body text-[0.83rem] text-text-muted">No experiences found</p>
       </div>
     );
   }
@@ -177,41 +174,46 @@ export default function ExperienceSection({
   };
 
   return (
-    <section className={`py-12 md:py-16 px-4 ${className}`}>
-      <div className={`max-w-6xl mx-auto ${containerClassName}`}>
+    <section className={`${className}`}>
+      <div className={containerClassName}>
         {/* Header */}
         {!hideHeader && (
-          <header className="text-center mb-1 md:mb-2 font-ui">
-            <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-2">
+          <div className="text-center mb-10">
+            <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+              <span className="w-8 h-px bg-accent-orange opacity-60" />
+              {type === 'work' ? 'Career' : type === 'education' ? 'Academic' : 'Background'}
+              <span className="w-8 h-px bg-accent-orange opacity-60" />
+            </p>
+            <h2
+              className="font-heading font-light text-ink mb-3 leading-none"
+              style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+            >
               {title || getDefaultTitle()}
             </h2>
-            <p className="text-body-sm text-gray-600 max-w-2xl mx-auto">
-              {subtitle || getDefaultSubtitle()}
-            </p>
-          </header>
+            {(subtitle || getDefaultSubtitle()) && (
+              <p className="font-body text-[0.9rem] text-text-muted max-w-[60ch] mx-auto leading-[1.7] font-light text-justify">
+                {subtitle || getDefaultSubtitle()}
+              </p>
+            )}
+          </div>
         )}
 
-        {/* Work Experience Section */}
+        {/* Work Experience */}
         {(type === 'both' || type === 'work') && hasWork && (
-          <div className="mb-8">
+          <div className={type === 'both' ? 'mb-10' : ''}>
             {type === 'both' && (
-              <div className="flex items-center gap-3 mb-2 font-ui">
-                <div className="p-1.5 rounded-lg icon-work-bg">
-                  <FaBriefcase className="icon-md icon-work" />
-                </div>
-                <div>
-                  <h3 className="text-h5 weight-semibold text-gray-900">Work Experience</h3>
-                  <p className="text-caption text-gray-600">Professional career journey</p>
-                </div>
-              </div>
+              <p className="font-mono text-[0.65rem] tracking-[0.16em] uppercase text-accent-orange mb-5 flex items-center gap-2">
+                <span className="w-4 h-px bg-accent-orange opacity-60" />
+                Work Experience
+              </p>
             )}
-            <div className={`grid gap-6 ${
-              gridClassName || (variant === 'compact' 
-                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+            <div className={`grid gap-4 ${
+              gridClassName || (variant === 'compact'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                 : 'grid-cols-1')
             }`}>
               {experiences.work.map((experience) => (
-                <ExperienceCard 
+                <ExperienceCard
                   key={experience._id}
                   experience={experience}
                   variant={variant}
@@ -221,27 +223,22 @@ export default function ExperienceSection({
           </div>
         )}
 
-        {/* Education Section */}
+        {/* Education */}
         {(type === 'both' || type === 'education') && hasEducation && (
           <div>
             {type === 'both' && (
-              <div className="flex items-center gap-3 mb-2 font-ui">
-                <div className="p-1.5 rounded-lg icon-edu-bg">
-                  <FaGraduationCap className="icon-md icon-edu" />
-                </div>
-                <div>
-                  <h3 className="text-h5 weight-semibold text-gray-900">Education</h3>
-                  <p className="text-caption text-gray-600">Academic background and qualifications</p>
-                </div>
-              </div>
+              <p className="font-mono text-[0.65rem] tracking-[0.16em] uppercase text-accent-teal mb-5 flex items-center gap-2">
+                <span className="w-4 h-px bg-accent-teal opacity-60" />
+                Education
+              </p>
             )}
-            <div className={`grid gap-6 ${
-              gridClassName || (variant === 'compact' 
-                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+            <div className={`grid gap-4 ${
+              gridClassName || (variant === 'compact'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                 : 'grid-cols-1')
             }`}>
               {experiences.education.map((experience) => (
-                <ExperienceCard 
+                <ExperienceCard
                   key={experience._id}
                   experience={experience}
                   variant={variant}

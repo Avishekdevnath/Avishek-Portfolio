@@ -126,7 +126,7 @@ export default function ExperienceForm({ initialData, type, mode, onClose }: Exp
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<FormDataState>(initialData || {});
+  const [formData, setFormData] = useState<FormDataState>({ status: 'published', ...initialData });
 
   // Normalize incoming ISO date strings to yyyy-mm-dd for date inputs
   useEffect(() => {

@@ -10,6 +10,28 @@ module.exports = {
       colors: {
         primary: '#007AFF',
         secondary: '#6B7280',
+        cream: {
+          DEFAULT: '#f0ece3',
+          dark: '#e8e2d6',
+          deeper: '#ddd5c5',
+        },
+        sand: '#c9b99a',
+        'warm-brown': '#8b7355',
+        'deep-brown': '#4a3728',
+        ink: '#2a2118',
+        'off-white': '#faf8f4',
+        'text-muted': '#8a7a6a',
+        accent: {
+          orange: '#d4622a',
+          teal: '#3a7d6e',
+          blue: '#2d5a8e',
+        },
+      },
+      fontFamily: {
+        heading: ['var(--font-heading)', 'Cormorant Garamond', 'serif'],
+        body: ['var(--font-body)', 'DM Sans', 'sans-serif'],
+        mono: ['var(--font-mono)', 'DM Mono', 'monospace'],
+        ui: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
       typography: {
         DEFAULT: {
@@ -84,6 +106,36 @@ module.exports = {
         bounce: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' }
+        },
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' }
+        },
+        'pulse-dot': {
+          '0%, 100%': { boxShadow: '0 0 0 3px rgba(58,176,122,.2)' },
+          '50%': { boxShadow: '0 0 0 6px rgba(58,176,122,.1)' }
+        },
+        bob: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(6px)' }
+        },
+        loaderSlideUp: {
+          from: { transform: 'translateY(110%)' },
+          to: { transform: 'translateY(0%)' }
+        },
+        grain: {
+          '0%, 100%': { transform: 'translate(0,0)' },
+          '25%': { transform: 'translate(-2%,-3%)' },
+          '50%': { transform: 'translate(2%,1%)' },
+          '75%': { transform: 'translate(-1%,3%)' }
+        },
+        curtainDrop: {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0%)' }
+        },
+        curtainRise: {
+          from: { transform: 'translateY(0%)' },
+          to: { transform: 'translateY(-100%)' }
         }
       },
       animation: {
@@ -92,7 +144,13 @@ module.exports = {
         fadeIn: 'fadeIn 0.5s ease-out',
         slideUp: 'slideUp 0.5s ease-out',
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        bounce: 'bounce 1s ease-in-out infinite'
+        bounce: 'bounce 1s ease-in-out infinite',
+        marquee: 'marquee 30s linear infinite',
+        'pulse-dot': 'pulse-dot 2s ease infinite',
+        bob: 'bob 2.2s ease-in-out infinite',
+        grain: 'grain 0.5s steps(2) infinite',
+        curtainDrop: 'curtainDrop .7s cubic-bezier(.76,0,.24,1) forwards',
+        curtainRise: 'curtainRise .6s cubic-bezier(.76,0,.24,1) forwards'
       }
     },
   },

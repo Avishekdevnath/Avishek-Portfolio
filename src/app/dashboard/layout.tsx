@@ -71,11 +71,18 @@ const sidebarItems: NavItem[] = [
     description: 'Update technical skills',
     category: 'Content'
   },
-  { 
-    icon: GraduationCap, 
-    label: 'Experience', 
+  {
+    icon: Briefcase,
+    label: 'Experience',
     href: '/dashboard/experience',
-    description: 'Work and education history',
+    description: 'Work experience history',
+    category: 'Content'
+  },
+  {
+    icon: GraduationCap,
+    label: 'Education',
+    href: '/dashboard/education',
+    description: 'Academic background and qualifications',
     category: 'Content'
   },
   { 

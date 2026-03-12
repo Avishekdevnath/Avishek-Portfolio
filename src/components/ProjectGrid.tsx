@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import ProjectCard from './ProjectCard';
 import SearchFilter from './SearchFilter';
-import { Project, Technology, Repository, DemoURL } from '@/types/dashboard';
+import { Project } from '@/types/dashboard';
 import ConfirmModal from './shared/ConfirmModal';
-
-// Search and filter functionality moved to SearchFilter component
 
 interface ProjectGridProps {
   projects?: Project[];
@@ -39,17 +37,25 @@ export default function ProjectGrid({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
+  const projectList = Array.isArray(projects) ? projects : [];
+
   // Get unique technologies from all projects
   const allTechnologies = Array.from(
     new Set(
-      projects
+      projectList
         .flatMap(project => project.technologies.map(tech => tech.name))
         .filter(Boolean)
     )
   ).sort();
 
-  // Sort projects safely
-  const sortedProjects = [...(projects || [])].sort((a, b) => {
+  // Compute category counts from all projects
+  const categoryCounts: Record<string, number> = {};
+  projectList.forEach(p => {
+    categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+  });
+
+  // Sort projects
+  const sortedProjects = [...projectList].sort((a, b) => {
     switch (sortBy) {
       case 'date': {
         const aTime = a.completionDate ? new Date(a.completionDate as any).getTime() : 0;
@@ -65,22 +71,21 @@ export default function ProjectGrid({
 
   // Filter projects
   const filteredProjects = sortedProjects.filter(project => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.shortDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.technologies.some(tech => 
+      project.technologies.some(tech =>
         tech.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
     const matchesCategory = !selectedCategory || project.category === selectedCategory;
     const matchesStatus = !selectedStatus || project.status === selectedStatus;
-    const matchesTech = !activeTechFilter || 
+    const matchesTech = !activeTechFilter ||
       project.technologies.some(tech => tech.name === activeTechFilter);
 
     return matchesSearch && matchesCategory && matchesStatus && matchesTech;
   });
 
-  // Clear all filters
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
@@ -106,7 +111,6 @@ export default function ProjectGrid({
       onProjectsChange?.();
       router.refresh();
     } catch (error) {
-      // Error deleting project
       toast.error(error instanceof Error ? error.message : 'Failed to delete project');
     } finally {
       setIsLoading(false);
@@ -134,7 +138,6 @@ export default function ProjectGrid({
       onProjectsChange?.();
       router.refresh();
     } catch (error) {
-      // Error updating project
       toast.error(error instanceof Error ? error.message : 'Failed to update project');
     } finally {
       setIsLoading(false);
@@ -161,23 +164,21 @@ export default function ProjectGrid({
       onProjectsChange?.();
       router.refresh();
     } catch (error) {
-      // Error updating project
       toast.error(error instanceof Error ? error.message : 'Failed to update project status');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Count active filters
   const activeFiltersCount = [
-    searchTerm, 
-    selectedCategory, 
-    selectedStatus, 
+    searchTerm,
+    selectedCategory,
+    selectedStatus,
     activeTechFilter
   ].filter(Boolean).length;
 
   return (
-    <div className="space-y-4 text-sm font-ui">
+    <div className="space-y-0 font-body">
       <SearchFilter
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -195,29 +196,25 @@ export default function ProjectGrid({
         isAdmin={isAdmin}
         onClearFilters={clearFilters}
         activeFiltersCount={activeFiltersCount}
+        categoryCounts={categoryCounts}
+        totalCount={projectList.length}
+        filteredCount={filteredProjects.length}
       />
-      {/* Results Count */}
-      <div className="flex justify-between items-center -mt-2">
-        <p className="text-caption text-gray-700 font-medium">
-          Showing {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'}
-          {activeFiltersCount > 0 ? ' with filters applied' : ''}
-        </p>
-      </div>
 
       {/* Projects Grid/List */}
       {filteredProjects.length > 0 ? (
-        <div 
+        <div
           className={`
-            ${viewMode === 'grid' 
-              ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr' 
-              : 'space-y-4'
+            ${viewMode === 'grid'
+              ? 'grid grid-cols-1 gap-[1.15rem] sm:grid-cols-2 lg:grid-cols-3'
+              : 'grid grid-cols-1 gap-[1.15rem]'
             }
             transition-all duration-300
           `}
         >
           {filteredProjects.map(project => (
-            <div 
-              key={project._id} 
+            <div
+              key={project._id}
               className={`transition-all duration-500 animate-fadeIn ${
                 viewMode === 'list' ? 'max-w-full' : ''
               }`}
@@ -233,20 +230,17 @@ export default function ProjectGrid({
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="bg-gray-100 rounded-full p-6 mb-6 shadow-sm">
-            <Search className="h-10 w-10 text-gray-500" />
-          </div>
-          <h3 className="text-h5 weight-semibold text-gray-900 mb-3">No projects found</h3>
-          <p className="text-body-sm text-gray-600 max-w-md leading-relaxed">
-            {activeFiltersCount > 0 
-              ? 'Try adjusting your filters or search term to find what you\'re looking for.'
-              : 'There are no projects available at the moment.'}
+        <div className="col-span-full text-center py-16">
+          <div className="text-[2rem] opacity-[0.22] mb-2">🔍</div>
+          <p className="text-[0.88rem] text-text-muted font-light">
+            {activeFiltersCount > 0
+              ? 'No projects match your search. Try adjusting your filters.'
+              : 'No projects available at the moment.'}
           </p>
           {activeFiltersCount > 0 && (
             <button
               onClick={clearFilters}
-              className="mt-6 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 text-button font-semibold border border-gray-300"
+              className="mt-4 px-5 py-2 bg-off-white text-text-muted rounded-full border-[1.5px] border-cream-deeper hover:border-sand hover:text-ink transition-all duration-200 text-[0.8rem] font-medium font-body"
             >
               Clear all filters
             </button>
@@ -267,4 +261,4 @@ export default function ProjectGrid({
       />
     </div>
   );
-} 
+}

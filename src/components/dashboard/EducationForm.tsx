@@ -139,31 +139,22 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Convert DraftContent to string if needed
-  const getInitialDescription = (desc: string | undefined): any => {
-    if (!desc) return EMPTY_CONTENT;
+  // Extract plain text from a description that may be a Draft.js JSON string or object
+  const getInitialDescription = (desc: string | undefined): string => {
+    if (!desc) return '';
     if (typeof desc === 'string') {
-      try {
-        // Check if it's already a JSON string
-        return JSON.parse(desc);
-      } catch {
-        // If not, convert it to DraftContent format
-        return {
-          blocks: [
-            {
-              text: desc,
-              type: 'unstyled',
-              depth: 0,
-              inlineStyleRanges: [],
-              entityRanges: [],
-              data: {},
-            },
-          ],
-          entityMap: {},
-        };
+      const trimmed = desc.trim();
+      if (trimmed.startsWith('{') && trimmed.includes('"blocks"')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return (parsed.blocks || []).map((b: { text: string }) => b.text).filter(Boolean).join('\n');
+        } catch { /* fall through */ }
       }
+      return desc;
     }
-    return desc;
+    // Already a DraftContent object
+    const obj = desc as unknown as { blocks?: { text: string }[] };
+    return (obj.blocks || []).map((b) => b.text).filter(Boolean).join('\n');
   };
 
   const [formData, setFormData] = useState<FormData>({
@@ -238,14 +229,10 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          description: typeof formData.description === 'string' 
-            ? JSON.parse(formData.description) 
-            : formData.description,
+          description: formData.description,
           thesis: {
             title: formData.thesisTitle,
-            description: typeof formData.thesisDescription === 'string'
-              ? JSON.parse(formData.thesisDescription)
-              : formData.thesisDescription,
+            description: formData.thesisDescription,
             supervisor: formData.thesisSupervisor,
           },
         }),
@@ -493,7 +480,7 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
           Description
         </label>
         <textarea
-          value={typeof formData.description === 'string' ? formData.description : JSON.stringify(formData.description)}
+          value={formData.description}
           onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
           className="min-h-[100px] w-full border rounded-md p-2"
           placeholder="Describe your education..."
@@ -543,7 +530,7 @@ export default function EducationForm({ mode, initialData, onClose }: EducationF
                 Thesis Description
               </label>
               <textarea
-                value={typeof formData.thesisDescription === 'string' ? formData.thesisDescription : JSON.stringify(formData.thesisDescription)}
+                value={formData.thesisDescription}
                 onChange={e => setFormData(prev => ({ ...prev, thesisDescription: e.target.value }))}
                 className="min-h-[100px] w-full border rounded-md p-2"
                 placeholder="Describe your thesis..."

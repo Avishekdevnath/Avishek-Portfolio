@@ -1,19 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from 'react';
-import { 
-  FaBriefcase, 
-  FaGraduationCap, 
-  FaMapMarkerAlt, 
-  FaCalendarAlt,
-  FaStar,
-  FaAward,
-  FaBook,
-  FaChalkboardTeacher,
-  FaCheckCircle,
-  FaBuilding,
-  FaCode
-} from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendarAlt, FaCode, FaCheckCircle, FaExternalLinkAlt, FaChalkboardTeacher } from 'react-icons/fa';
 import { IWorkExperience, IEducation, DraftContent } from '@/types/experience';
 import RichTextViewer from '@/components/shared/RichTextViewer';
 
@@ -25,8 +13,8 @@ interface ExperienceCardProps {
   onDelete?: (id: string) => void;
 }
 
-function ExperienceCardComponent({ 
-  experience, 
+function ExperienceCardComponent({
+  experience,
   variant = 'default',
   showActions = false,
   onEdit,
@@ -34,22 +22,20 @@ function ExperienceCardComponent({
 }: ExperienceCardProps) {
   const [isDescOpen, setIsDescOpen] = useState(false);
   const [isAchOpen, setIsAchOpen] = useState(false);
+
   if (!experience) {
-    // ExperienceCard: experience is undefined
     return (
-      <div className="bg-white p-6 rounded-xl shadow-md border border-red-200">
-        <p className="text-red-500">Error: Experience data is missing</p>
+      <div className="bg-off-white border border-cream-deeper rounded-[0.9rem] p-6">
+        <p className="font-body text-[0.83rem] text-accent-orange">Error: Experience data is missing</p>
       </div>
     );
   }
 
-  const isWorkExperience = experience.type === 'work';
-  const Icon = isWorkExperience ? FaBriefcase : FaGraduationCap;
+  const isWork = experience.type === 'work';
 
   const formatDate = (date: string | Date | undefined | null) => {
     if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
 
   const draftToHtml = (content: DraftContent): string => {
@@ -67,349 +53,340 @@ function ExperienceCardComponent({
         switch (block.type) {
           case 'unordered-list-item':
             if (!inUL) { closeLists(); html += '<ul>'; inUL = true; }
-            html += `<li>${text}</li>`;
-            break;
+            html += `<li>${text}</li>`; break;
           case 'ordered-list-item':
             if (!inOL) { closeLists(); html += '<ol>'; inOL = true; }
-            html += `<li>${text}</li>`;
-            break;
-          case 'header-one':
-            closeLists(); html += `<h1>${text}</h1>`; break;
-          case 'header-two':
-            closeLists(); html += `<h2>${text}</h2>`; break;
-          case 'header-three':
-            closeLists(); html += `<h3>${text}</h3>`; break;
-          case 'blockquote':
-            closeLists(); html += `<blockquote>${text}</blockquote>`; break;
-          case 'code-block':
-            closeLists(); html += `<pre><code>${text}</code></pre>`; break;
-          default:
-            closeLists(); html += `<p>${text}</p>`; break;
+            html += `<li>${text}</li>`; break;
+          case 'header-one': closeLists(); html += `<h1>${text}</h1>`; break;
+          case 'header-two': closeLists(); html += `<h2>${text}</h2>`; break;
+          case 'header-three': closeLists(); html += `<h3>${text}</h3>`; break;
+          case 'blockquote': closeLists(); html += `<blockquote>${text}</blockquote>`; break;
+          case 'code-block': closeLists(); html += `<pre><code>${text}</code></pre>`; break;
+          default: closeLists(); html += `<p>${text}</p>`; break;
         }
       }
       closeLists();
       return html;
-    } catch {
-      return '';
+    } catch { return ''; }
+  };
+
+  const hasDescriptionContent = (desc: string | DraftContent | undefined | null): boolean => {
+    if (!desc) return false;
+    if (typeof desc === 'string') {
+      const trimmed = desc.trim();
+      if (!trimmed) return false;
+      if (trimmed.startsWith('{') && trimmed.includes('"blocks"')) {
+        try {
+          const parsed = JSON.parse(trimmed) as DraftContent;
+          return (parsed.blocks || []).some(b => b.text?.trim());
+        } catch { return true; }
+      }
+      return true;
     }
+    return (desc.blocks || []).some(b => b.text?.trim());
   };
 
   const renderDescription = (desc: string | DraftContent) => {
     if (typeof desc === 'string') {
       const trimmed = desc.trim();
-      // Handle stringified Draft.js content
       if (trimmed.startsWith('{') && trimmed.includes('"blocks"')) {
         try {
           const parsed = JSON.parse(trimmed) as DraftContent;
-          const html = draftToHtml(parsed);
-          return <RichTextViewer html={html} className="prose-compact text-body-sm text-gray-700 font-ui rte-body-sm" />;
-        } catch {
-          // fall through to plain text
-        }
+          return <RichTextViewer html={draftToHtml(parsed)} className="font-body text-[0.83rem] text-text-muted leading-[1.7]" />;
+        } catch { /* fall through */ }
       }
-      return <p className="prose-compact text-body-sm text-gray-700 font-ui rte-body-sm">{desc}</p>;
+      return <p className="font-body text-[0.83rem] text-text-muted leading-[1.7]">{desc}</p>;
     }
-    const html = draftToHtml(desc);
-    return <RichTextViewer html={html} className="prose-compact text-body-sm text-gray-700 font-ui rte-body-sm" />;
+    return <RichTextViewer html={draftToHtml(desc)} className="font-body text-[0.83rem] text-text-muted leading-[1.7]" />;
   };
 
-  if (isWorkExperience) {
-    // Work Experience Card
+  // ── Chip component ──────────────────────────────────────────────────────────
+  const Chip = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
+    <span className="inline-flex items-center gap-1.5 font-mono text-[0.62rem] tracking-[0.06em] uppercase text-warm-brown bg-cream border border-cream-deeper rounded-md px-2.5 py-1">
+      {icon}
+      {label}
+    </span>
+  );
+
+  // ── WORK CARD ───────────────────────────────────────────────────────────────
+  if (isWork) {
     const workExp = experience as IWorkExperience;
-    const workId = useMemo(() => String(workExp._id ?? `${workExp.company}-${workExp.startDate}`), [workExp._id, workExp.company, workExp.startDate]);
+    const workId = useMemo(
+      () => String(workExp._id ?? `${workExp.company}-${workExp.startDate}`),
+      [workExp._id, workExp.company, workExp.startDate]
+    );
+
+    const dateRange = `${formatDate(workExp.startDate)} – ${workExp.isCurrent ? 'Present' : formatDate(workExp.endDate)}`;
+    const title = workExp.level && workExp.jobTitle
+      ? `${workExp.level} ${workExp.jobTitle}`
+      : workExp.jobTitle || workExp.title;
+
     return (
-      <article className={`bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300 ${variant === 'compact' ? 'p-4' : 'p-6'}`}>
-        {/* Header Section */}
-        <div className={`flex items-start justify-between`}>
-          <div className={`flex items-start space-x-4`}>
-            <div className="p-2 rounded-xl icon-work-bg">
-              <Icon className="icon-lg icon-work" />
-            </div>
-            <div>
-              <div className={`flex items-center gap-2`}>
-                <h3 className="text-h4 weight-bold text-gray-900 line-clamp-2">
-                  {workExp.level && workExp.jobTitle ? `${workExp.level} ${workExp.jobTitle}` : (workExp.jobTitle || workExp.title)}
-                </h3>
-                {workExp.featured && (
-                  <FaStar className="text-yellow-400" title="Featured" />
-                )}
-              </div>
-              <div className={`flex items-center gap-2 mt-1`}>
-                <FaBuilding className="text-gray-400 icon-sm" />
-                <p className="text-gray-700 text-body-sm font-medium line-clamp-1">{workExp.company}</p>
-              </div>
-            </div>
+      <article className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-6 py-6 overflow-hidden hover:border-sand hover:shadow-md transition-all duration-300">
+        {/* Left accent */}
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-orange rounded-l-[0.9rem]" />
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-heading text-[1.15rem] font-semibold text-ink leading-snug mb-1">
+              {title}
+              {workExp.featured && (
+                <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-accent-orange align-middle" title="Featured" />
+              )}
+            </h3>
+            <p className="font-mono text-[0.7rem] tracking-[0.08em] uppercase text-warm-brown">
+              {workExp.company}
+            </p>
           </div>
 
           {showActions && (
-            <div className="flex space-x-2">
+            <div className="flex gap-2 shrink-0">
               {onEdit && (
-                <button
-                  onClick={() => onEdit(workId)}
-                  className="text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  Edit
-                </button>
+                <button onClick={() => onEdit(workId)} className="font-mono text-[0.62rem] tracking-[0.06em] uppercase text-accent-blue hover:text-ink transition-colors">Edit</button>
               )}
               {onDelete && (
-                <button
-                  onClick={() => onDelete(workId)}
-                  className="text-red-600 hover:text-red-800 transition-colors"
-                >
-                  Delete
-                </button>
+                <button onClick={() => onDelete(workId)} className="font-mono text-[0.62rem] tracking-[0.06em] uppercase text-accent-orange hover:text-ink transition-colors">Delete</button>
               )}
             </div>
           )}
         </div>
 
-        {/* Meta Information */}
-        <div className={`mt-4 flex flex-wrap gap-2`}>
-          <div className="chip" aria-label={`Location ${String(workExp.location)}`}>
-            <FaMapMarkerAlt className="icon-sm text-gray-400" />
-            <span className="text-small">{workExp.location}</span>
-          </div>
-          <div className="chip" aria-label="Duration">
-            <FaCalendarAlt className="icon-sm text-gray-400" />
-            <span className="text-small">{formatDate(workExp.startDate)} – {workExp.isCurrent ? 'Present' : formatDate(workExp.endDate)}</span>
-          </div>
+        {/* Meta chips */}
+        <div className="flex flex-wrap gap-2 mt-4">
+          {workExp.location && (
+            <Chip icon={<FaMapMarkerAlt className="w-2.5 h-2.5" />} label={String(workExp.location)} />
+          )}
+          <Chip icon={<FaCalendarAlt className="w-2.5 h-2.5" />} label={dateRange} />
           {workExp.employmentType && (
-            <div className="chip" aria-label={`Employment ${String(workExp.employmentType)}`}>
-              <FaBriefcase className="icon-sm text-gray-400" />
-              <span className="text-small capitalize">{workExp.employmentType}</span>
-            </div>
+            <Chip icon={null} label={workExp.employmentType} />
           )}
         </div>
 
         {/* Technologies */}
         {workExp.technologies && workExp.technologies.length > 0 && (
-          <div className="mt-3">
-            <div className={`flex items-center gap-2 mb-2`}>
-              <FaCode className="icon-sm icon-work" />
-              <h4 className="text-body-sm weight-medium text-gray-700">Tech</h4>
-            </div>
-            <div className={`flex flex-wrap gap-1.5`}>
-              {workExp.technologies.slice(0, 8).map((tech, index) => (
-                <span 
-                  key={index}
-                  className="chip-muted"
-                >
+          <div className="mt-4">
+            <p className="font-mono text-[0.6rem] tracking-[0.14em] uppercase text-text-muted mb-2 flex items-center gap-1.5">
+              <FaCode className="w-2.5 h-2.5" />
+              Stack
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {workExp.technologies.slice(0, 10).map((tech, i) => (
+                <span key={i} className="font-mono text-[0.6rem] tracking-[0.05em] uppercase text-accent-orange bg-accent-orange/8 border border-accent-orange/20 rounded px-2 py-0.5">
                   {tech}
                 </span>
               ))}
-              {workExp.technologies.length > 8 && (
-                <span className="chip-muted">+{workExp.technologies.length - 8}</span>
+              {workExp.technologies.length > 10 && (
+                <span className="font-mono text-[0.6rem] tracking-[0.05em] uppercase text-text-muted bg-cream border border-cream-deeper rounded px-2 py-0.5">
+                  +{workExp.technologies.length - 10}
+                </span>
               )}
             </div>
           </div>
         )}
 
-        {/* Description */}
-          <div className={`mt-4`}>
-          <button
-            className="btn-cta"
-            aria-expanded={isDescOpen}
-            aria-controls={`desc-${workId}`}
-            onClick={() => setIsDescOpen(v => !v)}
-          >
-            {isDescOpen ? 'Hide description' : 'Show description'}
-          </button>
-          {isDescOpen && (
-            <div id={`desc-${workId}`} className="mt-3">
-              {renderDescription(workExp.description)}
-            </div>
-          )}
-        </div>
-
-        {/* Key Achievements */}
-        {workExp.achievements && workExp.achievements.length > 0 && (
-          <div className={`mt-4`}>
+        {/* Description toggle */}
+        {hasDescriptionContent(workExp.description) && (
+          <div className="mt-4">
             <button
-              className="btn-cta"
-              aria-expanded={isAchOpen}
-              aria-controls={`ach-${workId}`}
-              onClick={() => setIsAchOpen(v => !v)}
+              onClick={() => setIsDescOpen(v => !v)}
+              aria-expanded={isDescOpen}
+              className="font-mono text-[0.62rem] tracking-[0.08em] uppercase text-accent-blue hover:text-ink transition-colors duration-200 flex items-center gap-1.5"
             >
-              {isAchOpen ? 'Hide achievements' : `Show achievements (${workExp.achievements.length})`}
+              <span className={`inline-block transition-transform duration-200 ${isDescOpen ? 'rotate-90' : ''}`}>›</span>
+              {isDescOpen ? 'Hide description' : 'Show description'}
             </button>
-            {isAchOpen && (
-              <div id={`ach-${workId}`} className="mt-3 grid gap-2">
-                {workExp.achievements.map((achievement, index) => (
-                  <div key={index} className={`flex items-start gap-2 bg-blue-50 p-2.5 rounded-lg`}>
-                    <FaCheckCircle className="icon-sm icon-work mt-0.5" />
-                    <p className="text-gray-700 text-body-sm">{achievement}</p>
-                  </div>
-                ))}
+            {isDescOpen && (
+              <div id={`desc-${workId}`} className="mt-3 pl-3 border-l-2 border-cream-deeper">
+                {renderDescription(workExp.description)}
               </div>
             )}
           </div>
         )}
 
+        {/* Achievements */}
+        {workExp.achievements && workExp.achievements.length > 0 && (
+          <div className="mt-3">
+            <button
+              onClick={() => setIsAchOpen(v => !v)}
+              aria-expanded={isAchOpen}
+              className="font-mono text-[0.62rem] tracking-[0.08em] uppercase text-accent-teal hover:text-ink transition-colors duration-200 flex items-center gap-1.5"
+            >
+              <span className={`inline-block transition-transform duration-200 ${isAchOpen ? 'rotate-90' : ''}`}>›</span>
+              {isAchOpen ? 'Hide achievements' : `Achievements (${workExp.achievements.length})`}
+            </button>
+            {isAchOpen && (
+              <ul className="mt-3 space-y-2">
+                {workExp.achievements.map((ach, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <FaCheckCircle className="w-3 h-3 text-accent-teal mt-0.5 shrink-0" />
+                    <span className="font-body text-[0.83rem] text-text-muted leading-[1.65]">{ach}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         {/* Responsibilities */}
-        {workExp.responsibilities && workExp.responsibilities.length > 0 && (
-          <div className="mt-6">
-            <div className={`flex items-center gap-2 mb-3`}>
-              <FaBriefcase className="icon-sm icon-work" />
-              <h4 className="text-body-sm weight-semibold text-gray-800">Key Responsibilities</h4>
-            </div>
-            <ul className="list-none space-y-1.5">
-              {workExp.responsibilities.map((responsibility, index) => (
-                <li key={index} className={`flex items-start gap-3`}>
-                  <FaCheckCircle className="icon-sm icon-work mt-1" />
-                  <span className="text-gray-700 text-body-sm">{responsibility}</span>
+        {workExp.responsibilities && workExp.responsibilities.length > 0 && variant === 'detailed' && (
+          <div className="mt-4">
+            <p className="font-mono text-[0.6rem] tracking-[0.14em] uppercase text-text-muted mb-2">Responsibilities</p>
+            <ul className="space-y-1.5">
+              {workExp.responsibilities.map((r, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <span className="w-1 h-1 rounded-full bg-accent-orange mt-2 shrink-0" />
+                  <span className="font-body text-[0.83rem] text-text-muted leading-[1.65]">{r}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Website Link */}
+        {/* Website */}
         {workExp.website && (
-          <div className={`mt-4`}>
-            <a 
-              href={String(workExp.website)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-cta"
-              aria-label={`Visit ${workExp.company} website`}
-            >
-              <FaBuilding className="icon-sm" />
-              <span>Visit website</span>
-            </a>
-          </div>
+          <a
+            href={String(workExp.website)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-4 font-mono text-[0.62rem] tracking-[0.06em] uppercase text-text-muted hover:text-ink transition-colors duration-200"
+          >
+            <FaExternalLinkAlt className="w-2.5 h-2.5" />
+            Visit website
+          </a>
         )}
       </article>
     );
-  } else {
-    // Education Card
-    const educationExp = experience as IEducation;
-    return (
-      <article className={`bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300 ${variant === 'compact' ? 'p-4' : 'p-6'}`}>
-        <div className={`flex items-start justify-between`}>
-          <div className={`flex items-start space-x-4`}>
-            <div className="p-2 rounded-lg icon-edu-bg">
-              <Icon className="icon-lg icon-edu" />
-            </div>
-            <div>
-              <h3 className="text-h4 weight-semibold text-gray-900 line-clamp-2">
-                {educationExp.degree}
-                {educationExp.featured && (
-                  <FaStar className="inline-block ml-2 text-yellow-400" title="Featured" />
-                )}
-              </h3>
-              <p className="text-gray-700 text-body-sm line-clamp-1">{educationExp.institution}</p>
-            </div>
-          </div>
-
-          {showActions && (
-            <div className="flex space-x-2">
-              {onEdit && (
-                <button
-                  onClick={() => onEdit(String(educationExp._id ?? `${educationExp.institution}-${educationExp.startDate}`))}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  Edit
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  onClick={() => onDelete(String(educationExp._id ?? `${educationExp.institution}-${educationExp.startDate}`))}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-4 space-y-3">
-          {/* Field of Study */}
-          <div className={`flex items-center text-gray-700`}>
-            <FaBook className="icon-sm icon-edu mr-2" />
-            <span className="text-body-sm weight-medium">{educationExp.fieldOfStudy}</span>
-          </div>
-
-          {/* Location */}
-          <div className={`flex items-center text-gray-600`}>
-            <FaMapMarkerAlt className="icon-sm icon-edu mr-2" />
-            <span className="text-body-sm">{educationExp.location}</span>
-          </div>
-
-          {/* Duration */}
-          <div className={`flex items-center text-gray-600`}>
-            <FaCalendarAlt className="icon-sm icon-edu mr-2" />
-            <span className="text-body-sm">
-              {formatDate(educationExp.startDate)} – {educationExp.isCurrent ? 'Present' : formatDate(educationExp.endDate)}
-            </span>
-          </div>
-
-          {/* Description */}
-          <div className="mt-3">
-            <details>
-              <summary className="btn-cta cursor-pointer select-none">Description</summary>
-              <div className="mt-2">
-                {renderDescription(educationExp.description)}
-              </div>
-            </details>
-          </div>
-
-          {/* Thesis if available */}
-          {variant !== 'compact' && educationExp.thesis && (
-            <div className="mt-4 p-4 bg-green-50 rounded-lg">
-              <div className="flex items-center mb-2">
-                <FaChalkboardTeacher className="icon-sm icon-edu mr-2" />
-                <span className="font-medium text-green-800">Thesis</span>
-              </div>
-              <h4 className="text-gray-800 font-medium mb-1">{educationExp.thesis.title}</h4>
-              <p className="text-gray-600 text-sm">
-                Supervisor: {educationExp.thesis.supervisor}
-              </p>
-              {typeof educationExp.thesis.description === 'string' ? (
-                <p className="text-gray-600 mt-2">{educationExp.thesis.description}</p>
-              ) : (
-                <div className="mt-2">
-                  {renderDescription(educationExp.thesis.description)}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Achievements and Activities */}
-          {variant !== 'compact' && (educationExp.honors.length > 0 || educationExp.activities.length > 0) && (
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {educationExp.honors.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="font-medium text-gray-800 flex items-center">
-                    <FaAward className="icon-sm icon-edu mr-2" />
-                    Honors & Awards
-                  </h4>
-                  <ul className="list-disc list-inside text-gray-600 text-sm">
-                    {educationExp.honors.map((honor, index) => (
-                      <li key={index}>{honor}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {educationExp.activities.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="font-medium text-gray-800 flex items-center">
-                    <FaBook className="icon-sm icon-edu mr-2" />
-                    Activities
-                  </h4>
-                  <ul className="list-disc list-inside text-gray-600 text-sm">
-                    {educationExp.activities.map((activity, index) => (
-                      <li key={index}>{activity}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </article>
-    );
   }
+
+  // ── EDUCATION CARD ──────────────────────────────────────────────────────────
+  const eduExp = experience as IEducation;
+  const eduId = String(eduExp._id ?? `${eduExp.institution}-${eduExp.startDate}`);
+  const dateRange = `${formatDate(eduExp.startDate)} – ${eduExp.isCurrent ? 'Present' : formatDate(eduExp.endDate)}`;
+
+  return (
+    <article className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-6 py-6 overflow-hidden hover:border-sand hover:shadow-md transition-all duration-300">
+      {/* Left accent */}
+      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-teal rounded-l-[0.9rem]" />
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-heading text-[1.15rem] font-semibold text-ink leading-snug mb-1">
+            {eduExp.degree}
+            {eduExp.featured && (
+              <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-accent-teal align-middle" title="Featured" />
+            )}
+          </h3>
+          <p className="font-mono text-[0.7rem] tracking-[0.08em] uppercase text-warm-brown">
+            {eduExp.institution}
+          </p>
+        </div>
+
+        {showActions && (
+          <div className="flex gap-2 shrink-0">
+            {onEdit && (
+              <button onClick={() => onEdit(eduId)} className="font-mono text-[0.62rem] tracking-[0.06em] uppercase text-accent-blue hover:text-ink transition-colors">Edit</button>
+            )}
+            {onDelete && (
+              <button onClick={() => onDelete(eduId)} className="font-mono text-[0.62rem] tracking-[0.06em] uppercase text-accent-orange hover:text-ink transition-colors">Delete</button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Field of study */}
+      {eduExp.fieldOfStudy && (
+        <p className="font-body text-[0.83rem] text-text-muted mt-2">{eduExp.fieldOfStudy}</p>
+      )}
+
+      {/* Meta chips */}
+      <div className="flex flex-wrap gap-2 mt-4">
+        {eduExp.location && (
+          <Chip icon={<FaMapMarkerAlt className="w-2.5 h-2.5" />} label={String(eduExp.location)} />
+        )}
+        <Chip icon={<FaCalendarAlt className="w-2.5 h-2.5" />} label={dateRange} />
+        {(eduExp as IEducation & { gpa?: string }).gpa && (
+          <Chip icon={null} label={`GPA ${(eduExp as IEducation & { gpa?: string }).gpa}`} />
+        )}
+      </div>
+
+      {/* Description */}
+      {hasDescriptionContent(eduExp.description) && (
+        <div className="mt-4">
+          <button
+            onClick={() => setIsDescOpen(v => !v)}
+            aria-expanded={isDescOpen}
+            className="font-mono text-[0.62rem] tracking-[0.08em] uppercase text-accent-blue hover:text-ink transition-colors duration-200 flex items-center gap-1.5"
+          >
+            <span className={`inline-block transition-transform duration-200 ${isDescOpen ? 'rotate-90' : ''}`}>›</span>
+            {isDescOpen ? 'Hide description' : 'Show description'}
+          </button>
+          {isDescOpen && (
+            <div className="mt-3 pl-3 border-l-2 border-cream-deeper">
+              {renderDescription(eduExp.description)}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Thesis */}
+      {variant !== 'compact' && eduExp.thesis?.title?.trim() && (
+        <div className="mt-4 bg-cream border border-cream-deeper rounded-lg px-4 py-3">
+          <p className="font-mono text-[0.6rem] tracking-[0.14em] uppercase text-accent-teal mb-2 flex items-center gap-1.5">
+            <FaChalkboardTeacher className="w-2.5 h-2.5" />
+            Thesis
+          </p>
+          <p className="font-body text-[0.86rem] text-ink font-medium leading-snug mb-1">{eduExp.thesis.title}</p>
+          {eduExp.thesis.supervisor?.trim() && (
+            <p className="font-mono text-[0.62rem] tracking-[0.05em] text-text-muted">
+              Supervisor: {eduExp.thesis.supervisor}
+            </p>
+          )}
+          {hasDescriptionContent(eduExp.thesis.description) && (
+            <div className="mt-2">
+              {typeof eduExp.thesis.description === 'string'
+                ? <p className="font-body text-[0.83rem] text-text-muted leading-[1.65]">{eduExp.thesis.description}</p>
+                : renderDescription(eduExp.thesis.description)
+              }
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Honors & Activities */}
+      {variant !== 'compact' && (eduExp.honors?.length > 0 || eduExp.activities?.length > 0) && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {eduExp.honors?.length > 0 && (
+            <div>
+              <p className="font-mono text-[0.6rem] tracking-[0.14em] uppercase text-text-muted mb-2">Honors & Awards</p>
+              <ul className="space-y-1">
+                {eduExp.honors.map((h, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="w-1 h-1 rounded-full bg-accent-teal mt-2 shrink-0" />
+                    <span className="font-body text-[0.83rem] text-text-muted">{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {eduExp.activities?.length > 0 && (
+            <div>
+              <p className="font-mono text-[0.6rem] tracking-[0.14em] uppercase text-text-muted mb-2">Activities</p>
+              <ul className="space-y-1">
+                {eduExp.activities.map((a, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="w-1 h-1 rounded-full bg-accent-blue mt-2 shrink-0" />
+                    <span className="font-body text-[0.83rem] text-text-muted">{a}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </article>
+  );
 }
 
 const ExperienceCard = React.memo(ExperienceCardComponent);

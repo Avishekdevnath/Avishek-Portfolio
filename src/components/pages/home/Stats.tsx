@@ -16,39 +16,49 @@ interface StatsResponse {
     projectsCompleted: StatData;
     studentsCount: StatData;
     workExperience: StatData;
-    customStats: Array<{
-      title: string;
-      value: number;
-      description: string;
-      icon: string;
-    }>;
+    customStats: Array<{ title: string; value: number; description: string; icon: string }>;
     tagline: string;
   };
   error?: string;
 }
 
+const ACCENT_COLORS = ['bg-accent-orange', 'bg-accent-teal', 'bg-accent-blue', 'bg-[#c4841a]'];
+const ICON_BG = [
+  'bg-accent-orange/10 text-accent-orange',
+  'bg-accent-teal/10 text-accent-teal',
+  'bg-accent-blue/10 text-accent-blue',
+  'bg-[rgba(196,132,26,0.10)] text-[#c4841a]',
+];
+
 interface StatCardProps {
   title: string;
   value: number;
+  suffix?: string;
   icon: React.ElementType;
   description: string;
+  accentIdx: number;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, description }) => (
-  <div 
-    className="bg-gradient-to-b from-gray-50 to-white p-6 rounded-2xl border border-gray-300 shadow-inner transform transition-all duration-300 hover:shadow-lg hover:-translate-y-1 font-ui"
-    style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}
-  >
-    <div className="flex items-center justify-between mb-4">
-      <div className="text-gray-600 text-sm font-medium">{title}</div>
-      <div className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm">
-        <Icon className="text-xl text-blue-600" />
+const StatCard: React.FC<StatCardProps> = ({ title, value, suffix = '+', icon: Icon, description, accentIdx }) => (
+  <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] px-6 py-6 hover:border-sand hover:shadow-lg transition-all duration-300 overflow-hidden group">
+    <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${ACCENT_COLORS[accentIdx]} rounded-l-[0.9rem]`} />
+
+    <div className="flex items-start justify-between mb-4">
+      <p className="font-mono text-[0.62rem] tracking-[0.14em] uppercase text-text-muted leading-snug max-w-[70%]">
+        {title}
+      </p>
+      <div className={`w-9 h-9 rounded-lg ${ICON_BG[accentIdx]} flex items-center justify-center shrink-0`}>
+        <Icon className="w-4 h-4" />
       </div>
     </div>
-    <div className="text-h4 weight-bold mb-2 text-gray-900">
-      <CountUp end={value} duration={2.5} />+
+
+    <div className="font-heading text-[2.6rem] font-semibold text-ink leading-none mb-2">
+      <CountUp end={value} duration={2.5} />{suffix}
     </div>
-    <div className="text-body-sm text-gray-600 leading-relaxed">{description}</div>
+
+    <p className="font-body text-[0.8rem] text-text-muted leading-[1.6] font-light text-justify">
+      {description}
+    </p>
   </div>
 );
 
@@ -58,124 +68,102 @@ export default function Stats() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/stats');
-        if (!response.ok) {
-          throw new Error('Failed to fetch stats');
-        }
-        const data: StatsResponse = await response.json();
-        if (!data.success) {
-          throw new Error(data.error || 'Failed to fetch stats');
-        }
+    fetch('/api/stats')
+      .then(r => { if (!r.ok) throw new Error('Failed to fetch stats'); return r.json(); })
+      .then((data: StatsResponse) => {
+        if (!data.success) throw new Error(data.error || 'Failed to fetch stats');
         setStats(data.data);
-      } catch (err) {
-        console.error('Error fetching stats:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch stats');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
+      })
+      .catch(err => setError(err instanceof Error ? err.message : 'Failed to fetch stats'))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <div className="min-h-[300px] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
+      <section className="py-20 px-4 bg-off-white">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="text-center mb-12 space-y-3">
+            <div className="h-3 w-28 bg-cream-deeper rounded-full mx-auto animate-pulse" />
+            <div className="h-9 w-52 bg-cream-deeper rounded mx-auto animate-pulse" />
+            <div className="h-4 w-72 bg-cream-deeper rounded mx-auto animate-pulse" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-cream border border-cream-deeper rounded-[0.9rem] p-6 animate-pulse space-y-3">
+                <div className="h-3 bg-cream-deeper rounded w-3/4" />
+                <div className="h-8 bg-cream-deeper rounded w-1/2" />
+                <div className="h-3 bg-cream-deeper rounded w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-[300px] flex items-center justify-center text-red-600">
-        {error}
-      </div>
-    );
-  }
+  if (error || !stats) return null;
 
-  if (!stats) {
-    return null;
-  }
-
-  const defaultStats = [
-    {
-      title: "Programming Languages",
-      value: stats.programmingLanguages.value,
-      icon: FaCode,
-      description: stats.programmingLanguages.description
-    },
-    {
-      title: "Projects Completed",
-      value: stats.projectsCompleted.value,
-      icon: FaLaptopCode,
-      description: stats.projectsCompleted.description
-    },
-    {
-      title: "Students Mentored",
-      value: stats.studentsCount.value,
-      icon: FaUserGraduate,
-      description: stats.studentsCount.description
-    },
-    {
-      title: "Work Experience",
-      value: stats.workExperience.value,
-      icon: FaBriefcase,
-      description: stats.workExperience.description
-    }
+  const statCards = [
+    { title: "Programming Languages", value: stats.programmingLanguages.value, icon: FaCode,         description: stats.programmingLanguages.description },
+    { title: "Projects Completed",    value: stats.projectsCompleted.value,    icon: FaLaptopCode,   description: stats.projectsCompleted.description },
+    { title: "Students Mentored",     value: stats.studentsCount.value,        icon: FaUserGraduate, description: stats.studentsCount.description },
+    { title: "Work Experience",       value: stats.workExperience.value,       icon: FaBriefcase,    description: stats.workExperience.description },
   ];
 
   return (
-    <div className="py-16 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <section className="py-20 px-4 bg-off-white">
+      <div className="max-w-[1100px] mx-auto">
+
+        {/* ── Section header ── */}
         <div className="text-center mb-12">
-          <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Career Highlights</h4>
-          <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-6">Achievement Numbers</h2>
-          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+            <span className="w-8 h-px bg-accent-orange opacity-60" />
+            Career Highlights
+            <span className="w-8 h-px bg-accent-orange opacity-60" />
+          </p>
+          <h2
+            className="font-heading font-light text-ink mb-3 leading-none"
+            style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+          >
+            Achievement Numbers
+          </h2>
+          <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
             Key metrics that showcase my professional growth and impact in software development and education.
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {defaultStats.map((stat, index) => (
-            <StatCard
-              key={index}
-              title={stat.title}
-              value={stat.value}
-              icon={stat.icon}
-              description={stat.description}
-            />
+        {/* ── Stat cards ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {statCards.map((stat, i) => (
+            <StatCard key={i} {...stat} accentIdx={i % ACCENT_COLORS.length} />
           ))}
         </div>
 
-        {/* Custom Stats if any */}
-        {stats.customStats && stats.customStats.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {stats.customStats.map((stat, index) => (
+        {/* ── Custom stats ── */}
+        {stats.customStats?.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mt-5">
+            {stats.customStats.map((stat, i) => (
               <StatCard
-                key={`custom-${index}`}
+                key={`c-${i}`}
                 title={stat.title}
                 value={stat.value}
-                icon={FaCode} // You might want to create a mapping for custom icons
+                icon={FaCode}
                 description={stat.description}
+                accentIdx={(statCards.length + i) % ACCENT_COLORS.length}
               />
             ))}
           </div>
         )}
 
-        {/* Tagline */}
-        <div className="mt-12 text-center">
-          <div className="bg-gradient-to-b from-gray-50 to-white p-8 rounded-2xl border border-gray-300 shadow-inner max-w-4xl mx-auto" style={{boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'}}>
-            <p className="text-body-sm text-gray-600 leading-relaxed">
-              {stats.tagline}
+        {/* ── Tagline ── */}
+        {stats.tagline && (
+          <div className="mt-10 text-center">
+            <p className="font-heading italic font-light text-warm-brown text-[clamp(1rem,2vw,1.25rem)] leading-relaxed max-w-[65ch] mx-auto">
+              &ldquo;{stats.tagline}&rdquo;
             </p>
           </div>
-        </div>
+        )}
       </div>
-    </div>
+    </section>
   );
-} 
+}
