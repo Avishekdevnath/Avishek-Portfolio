@@ -1,252 +1,193 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect, useRef } from 'react';
 import { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { usePageReady } from '@/context/PageReadyContext';
 import {
   LayoutDashboard,
   Briefcase,
   GraduationCap,
   Code2,
-  FileText,
+  BookOpen,
   Send,
   Mail,
   Settings,
-  BookOpen,
   Award,
-  User,
   Bell,
   BarChart3,
-  Wrench
+  Wrench,
+  History,
+  UserCheck,
 } from 'lucide-react';
-import Sidebar, { NavItem, NavCategory } from '@/components/dashboard/Sidebar';
+import Sidebar, { NavItem } from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
-interface DashboardLayoutProps {
-  children: ReactNode;
-}
-
 const sidebarItems: NavItem[] = [
-  { 
-    icon: LayoutDashboard, 
-    label: 'Overview', 
+  {
+    icon: LayoutDashboard,
+    label: 'Overview',
     href: '/dashboard',
-    description: 'Dashboard overview and analytics',
-    category: 'Main'
+    description: 'Dashboard overview and stats',
+    category: 'Main',
   },
-  { 
-    icon: Send, 
-    label: 'Outreach', 
+  {
+    icon: Send,
+    label: 'Outreach',
     href: '/dashboard/outreach',
     description: 'Cold outreach workflow',
     category: 'Main',
     children: [
-      { label: 'Overview', href: '/dashboard/outreach' },
-      { label: 'Companies', href: '/dashboard/outreach/companies' },
-      { label: 'Contacts', href: '/dashboard/outreach/contacts' },
-      { label: 'Templates', href: '/dashboard/outreach/templates' },
-      { label: 'AI Assistant', href: '/dashboard/outreach/ai' },
-      { label: 'Follow-ups', href: '/dashboard/outreach/follow-ups' },
-      { label: 'Log', href: '/dashboard/outreach/log' },
-      { label: 'Analytics', href: '/dashboard/outreach/analytics' },
-    ]
+      { label: 'Overview',    href: '/dashboard/outreach' },
+      { label: 'Companies',   href: '/dashboard/outreach/companies' },
+      { label: 'Contacts',    href: '/dashboard/outreach/contacts' },
+      { label: 'Templates',   href: '/dashboard/outreach/templates' },
+      { label: 'AI Assistant',href: '/dashboard/outreach/ai' },
+      { label: 'Follow-ups',  href: '/dashboard/outreach/follow-ups' },
+      { label: 'Log',         href: '/dashboard/outreach/log' },
+      { label: 'Analytics',   href: '/dashboard/outreach/analytics' },
+    ],
   },
-  { 
-    icon: Wrench, 
-    label: 'Tools', 
+  {
+    icon: Wrench,
+    label: 'Tools',
     href: '/dashboard/tools',
     description: 'Utility tools and features',
-    category: 'Main'
-  },
-  { 
-    icon: Briefcase, 
-    label: 'Projects', 
-    href: '/dashboard/projects',
-    description: 'Manage portfolio projects',
-    category: 'Content'
-  },
-  { 
-    icon: Code2, 
-    label: 'Skills', 
-    href: '/dashboard/skills',
-    description: 'Update technical skills',
-    category: 'Content'
+    category: 'Main',
   },
   {
     icon: Briefcase,
+    label: 'Projects',
+    href: '/dashboard/projects',
+    description: 'Manage portfolio projects',
+    category: 'Content',
+  },
+  {
+    icon: Code2,
+    label: 'Skills',
+    href: '/dashboard/skills',
+    description: 'Update technical skills',
+    category: 'Content',
+  },
+  {
+    icon: History,
     label: 'Experience',
     href: '/dashboard/experience',
     description: 'Work experience history',
-    category: 'Content'
+    category: 'Content',
   },
   {
     icon: GraduationCap,
     label: 'Education',
     href: '/dashboard/education',
-    description: 'Academic background and qualifications',
-    category: 'Content'
+    description: 'Academic background',
+    category: 'Content',
   },
-  { 
-    icon: Award, 
-    label: 'Achievements', 
+  {
+    icon: Award,
+    label: 'Achievements',
     href: '/dashboard/achievements',
     description: 'Awards and certifications',
-    category: 'Content'
+    category: 'Content',
   },
-  { 
-    icon: BarChart3, 
-    label: 'Statistics', 
+  {
+    icon: BarChart3,
+    label: 'Statistics',
     href: '/dashboard/stats',
-    description: 'Portfolio stats and achievements',
-    category: 'Content'
+    description: 'Portfolio stats',
+    category: 'Content',
   },
-  { 
-    icon: BookOpen, 
-    label: 'Blog Posts', 
+  {
+    icon: BookOpen,
+    label: 'Blog Posts',
     href: '/dashboard/posts',
     description: 'Manage blog content',
-    category: 'Content'
+    category: 'Content',
   },
-  { 
-    icon: Mail, 
-    label: 'Messages', 
+  {
+    icon: Mail,
+    label: 'Messages',
     href: '/dashboard/messages',
     description: 'Contact form submissions',
-    category: 'Engagement'
+    category: 'Engagement',
   },
-  { 
-    icon: Mail, 
-    label: 'Hiring Inquiries', 
+  {
+    icon: UserCheck,
+    label: 'Hiring Inquiries',
     href: '/dashboard/hiring-inquiries',
-    description: 'Job opportunities and hiring requests',
-    category: 'Engagement'
+    description: 'Job opportunities',
+    category: 'Engagement',
   },
-  { 
-    icon: Bell, 
-    label: 'Notifications', 
+  {
+    icon: Bell,
+    label: 'Notifications',
     href: '/dashboard/notifications',
     description: 'System notifications',
-    category: 'Engagement'
+    category: 'Engagement',
   },
-  { 
-    icon: Settings, 
-    label: 'Settings', 
+  {
+    icon: Settings,
+    label: 'Settings',
     href: '/dashboard/settings',
     description: 'Profile and website settings',
-    category: 'System'
+    category: 'System',
   },
 ];
 
-function SidebarSkeleton() {
-  return (
-    <div className="fixed inset-y-0 left-0 w-[280px] bg-white border-r border-gray-200 z-30">
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
-        <div className="animate-pulse flex items-center gap-3">
-          <div className="h-8 w-8 bg-gray-200 rounded-lg"></div>
-          <div className="h-4 w-32 bg-gray-200 rounded"></div>
-        </div>
-      </div>
+function DashboardPageReady() {
+  const { setReady } = usePageReady();
+  const pathname = usePathname();
+  const prevPath = useRef(pathname);
 
-      {/* Navigation Items */}
-      <div className="p-4 space-y-2">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="animate-pulse flex items-center gap-3 px-3 py-2">
-            <div className="h-5 w-5 bg-gray-200 rounded"></div>
-            <div className="h-4 w-24 bg-gray-200 rounded"></div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  // Signal ready on first mount
+  useEffect(() => { setReady(); }, [setReady]);
+
+  // Signal ready on every intra-dashboard navigation
+  useEffect(() => {
+    if (pathname !== prevPath.current) {
+      prevPath.current = pathname;
+      setReady();
+    }
+  }, [pathname, setReady]);
+
+  return null;
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="dashboard-layout">
-      <DashboardHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} isOpen={isSidebarOpen} />
-      
-      <Suspense fallback={<SidebarSkeleton />}>
-        <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} items={sidebarItems} />
-      </Suspense>
+    <div className="min-h-screen bg-[#f7f5f1] font-body">
+      <DashboardPageReady />
 
-      {/* Mobile overlay when sidebar is open */}
-      {isSidebarOpen && (
+      {/* Sidebar — fixed, always visible on md+, overlay on mobile */}
+      <Sidebar
+        isOpen={mobileOpen}
+        onToggle={() => setMobileOpen(false)}
+        items={sidebarItems}
+      />
+
+      {/* Mobile overlay backdrop */}
+      {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-10 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
+          onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      <main className={`dashboard-main ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
-        <div className="content-wrapper">
+      {/* Header — fixed, offset by sidebar on md+ */}
+      <DashboardHeader onMenuToggle={() => setMobileOpen(v => !v)} />
+
+      {/* Main content — offset by sidebar + header */}
+      <main className="md:ml-[240px] pt-14 min-h-screen">
+        <div className="p-5 lg:p-6 max-w-[1200px] mx-auto">
           <Suspense>
             {children}
           </Suspense>
         </div>
       </main>
 
-      <style jsx>{`
-        .dashboard-layout {
-          min-height: 100vh;
-          background: #f8fafc;
-        }
-
-        .dashboard-main {
-          margin-left: 280px;
-          margin-top: 64px;
-          min-height: calc(100vh - 64px);
-          padding: 24px;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .dashboard-main.sidebar-collapsed {
-          margin-left: 72px;
-        }
-
-        .content-wrapper {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        /* Tablet: avoid sidebar overlay by giving main space for collapsed rail */
-        @media (max-width: 1024px) {
-          .dashboard-main {
-            margin-left: 0;
-            padding: 16px;
-          }
-
-          .dashboard-main.sidebar-collapsed {
-            margin-left: 0;
-          }
-        }
-
-        @media (max-width: 1536px) {
-          .dashboard-main {
-            padding: 20px;
-          }
-        }
-
-        @media (max-width: 1280px) {
-          .dashboard-main {
-            padding: 16px;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .dashboard-main {
-            margin-left: 0;
-            margin-top: 64px;
-            padding: 12px;
-          }
-          
-          .dashboard-main.sidebar-collapsed {
-            margin-left: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 }

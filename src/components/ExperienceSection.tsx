@@ -9,7 +9,7 @@ interface ExperienceSectionProps {
   variant?: 'default' | 'compact' | 'detailed';
   showFeaturedOnly?: boolean;
   limit?: number;
-  title?: string;
+  title?: React.ReactNode;
   subtitle?: string;
   hideHeader?: boolean;
   gridClassName?: string;
@@ -179,14 +179,14 @@ export default function ExperienceSection({
         {/* Header */}
         {!hideHeader && (
           <div className="text-center mb-10">
-            <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-              <span className="w-8 h-px bg-accent-orange opacity-60" />
+            <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+              <span className="w-8 h-px bg-accent-orange opacity-50" />
               {type === 'work' ? 'Career' : type === 'education' ? 'Academic' : 'Background'}
-              <span className="w-8 h-px bg-accent-orange opacity-60" />
+              <span className="w-8 h-px bg-accent-orange opacity-50" />
             </p>
             <h2
-              className="font-heading font-light text-ink mb-3 leading-none"
-              style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+              className="font-heading font-light text-ink mb-4 leading-[1.05]"
+              style={{ fontSize: 'clamp(2.2rem,5vw,3.6rem)' }}
             >
               {title || getDefaultTitle()}
             </h2>

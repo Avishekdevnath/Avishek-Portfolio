@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { FaBriefcase, FaGraduationCap, FaFilter, FaStar } from 'react-icons/fa';
+import { FaBriefcase, FaGraduationCap, FaStar } from 'react-icons/fa';
 import ExperienceCard from '@/components/ExperienceCard';
 import { ExperienceListApiResponse, IWorkExperience, IEducation } from '@/types/experience';
 
@@ -66,48 +66,64 @@ export default function ExperienceShowcase({
     return { work, education };
   }, [tab, work, education]);
 
+  const tabs: { key: TabKey; label: string; icon: React.ElementType | null }[] = [
+    { key: 'all', label: 'All', icon: null },
+    { key: 'work', label: 'Work', icon: FaBriefcase },
+    { key: 'education', label: 'Education', icon: FaGraduationCap },
+  ];
+
   return (
     <section className={`py-12 md:py-16 px-4 ${className}`}>
-      <div className="max-w-6xl mx-auto font-ui">
-        <header className="text-center mb-6 md:mb-10">
-          <h2 className="text-h4 md:text-h3 weight-bold text-gray-900 mb-2">{title}</h2>
-          <p className="text-body-sm text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
+      <div className="max-w-[1100px] mx-auto font-body">
+        {/* Header */}
+        <header className="text-center mb-10">
+          <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+            <span className="w-8 h-px bg-accent-orange opacity-50" />
+            Professional Journey
+            <span className="w-8 h-px bg-accent-orange opacity-50" />
+          </p>
+          <h2
+            className="font-heading font-light text-ink mb-4 leading-[1.05]"
+            style={{ fontSize: 'clamp(2.2rem,5vw,3.6rem)' }}
+          >
+            {title}
+          </h2>
+          <p className="text-[0.9rem] text-text-muted max-w-[54ch] mx-auto leading-[1.75] font-light">
+            {subtitle}
+          </p>
         </header>
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
-          <div role="tablist" aria-label="Experience categories" className="inline-flex rounded-lg border border-gray-200 overflow-hidden bg-white">
-            {([
-              { key: 'all', label: 'All', icon: null },
-              { key: 'work', label: 'Work', icon: FaBriefcase },
-              { key: 'education', label: 'Education', icon: FaGraduationCap },
-            ] as Array<{ key: TabKey; label: string; icon: any }>).map(({ key, label, icon: Icon }) => (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-8">
+          <div className="flex items-center gap-1.5 bg-off-white border border-cream-deeper rounded-full p-1 shadow-sm flex-wrap">
+            {tabs.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 role="tab"
                 aria-selected={tab === key}
-                aria-controls={`panel-${key}`}
-                className={`px-4 py-2 text-sm inline-flex items-center gap-2 transition-colors ${
-                  tab === key ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'
+                className={`font-mono text-[0.72rem] tracking-wider uppercase px-5 py-2.5 rounded-full border-none flex items-center gap-2 whitespace-nowrap transition-all duration-250 cursor-pointer ${
+                  tab === key
+                    ? 'bg-ink text-off-white shadow-md'
+                    : 'bg-transparent text-text-muted hover:text-ink'
                 }`}
                 onClick={() => setTab(key)}
               >
-                {Icon ? <Icon className={key === 'work' ? 'icon-sm icon-work' : key === 'education' ? 'icon-sm icon-edu' : 'icon-sm'} /> : <FaFilter className="icon-sm text-gray-400" />}
-                <span className="weight-medium">{label}</span>
+                {Icon && <Icon className="w-3.5 h-3.5" />}
+                {label}
               </button>
             ))}
           </div>
 
           {showFeaturedToggle && (
-            <label className="inline-flex items-center gap-2 text-sm text-gray-700 select-none cursor-pointer">
+            <label className="inline-flex items-center gap-2 font-mono text-[0.65rem] tracking-wider uppercase text-text-muted select-none cursor-pointer">
               <input
                 type="checkbox"
-                className="h-4 w-4"
+                className="h-4 w-4 accent-accent-orange"
                 checked={featuredOnly}
                 onChange={(e) => setFeaturedOnly(e.target.checked)}
                 aria-label="Show featured only"
               />
-              <FaStar className="text-yellow-400 icon-sm" />
+              <FaStar className="text-[#c4841a] w-3 h-3" />
               <span>Featured only</span>
             </label>
           )}
@@ -115,28 +131,32 @@ export default function ExperienceShowcase({
 
         {/* Panels */}
         {loading && (
-          <div className="text-center py-10 text-gray-600">Loading experiences…</div>
+          <div className="flex justify-center py-16">
+            <div className="w-8 h-8 border-2 border-accent-orange border-t-transparent rounded-full animate-spin" />
+          </div>
         )}
         {error && !loading && (
-          <div className="text-center py-10 text-red-600">{error}</div>
+          <div className="text-center py-10">
+            <p className="font-body text-[0.83rem] text-accent-orange">{error}</p>
+          </div>
         )}
 
         {!loading && !error && (
           <div className="space-y-10">
             {(tab === 'all' || tab === 'work') && filtered.work.length > 0 && (
-              <section id="panel-work" aria-labelledby="tab-work">
+              <section>
                 {tab === 'all' && (
-                  <div className="flex items-center gap-3 mb-4 md:mb-6">
-                    <div className="p-1.5 rounded-lg icon-work-bg">
-                      <FaBriefcase className="icon-md icon-work" />
+                  <div className="flex items-center gap-3 px-4 py-3 mb-4 bg-off-white border border-cream-deeper rounded-xl">
+                    <div className="w-9 h-9 rounded-lg bg-accent-orange/10 flex items-center justify-center shrink-0">
+                      <FaBriefcase className="w-4 h-4 text-accent-orange" />
                     </div>
                     <div>
-                      <h3 className="text-h5 weight-semibold text-gray-900">Work Experience</h3>
-                      <p className="text-caption text-gray-600">Professional career journey</p>
+                      <h3 className="font-heading text-[1.1rem] font-semibold text-ink leading-none">Work Experience</h3>
+                      <p className="font-mono text-[0.62rem] tracking-wider uppercase text-text-muted mt-0.5">Professional career journey</p>
                     </div>
                   </div>
                 )}
-                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+                <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                   {filtered.work.map((exp) => (
                     <ExperienceCard key={exp._id} experience={exp} variant="compact" />
                   ))}
@@ -145,19 +165,19 @@ export default function ExperienceShowcase({
             )}
 
             {(tab === 'all' || tab === 'education') && filtered.education.length > 0 && (
-              <section id="panel-education" aria-labelledby="tab-education">
+              <section>
                 {tab === 'all' && (
-                  <div className="flex items-center gap-3 mb-4 md:mb-6">
-                    <div className="p-1.5 rounded-lg icon-edu-bg">
-                      <FaGraduationCap className="icon-md icon-edu" />
+                  <div className="flex items-center gap-3 px-4 py-3 mb-4 bg-off-white border border-cream-deeper rounded-xl">
+                    <div className="w-9 h-9 rounded-lg bg-accent-teal/10 flex items-center justify-center shrink-0">
+                      <FaGraduationCap className="w-4 h-4 text-accent-teal" />
                     </div>
                     <div>
-                      <h3 className="text-h5 weight-semibold text-gray-900">Education</h3>
-                      <p className="text-caption text-gray-600">Academic background and qualifications</p>
+                      <h3 className="font-heading text-[1.1rem] font-semibold text-ink leading-none">Education</h3>
+                      <p className="font-mono text-[0.62rem] tracking-wider uppercase text-text-muted mt-0.5">Academic background</p>
                     </div>
                   </div>
                 )}
-                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
+                <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                   {filtered.education.map((exp) => (
                     <ExperienceCard key={exp._id} experience={exp} variant="compact" />
                   ))}
@@ -170,5 +190,3 @@ export default function ExperienceShowcase({
     </section>
   );
 }
-
-

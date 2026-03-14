@@ -47,7 +47,7 @@ export default function About() {
   };
 
   return (
-    <div className="min-h-screen bg-cream font-ui">
+    <div className="min-h-screen bg-cream font-body">
       <div className="pt-6">
         <Header />
       </div>
@@ -70,7 +70,7 @@ export default function About() {
                 {/* Role badge */}
                 <span className="inline-flex items-center gap-2 font-mono text-[0.65rem] tracking-[0.18em] uppercase text-warm-brown bg-off-white border border-cream-deeper px-4 py-2 rounded-full shadow-sm">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-orange shrink-0" />
-                  Backend Engineer · System Design Ownership
+                  Software Engineer · Backend & Systems
                 </span>
 
                 {/* Name */}
@@ -84,22 +84,22 @@ export default function About() {
                 </p>
 
                 {/* CTAs */}
-                <div className="flex flex-wrap gap-3 justify-center">
+                <div className="flex flex-wrap gap-2.5 justify-center">
                   <button
                     onClick={() => scrollToSection("experience")}
-                    className="font-body bg-ink text-off-white px-7 py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-ink hover:bg-accent-orange hover:border-accent-orange transition-all duration-250"
+                    className="font-body bg-ink text-off-white px-5 sm:px-7 py-2.5 sm:py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-ink hover:bg-accent-orange hover:border-accent-orange transition-all duration-250"
                   >
                     View Experience
                   </button>
                   <button
                     onClick={() => scrollToSection("skills")}
-                    className="font-body bg-transparent text-ink px-7 py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-sand hover:border-ink transition-all duration-250"
+                    className="font-body bg-transparent text-ink px-5 sm:px-7 py-2.5 sm:py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-sand hover:border-ink transition-all duration-250"
                   >
                     See Skills
                   </button>
                   <button
                     onClick={() => scrollToSection("projects")}
-                    className="font-body bg-transparent text-ink px-7 py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-sand hover:border-ink transition-all duration-250"
+                    className="font-body bg-transparent text-ink px-5 sm:px-7 py-2.5 sm:py-3 rounded-md text-[0.83rem] font-medium tracking-wide border-[1.5px] border-sand hover:border-ink transition-all duration-250"
                   >
                     Browse Projects
                   </button>
@@ -110,7 +110,7 @@ export default function About() {
               <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-5 mb-5">
 
                 {/* Profile card */}
-                <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] p-8 flex gap-7 items-start hover:border-sand hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <div className="relative bg-off-white border border-cream-deeper rounded-[0.9rem] p-5 sm:p-8 flex flex-col sm:flex-row gap-5 sm:gap-7 items-center sm:items-start hover:border-sand hover:shadow-lg transition-all duration-300 overflow-hidden">
                   {/* Orange left accent */}
                   <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-orange rounded-l-[0.9rem]" />
 
@@ -145,7 +145,7 @@ export default function About() {
                         I've worked on internal and public-facing platforms such as a multi-tenant CRM, a role-based student management system, and an offline, consent-based biometric system.
                       </p>
                       <p className="font-body text-[0.86rem] leading-[1.75] text-warm-brown font-light text-justify">
-                        Alongside engineering work, I serve as a Senior CS Instructor at Phitron. Teaching sharpens fundamentals and communication; engineering remains my primary focus.
+                        Beyond engineering, I&apos;ve mentored 10,000+ students in DSA and backend development — an experience that sharpens fundamentals and communication. Engineering remains my primary focus.
                       </p>
                     </div>
                   </div>
@@ -193,7 +193,7 @@ export default function About() {
               </div>
 
               {/* ── STATS ROW ── */}
-              <div className="grid grid-cols-3 gap-5 mb-5">
+              <div className="grid grid-cols-3 gap-2 sm:gap-5 mb-5">
                 {[
                   { num: "3+",    label: "Years Building" },
                   { num: "10k+",  label: "Students Taught" },
@@ -201,21 +201,21 @@ export default function About() {
                 ].map(({ num, label }) => (
                   <div
                     key={label}
-                    className="bg-off-white border border-cream-deeper rounded-[0.9rem] px-5 py-5 text-center hover:border-sand hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                    className="bg-off-white border border-cream-deeper rounded-[0.9rem] px-2 sm:px-5 py-3 sm:py-5 text-center hover:border-sand hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
-                    <div className="font-heading text-[2.4rem] font-semibold text-ink leading-none mb-1.5">{num}</div>
-                    <div className="font-mono text-[0.62rem] tracking-[0.1em] uppercase text-text-muted">{label}</div>
+                    <div className="font-heading text-[1.6rem] sm:text-[2.4rem] font-semibold text-ink leading-none mb-1">{num}</div>
+                    <div className="font-mono text-[0.55rem] sm:text-[0.62rem] tracking-[0.08em] sm:tracking-[0.1em] uppercase text-text-muted">{label}</div>
                   </div>
                 ))}
               </div>
 
               {/* ── PILLARS ROW ── */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
                 {[
                   { icon: "🏗️", name: "Architecture",    desc: "Designing systems for maintainability, not just delivery.",           bg: "bg-accent-orange/10" },
                   { icon: "🗄️", name: "Database Design", desc: "Relational modeling, migrations, and data integrity at scale.",       bg: "bg-accent-blue/10" },
                   { icon: "🔐", name: "Security",         desc: "Auth, RBAC, and secure workflows built from the ground up.",         bg: "bg-accent-teal/10" },
-                  { icon: "🎓", name: "Teaching",         desc: "Mentoring 10,000+ students in DSA and backend engineering.",         bg: "bg-[rgba(196,132,26,0.10)]" },
+                  { icon: "🎓", name: "Mentorship",       desc: "Guided 10,000+ students through DSA and backend engineering.",       bg: "bg-[rgba(196,132,26,0.10)]" },
                 ].map(({ icon, name, desc, bg }) => (
                   <div
                     key={name}
@@ -256,13 +256,13 @@ export default function About() {
               }`}
             >
               <div className="text-center mb-8">
-                <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-                  <span className="w-8 h-px bg-accent-orange opacity-60" />
+                <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+                  <span className="w-8 h-px bg-accent-orange opacity-50" />
                   Shipped &amp; Maintained
-                  <span className="w-8 h-px bg-accent-orange opacity-60" />
+                  <span className="w-8 h-px bg-accent-orange opacity-50" />
                 </p>
-                <h2 className="font-heading font-light text-ink mb-3" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>Projects</h2>
-                <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
+                <h2 className="font-heading font-light text-ink leading-[1.05] mb-4" style={{ fontSize: "clamp(2.2rem,5vw,3.6rem)" }}>Featured <em className="italic text-warm-brown">Projects</em></h2>
+                <p className="text-[0.9rem] text-text-muted max-w-[54ch] mx-auto leading-[1.75] font-light text-justify">
                   Selected systems where I owned backend architecture, data lifecycle, and reliability.
                 </p>
               </div>
@@ -302,13 +302,13 @@ export default function About() {
               }`}
             >
               <div className="text-center mb-8">
-                <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-                  <span className="w-8 h-px bg-accent-orange opacity-60" />
+                <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+                  <span className="w-8 h-px bg-accent-orange opacity-50" />
                   Get in Touch
-                  <span className="w-8 h-px bg-accent-orange opacity-60" />
+                  <span className="w-8 h-px bg-accent-orange opacity-50" />
                 </p>
-                <h2 className="font-heading font-light text-ink mb-3" style={{ fontSize: "clamp(2rem,4vw,3rem)" }}>Contact Me</h2>
-                <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
+                <h2 className="font-heading font-light text-ink leading-[1.05] mb-4" style={{ fontSize: "clamp(2.2rem,5vw,3.6rem)" }}>Contact <em className="italic text-warm-brown">Me</em></h2>
+                <p className="text-[0.9rem] text-text-muted max-w-[54ch] mx-auto leading-[1.75] font-light text-justify">
                   Ready to collaborate or have a question? Let's connect and discuss how we can work together.
                 </p>
               </div>

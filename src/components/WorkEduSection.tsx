@@ -90,7 +90,7 @@ function WorkCard({ exp }: { exp: IWorkExperience }) {
       {/* Card head */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full text-left px-5 pt-5 pb-4 pl-[1.35rem] cursor-pointer min-h-[10rem] flex flex-col"
+        className="w-full text-left px-4 sm:px-5 pt-5 pb-4 pl-[1.15rem] sm:pl-[1.35rem] cursor-pointer min-h-[8rem] sm:min-h-[10rem] flex flex-col"
       >
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ function WorkCard({ exp }: { exp: IWorkExperience }) {
       <div className="grid transition-[grid-template-rows] duration-350 ease-[cubic-bezier(0.4,0,0.2,1)]"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}>
         <div className="overflow-hidden min-h-0">
-          <div className="px-5 pb-5 pl-[1.35rem] border-t border-cream-deeper pt-4">
+          <div className="px-4 sm:px-5 pb-5 pl-[1.15rem] sm:pl-[1.35rem] border-t border-cream-deeper pt-4">
             {/* Description */}
             {descText && (
               <p className="font-body text-[0.86rem] leading-relaxed text-warm-brown font-light mb-4">
@@ -185,7 +185,7 @@ function EduCard({ exp }: { exp: IEducation }) {
       {/* Card head */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full text-left px-5 pt-5 pb-4 pl-[1.35rem] cursor-pointer min-h-[10rem] flex flex-col"
+        className="w-full text-left px-4 sm:px-5 pt-5 pb-4 pl-[1.15rem] sm:pl-[1.35rem] cursor-pointer min-h-[8rem] sm:min-h-[10rem] flex flex-col"
       >
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
@@ -224,7 +224,7 @@ function EduCard({ exp }: { exp: IEducation }) {
       <div className="grid transition-[grid-template-rows] duration-350 ease-[cubic-bezier(0.4,0,0.2,1)]"
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}>
         <div className="overflow-hidden min-h-0">
-          <div className="px-5 pb-5 pl-[1.35rem] border-t border-cream-deeper pt-4">
+          <div className="px-4 sm:px-5 pb-5 pl-[1.15rem] sm:pl-[1.35rem] border-t border-cream-deeper pt-4">
             {descText && (
               <p className="font-body text-[0.86rem] leading-relaxed text-warm-brown font-light mb-4">
                 {descText}
@@ -278,10 +278,10 @@ export default function WorkEduSection({ className = "" }: WorkEduSectionProps) 
   const education = [...rawEducation].sort(byDate) as IEducation[];
 
   return (
-    <section id="experience" className={`w-full max-w-[1100px] mx-auto font-ui ${className}`}>
+    <section id="experience" className={`w-full max-w-[1100px] mx-auto font-body ${className}`}>
       <SectionHeader
         eyebrow="Professional Journey"
-        title="Work Experience & Education"
+        title={<>Work Experience & <em className="italic text-warm-brown">Education</em></>}
         subtitle="My professional journey and academic background across backend engineering and system building."
         center
         className="mb-12"

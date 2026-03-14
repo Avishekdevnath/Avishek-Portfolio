@@ -101,16 +101,16 @@ function SkillCard({ skill }: { skill: SkillItem }) {
       onMouseLeave={() => setHovered(false)}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[0.88rem] font-medium text-ink flex items-center gap-2">
+        <span className="font-body text-[0.88rem] font-medium text-ink flex items-center gap-2">
           <span className="text-[0.95rem]">{skill.emoji}</span>
           {skill.name}
         </span>
-        <span className={`font-ui text-[0.6rem] tracking-wider uppercase px-2.5 py-0.5 rounded-full ${levelBadgeClass[skill.level]}`}>
+        <span className={`font-mono text-[0.6rem] tracking-wider uppercase px-2.5 py-0.5 rounded-full ${levelBadgeClass[skill.level]}`}>
           {skill.level}
         </span>
       </div>
       <div className="relative">
-        <span className={`absolute right-0 -top-5 font-ui text-[0.6rem] text-text-muted transition-opacity duration-300 ${hovered ? "opacity-100" : "opacity-0"}`}>
+        <span className={`absolute right-0 -top-5 font-mono text-[0.6rem] text-text-muted transition-opacity duration-300 ${hovered ? "opacity-100" : "opacity-0"}`}>
           {skill.percentage}%
         </span>
         <SkillBar percentage={skill.percentage} barColor={skill.barColor} />
@@ -133,7 +133,7 @@ function PillCloud({ pills }: { pills: PillItem[] }) {
       {pills.map((pill) => (
         <span
           key={pill.name}
-          className={`font-ui text-[0.68rem] tracking-wide px-3.5 py-1 border rounded-full bg-off-white transition-all duration-200 cursor-default ${
+          className={`font-mono text-[0.62rem] tracking-wide px-3.5 py-1 border rounded-full bg-off-white transition-all duration-200 cursor-default ${
             variantClass[pill.variant || "default"]
           }`}
         >
@@ -147,7 +147,7 @@ function PillCloud({ pills }: { pills: PillItem[] }) {
 function PillSection({ group }: { group: PillGroup }) {
   return (
     <div>
-      <h4 className="font-ui text-[0.65rem] tracking-[0.18em] uppercase text-text-muted mb-3 flex items-center gap-2.5">
+      <h4 className="font-mono text-[0.65rem] tracking-[0.18em] uppercase text-text-muted mb-3 flex items-center gap-2.5">
         {group.title}
         <span className="flex-1 h-px bg-cream-deeper" />
       </h4>
@@ -186,8 +186,8 @@ function Accordion({
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0 ${iconBgClass[cat.iconBg]}`}>
                   {cat.icon}
                 </div>
-                <span className="font-ui text-xl font-semibold text-ink">{cat.label}</span>
-                <span className="font-ui text-[0.65rem] tracking-wider text-text-muted bg-cream-dark px-2.5 py-0.5 rounded-full">
+                <span className="font-body text-[0.95rem] font-semibold text-ink">{cat.label}</span>
+                <span className="font-mono text-[0.65rem] tracking-wider text-text-muted bg-cream-dark px-2.5 py-0.5 rounded-full">
                   {cat.skills ? `${cat.skills.length} skills` : `${cat.pillGroups?.reduce((n, g) => n + g.pills.length, 0)} items`}
                 </span>
               </div>
@@ -208,7 +208,7 @@ function Accordion({
               <div className="overflow-hidden min-h-0">
                 <div className="px-5 pb-5">
                   {cat.skills && (
-                    <div className="grid grid-cols-3 md:grid-cols-3 sm:grid-cols-2 max-sm:grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {cat.skills.map((skill) => (
                         <SkillCard key={skill.name} skill={skill} />
                       ))}
@@ -236,20 +236,20 @@ function Accordion({
 function LanguageCard({ lang }: { lang: typeof languageItems[0] }) {
   const isTextFlag = lang.flag.length <= 3 && !lang.flag.match(/\p{Emoji}/u);
   return (
-    <div className={`group relative bg-off-white border border-cream-deeper rounded-xl px-6 py-5 flex items-center gap-5 transition-all duration-250 overflow-hidden hover:border-sand hover:shadow-md hover:translate-x-1 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] before:rounded-l-[3px] before:transition-colors ${langBorderClass[lang.badgeVariant]}`}>
-      <div className="w-[52px] h-[52px] rounded-lg bg-cream border border-cream-deeper flex items-center justify-center text-[1.6rem] shrink-0 transition-all group-hover:bg-cream-dark group-hover:border-sand">
+    <div className={`group relative bg-off-white border border-cream-deeper rounded-xl px-4 sm:px-6 py-4 sm:py-5 flex items-center gap-3 sm:gap-5 transition-all duration-250 overflow-hidden hover:border-sand hover:shadow-md hover:translate-x-1 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] before:rounded-l-[3px] before:transition-colors ${langBorderClass[lang.badgeVariant]}`}>
+      <div className="w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-lg bg-cream border border-cream-deeper flex items-center justify-center text-[1.3rem] sm:text-[1.6rem] shrink-0 transition-all group-hover:bg-cream-dark group-hover:border-sand">
         {isTextFlag ? (
-          <span className="font-ui text-base font-medium text-ink tracking-wide">{lang.flag}</span>
+          <span className="font-body text-base font-medium text-ink tracking-wide">{lang.flag}</span>
         ) : (
           lang.flag
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-ui text-xl font-semibold text-ink leading-none mb-1">{lang.name}</div>
-        <div className="font-ui text-[0.65rem] tracking-wider uppercase text-text-muted">{lang.description}</div>
+        <div className="font-body text-[0.95rem] font-semibold text-ink leading-none mb-1">{lang.name}</div>
+        <div className="font-mono text-[0.65rem] tracking-wider uppercase text-text-muted">{lang.description}</div>
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
-        <span className={`font-ui text-[0.6rem] tracking-wider uppercase px-3 py-0.5 rounded-full ${badgeVariantClass[lang.badgeVariant]}`}>
+        <span className={`font-mono text-[0.6rem] tracking-wider uppercase px-3 py-0.5 rounded-full ${badgeVariantClass[lang.badgeVariant]}`}>
           {lang.levelLabel}
         </span>
         <div className="flex gap-1.5">
@@ -270,11 +270,11 @@ function LanguageCard({ lang }: { lang: typeof languageItems[0] }) {
 // ── DSA stats strip ──
 function DsaStrip() {
   return (
-    <div className="grid grid-cols-4 sm:grid-cols-4 max-sm:grid-cols-2 gap-3 mb-5">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
       {dsaStats.map((stat) => (
         <div key={stat.label} className="bg-ink rounded-[0.65rem] p-5 text-center">
-          <div className="font-ui text-4xl font-semibold text-cream leading-none mb-1">{stat.value}</div>
-          <div className="font-ui text-[0.6rem] tracking-wider uppercase text-sand/45">{stat.label}</div>
+          <div className="font-heading text-4xl font-semibold text-cream leading-none mb-1">{stat.value}</div>
+          <div className="font-mono text-[0.6rem] tracking-wider uppercase text-sand/45">{stat.label}</div>
         </div>
       ))}
     </div>
@@ -298,11 +298,11 @@ export default function SkillsSection({ className = "" }: SkillsSectionProps) {
   const handleDsaToggle = useCallback((i: number) => setDsaOpen((prev) => (prev === i ? null : i)), []);
 
   return (
-    <section id="skills" className={`w-full max-w-[1100px] mx-auto font-ui ${className}`}>
+    <section id="skills" className={`w-full max-w-[1100px] mx-auto font-body ${className}`}>
       {/* Header */}
       <SectionHeader
         eyebrow="Explore My"
-        title="Technical Skills"
+        title={<>Technical <em className="italic text-warm-brown">Skills</em></>}
         subtitle="A comprehensive overview of my technical skills, programming languages, and software tools expertise."
         center
         className="mb-12"
@@ -310,12 +310,12 @@ export default function SkillsSection({ className = "" }: SkillsSectionProps) {
 
       {/* Tab switcher */}
       <div className="flex items-center justify-center mb-10">
-        <div className="flex items-center gap-1.5 bg-off-white border border-cream-deeper rounded-full p-1 shadow-sm flex-wrap justify-center">
+        <div className="flex items-center gap-1.5 bg-off-white border border-cream-deeper rounded-xl sm:rounded-full p-1 shadow-sm flex-wrap justify-center">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`font-ui text-[0.72rem] tracking-wider uppercase px-5 py-2.5 rounded-full border-none flex items-center gap-2 whitespace-nowrap transition-all duration-250 cursor-pointer ${
+              className={`font-mono text-[0.72rem] tracking-wider uppercase px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full border-none flex items-center gap-1.5 sm:gap-2 whitespace-nowrap transition-all duration-250 cursor-pointer ${
                 activeTab === tab.key
                   ? "bg-ink text-off-white shadow-md"
                   : "bg-transparent text-text-muted hover:text-ink"

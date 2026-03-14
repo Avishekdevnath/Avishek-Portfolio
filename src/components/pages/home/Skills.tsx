@@ -166,7 +166,7 @@ function SkillRow({ skill, gradient }: { skill: Skill; gradient: string }) {
           <div className="w-5 h-5 rounded-[0.3rem] flex-shrink-0 flex items-center justify-center text-[0.85rem] bg-cream-dark border border-cream-deeper">
             {getSkillIcon(skill)}
           </div>
-          <span className="text-[0.9rem] font-medium text-ink whitespace-nowrap overflow-hidden text-ellipsis">
+          <span className="font-body text-[0.9rem] font-medium text-ink whitespace-nowrap overflow-hidden text-ellipsis">
             {skill.name}
           </span>
         </div>
@@ -179,7 +179,7 @@ function SkillRow({ skill, gradient }: { skill: Skill; gradient: string }) {
       </div>
       <ProgressBar percentage={pct} gradient={gradient} />
       {skill.description && (
-        <p className="text-[0.78rem] text-text-muted leading-[1.5] font-light mt-[0.45rem]">
+        <p className="font-body text-[0.78rem] text-text-muted leading-[1.5] font-light mt-[0.45rem]">
           {skill.description}
         </p>
       )}

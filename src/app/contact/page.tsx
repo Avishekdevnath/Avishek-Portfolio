@@ -95,16 +95,16 @@ export default function Contact() {
 
           {/* ── Page header ── */}
           <div className="text-center mb-12">
-            <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-              <span className="w-8 h-px bg-accent-orange opacity-60" />
+            <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+              <span className="w-8 h-px bg-accent-orange opacity-50" />
               Let&apos;s Connect
-              <span className="w-8 h-px bg-accent-orange opacity-60" />
+              <span className="w-8 h-px bg-accent-orange opacity-50" />
             </p>
             <h1
-              className="font-heading font-light text-ink mb-3 leading-none"
-              style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+              className="font-heading font-light text-ink mb-4 leading-[1.05]"
+              style={{ fontSize: 'clamp(2.2rem,5vw,3.6rem)' }}
             >
-              Get in Touch
+              Get in <em className="italic text-warm-brown">Touch</em>
             </h1>
             <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
               Have a project in mind or just want to chat? I&apos;d love to hear from you.

@@ -1,115 +1,138 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { LogOut, User, Settings } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LogOut, Menu, Settings } from 'lucide-react';
 
 interface HeaderProps {
-  onMenuToggle?: () => void;
-  isOpen?: boolean;
+  onMenuToggle: () => void;
 }
 
-export default function DashboardHeader({ onMenuToggle, isOpen }: HeaderProps) {
-  const [username, setUsername] = useState('Admin');
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+const PAGE_TITLES: Record<string, string> = {
+  '/dashboard': 'Overview',
+  '/dashboard/outreach': 'Outreach',
+  '/dashboard/outreach/companies': 'Companies',
+  '/dashboard/outreach/contacts': 'Contacts',
+  '/dashboard/outreach/templates': 'Templates',
+  '/dashboard/outreach/ai': 'AI Assistant',
+  '/dashboard/outreach/follow-ups': 'Follow-ups',
+  '/dashboard/outreach/log': 'Outreach Log',
+  '/dashboard/outreach/analytics': 'Outreach Analytics',
+  '/dashboard/tools': 'Tools',
+  '/dashboard/projects': 'Projects',
+  '/dashboard/skills': 'Skills',
+  '/dashboard/experience': 'Experience',
+  '/dashboard/education': 'Education',
+  '/dashboard/achievements': 'Achievements',
+  '/dashboard/stats': 'Statistics',
+  '/dashboard/posts': 'Blog Posts',
+  '/dashboard/messages': 'Messages',
+  '/dashboard/hiring-inquiries': 'Hiring Inquiries',
+  '/dashboard/notifications': 'Notifications',
+  '/dashboard/settings': 'Settings',
+};
+
+export default function DashboardHeader({ onMenuToggle }: HeaderProps) {
+  const pathname = usePathname();
   const router = useRouter();
+  const [fullName, setFullName] = useState('Admin');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const response = await fetch('/api/settings');
-        const data = await response.json();
-        if (data.success && data.data.fullName) {
-          setUsername(data.data.fullName);
-        }
-      } catch (error) {
-        // Failed to fetch user info
-      }
-    };
-    fetchUserInfo();
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.data?.fullName) setFullName(d.data.fullName); })
+      .catch(() => {});
   }, []);
+
+  const pageTitle = useMemo(() => {
+    if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+    // Longest-prefix match for dynamic sub-routes
+    const match = Object.entries(PAGE_TITLES)
+      .sort((a, b) => b[0].length - a[0].length)
+      .find(([p]) => pathname.startsWith(p) && p !== '/dashboard');
+    return match ? match[1] : 'Dashboard';
+  }, [pathname]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        router.push('/login');
-      } else {
-        // Logout failed
-        // Still redirect to login even if API fails
-        router.push('/login');
-      }
-    } catch (error) {
-      // Logout error
-      // Still redirect to login even if API fails
-      router.push('/login');
+      await fetch('/api/auth/logout', { method: 'POST' });
     } finally {
+      router.push('/login');
       setIsLoggingOut(false);
     }
   };
 
+  const initials = fullName
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-30 flex items-center justify-between px-4 sm:px-6">
-      {/* Left */}
+    <header className="fixed top-0 left-0 right-0 md:left-[240px] h-14 bg-[#f7f5f1] border-b border-[#e8e3db] z-20 flex items-center justify-between px-4 sm:px-6">
+
+      {/* ── Left: hamburger + page title ── */}
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuToggle}
-          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100"
-          aria-label={isOpen ? 'Close menu' : 'Open menu'}
+          className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-[#4a3728] hover:bg-[#e8e3db] transition-colors"
+          aria-label="Open menu"
         >
-          {/* Hamburger / Close icon */}
-          <span className="block w-5 h-0.5 bg-gray-700 relative">
-            <span className="absolute top-[-6px] left-0 w-5 h-0.5 bg-gray-700"></span>
-            <span className="absolute top-[6px] left-0 w-5 h-0.5 bg-gray-700"></span>
-          </span>
+          <Menu size={18} />
         </button>
-        <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
+        <h1 className="text-[0.9rem] font-semibold text-[#2a2118] font-body tracking-[-0.01em]">
+          {pageTitle}
+        </h1>
       </div>
 
-      {/* Right side - User info and actions */}
-      <div className="flex items-center gap-4">
-        {/* User info */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-            <User size={16} className="text-white" />
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-medium text-gray-900">{username}</p>
-            <p className="text-xs text-gray-500">Administrator</p>
-          </div>
-        </div>
+      {/* ── Right: settings + user + logout ── */}
+      <div className="flex items-center gap-1.5">
 
-        {/* Settings link */}
+        {/* Settings */}
         <button
           onClick={() => router.push('/dashboard/settings')}
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#8a7a6a] hover:text-[#2a2118] hover:bg-[#e8e3db] transition-colors"
           title="Settings"
         >
-          <Settings size={18} />
+          <Settings size={15} />
         </button>
 
-        {/* Logout button */}
+        {/* Divider */}
+        <div className="w-px h-5 bg-[#ddd5c5] mx-1.5" />
+
+        {/* User avatar + name */}
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-[#d4622a] flex items-center justify-center flex-shrink-0">
+            <span className="text-[0.58rem] font-bold text-white font-mono">{initials}</span>
+          </div>
+          <span className="hidden sm:block text-[0.82rem] font-medium text-[#2a2118] leading-none">
+            {fullName}
+          </span>
+        </div>
+
+        {/* Divider */}
+        <div className="w-px h-5 bg-[#ddd5c5] mx-1.5" />
+
+        {/* Logout */}
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[0.75rem] font-medium transition-colors ${
             isLoggingOut
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-red-50 text-red-700 hover:bg-red-100'
+              ? 'text-[#8a7a6a] cursor-not-allowed'
+              : 'text-[#8a7a6a] hover:text-red-600 hover:bg-red-50'
           }`}
+          title="Logout"
         >
-          <LogOut size={16} />
+          <LogOut size={14} />
           <span className="hidden sm:inline">
-            {isLoggingOut ? 'Logging out...' : 'Logout'}
+            {isLoggingOut ? 'Logging out…' : 'Logout'}
           </span>
         </button>
+
       </div>
     </header>
   );

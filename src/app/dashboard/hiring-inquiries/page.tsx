@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Mail, 
-  Building, 
-  User, 
-  Calendar, 
+import {
+  Mail,
+  Building,
+  User,
+  Calendar,
   Filter,
   Search,
   MoreVertical,
@@ -36,10 +36,10 @@ interface InquiryStats {
 }
 
 const statusConfig = {
-  new: { label: 'New', color: 'bg-blue-100 text-blue-800', icon: AlertCircle },
-  reviewed: { label: 'Reviewed', color: 'bg-yellow-100 text-yellow-800', icon: Eye },
-  contacted: { label: 'Contacted', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  archived: { label: 'Archived', color: 'bg-gray-100 text-gray-800', icon: Archive },
+  new: { label: 'New', color: 'bg-[#e8f0fc] text-[#2d4eb3]', icon: AlertCircle },
+  reviewed: { label: 'Reviewed', color: 'bg-[#fef3e2] text-[#92510a]', icon: Eye },
+  contacted: { label: 'Contacted', color: 'bg-[#e6f2ee] text-[#2a6b4f]', icon: CheckCircle },
+  archived: { label: 'Archived', color: 'bg-[#f3f1ee] text-[#6b5c4e]', icon: Archive },
 };
 
 export default function HiringInquiriesPage() {
@@ -92,8 +92,8 @@ export default function HiringInquiriesPage() {
       if (!data.success) throw new Error(data.error || 'Failed to update status');
 
       // Update local state
-      setInquiries(prev => 
-        prev.map(inquiry => 
+      setInquiries(prev =>
+        prev.map(inquiry =>
           inquiry._id === id ? { ...inquiry, status: newStatus as any } : inquiry
         )
       );
@@ -106,12 +106,12 @@ export default function HiringInquiriesPage() {
   };
 
   const filteredInquiries = inquiries.filter(inquiry => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       inquiry.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inquiry.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inquiry.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inquiry.message.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesSearch;
   });
 
@@ -127,33 +127,33 @@ export default function HiringInquiriesPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Hiring Inquiries</h1>
-            <p className="text-gray-600">Manage job opportunities and hiring requests</p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="space-y-5">
+        {/* Stat card skeletons */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl shadow-sm animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
-              <div className="h-8 bg-gray-200 rounded w-12"></div>
+            <div key={i} className="bg-white border border-[#e8e3db] rounded-xl p-5 shadow-sm animate-pulse flex items-center gap-4">
+              <div className="w-9 h-9 rounded-lg bg-[#f3f1ee] flex-shrink-0" />
+              <div className="space-y-2">
+                <div className="h-6 bg-[#f3f1ee] rounded w-10" />
+                <div className="h-3 bg-[#f3f1ee] rounded w-16" />
+              </div>
             </div>
           ))}
         </div>
 
+        {/* Card skeletons */}
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl shadow-sm animate-pulse">
-              <div className="flex justify-between items-start">
+            <div key={i} className="bg-white border border-[#e8e3db] rounded-xl p-5 shadow-sm animate-pulse">
+              <div className="flex justify-between items-start mb-3">
                 <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-32"></div>
-                  <div className="h-3 bg-gray-200 rounded w-48"></div>
+                  <div className="h-4 bg-[#f3f1ee] rounded w-36" />
+                  <div className="h-3 bg-[#f3f1ee] rounded w-52" />
                 </div>
-                <div className="h-6 bg-gray-200 rounded w-16"></div>
+                <div className="h-6 bg-[#f3f1ee] rounded-full w-20" />
               </div>
+              <div className="h-3 bg-[#f3f1ee] rounded w-full mb-1.5" />
+              <div className="h-3 bg-[#f3f1ee] rounded w-4/5" />
             </div>
           ))}
         </div>
@@ -163,20 +163,13 @@ export default function HiringInquiriesPage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Hiring Inquiries</h1>
-            <p className="text-gray-600">Manage job opportunities and hiring requests</p>
-          </div>
-        </div>
-        
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          <p className="font-medium">Error loading inquiries</p>
-          <p className="text-sm mt-1">{error}</p>
-          <button 
+      <div className="space-y-5">
+        <div className="bg-[#fceaea] border border-red-200 text-[#c0392b] px-5 py-4 rounded-xl">
+          <p className="font-semibold text-[0.875rem] font-body">Error loading inquiries</p>
+          <p className="text-[0.82rem] mt-1 font-body">{error}</p>
+          <button
             onClick={fetchInquiries}
-            className="mt-2 text-sm underline hover:no-underline"
+            className="mt-3 text-[0.82rem] underline hover:no-underline font-body"
           >
             Try again
           </button>
@@ -185,87 +178,67 @@ export default function HiringInquiriesPage() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Hiring Inquiries</h1>
-          <p className="text-gray-600">Manage job opportunities and hiring requests</p>
-        </div>
-      </div>
+  const statCards = stats ? [
+    { label: 'Total', count: stats.total, icon: Mail, tint: 'bg-[#e8f0fc] text-[#2d4eb3]' },
+    { label: 'New', count: stats.new, icon: AlertCircle, tint: 'bg-[#fdf0eb] text-[#d4622a]' },
+    { label: 'Reviewed', count: stats.reviewed, icon: Eye, tint: 'bg-[#fef3e2] text-[#92510a]' },
+    { label: 'Contacted', count: stats.contacted, icon: CheckCircle, tint: 'bg-[#e6f2ee] text-[#2a6b4f]' },
+  ] : [];
 
-      {/* Stats */}
+  return (
+    <div className="space-y-5">
+      {/* Stat Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <div className="flex items-center">
-              <Mail className="text-blue-500 mr-2" size={20} />
-              <span className="text-sm text-gray-500">Total</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {statCards.map(({ label, count, icon: Icon, tint }) => (
+            <div key={label} className="bg-white border border-[#e8e3db] rounded-xl p-5 shadow-sm flex items-center gap-4">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${tint}`}>
+                <Icon className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-mono text-2xl font-semibold text-[#2a2118] leading-none">{count}</p>
+                <p className="text-[0.72rem] text-[#8a7a6a] mt-0.5">{label}</p>
+              </div>
             </div>
-            <h3 className="text-2xl font-semibold mt-2">{stats.total}</h3>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <div className="flex items-center">
-              <AlertCircle className="text-blue-500 mr-2" size={20} />
-              <span className="text-sm text-gray-500">New</span>
-            </div>
-            <h3 className="text-2xl font-semibold mt-2">{stats.new}</h3>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <div className="flex items-center">
-              <Eye className="text-yellow-500 mr-2" size={20} />
-              <span className="text-sm text-gray-500">Reviewed</span>
-            </div>
-            <h3 className="text-2xl font-semibold mt-2">{stats.reviewed}</h3>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <div className="flex items-center">
-              <CheckCircle className="text-green-500 mr-2" size={20} />
-              <span className="text-sm text-gray-500">Contacted</span>
-            </div>
-            <h3 className="text-2xl font-semibold mt-2">{stats.contacted}</h3>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-xl shadow-sm">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="relative flex-1 min-w-[200px] max-w-md">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="w-4 h-4 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search inquiries..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Status</option>
-            <option value="new">New</option>
-            <option value="reviewed">Reviewed</option>
-            <option value="contacted">Contacted</option>
-            <option value="archived">Archived</option>
-          </select>
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a7a6a]" />
+          <input
+            type="text"
+            placeholder="Search inquiries..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pr-3 bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.875rem] text-[#2a2118] focus:outline-none focus:border-[#d4622a] focus:ring-1 focus:ring-[#d4622a]/20"
+            style={{ paddingLeft: '2.25rem' }}
+          />
         </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.875rem] text-[#2a2118] focus:outline-none focus:border-[#d4622a] focus:ring-1 focus:ring-[#d4622a]/20"
+        >
+          <option value="all">All Status</option>
+          <option value="new">New</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="contacted">Contacted</option>
+          <option value="archived">Archived</option>
+        </select>
       </div>
 
       {/* Inquiries List */}
       <div className="space-y-4">
         {filteredInquiries.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl shadow-sm text-center">
-            <Mail className="mx-auto text-gray-400 mb-4" size={48} />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No inquiries found</h3>
-            <p className="text-gray-600">
+          <div className="bg-white border border-[#e8e3db] rounded-xl p-12 shadow-sm flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-xl bg-[#f3f1ee] flex items-center justify-center mb-4">
+              <Mail className="w-6 h-6 text-[#8a7a6a]" />
+            </div>
+            <h3 className="text-[0.95rem] font-semibold text-[#2a2118] font-body mb-1">No inquiries found</h3>
+            <p className="text-[0.82rem] text-[#8a7a6a] font-body">
               {searchTerm ? 'Try adjusting your search terms' : 'No hiring inquiries have been submitted yet.'}
             </p>
           </div>
@@ -273,57 +246,57 @@ export default function HiringInquiriesPage() {
           filteredInquiries.map((inquiry) => {
             const StatusIcon = statusConfig[inquiry.status].icon;
             return (
-              <div key={inquiry._id} className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      {inquiry.company && (
-                        <div className="flex items-center text-gray-600">
-                          <Building size={16} className="mr-1" />
-                          <span className="text-sm font-medium">{inquiry.company}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center text-gray-600">
-                        <User size={16} className="mr-1" />
-                        <span className="text-sm">{inquiry.email}</span>
+              <div key={inquiry._id} className="bg-white border border-[#e8e3db] rounded-xl p-5 shadow-sm">
+                {/* Header row */}
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    {inquiry.company && (
+                      <div className="flex items-center gap-1.5 text-[#2a2118]">
+                        <Building className="w-4 h-4 text-[#8a7a6a] flex-shrink-0" />
+                        <span className="text-[0.875rem] font-semibold font-body">{inquiry.company}</span>
                       </div>
-                      {inquiry.role && (
-                        <div className="flex items-center text-gray-600">
-                          <span className="text-sm font-medium">{inquiry.role}</span>
-                        </div>
-                      )}
+                    )}
+                    <div className="flex items-center gap-1.5 text-[#4a3728]">
+                      <Mail className="w-3.5 h-3.5 text-[#8a7a6a] flex-shrink-0" />
+                      <span className="text-[0.82rem] font-body">{inquiry.email}</span>
                     </div>
-                    <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                      {inquiry.message.length > 200 
-                        ? `${inquiry.message.substring(0, 200)}...` 
-                        : inquiry.message
-                      }
-                    </p>
-                    <div className="flex items-center text-gray-500 text-xs">
-                      <Calendar size={14} className="mr-1" />
-                      <span>{formatDate(inquiry.createdAt)}</span>
-                    </div>
+                    {inquiry.role && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[0.72rem] font-mono tracking-wider uppercase bg-[#fef3e2] text-[#92510a]">
+                        {inquiry.role}
+                      </span>
+                    )}
                   </div>
-                  
-                  <div className="flex items-center gap-2 ml-4">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig[inquiry.status].color}`}>
-                      <StatusIcon size={12} />
+
+                  {/* Status badge + select */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[0.65rem] font-mono tracking-wider uppercase ${statusConfig[inquiry.status].color}`}>
+                      <StatusIcon className="w-3 h-3" />
                       {statusConfig[inquiry.status].label}
                     </span>
-                    
-                    <div className="relative">
-                      <select
-                        value={inquiry.status}
-                        onChange={(e) => updateStatus(inquiry._id, e.target.value)}
-                        className="appearance-none bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      >
-                        <option value="new">New</option>
-                        <option value="reviewed">Reviewed</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="archived">Archived</option>
-                      </select>
-                    </div>
+                    <select
+                      value={inquiry.status}
+                      onChange={(e) => updateStatus(inquiry._id, e.target.value)}
+                      className="bg-[#faf8f4] border border-[#ddd5c5] rounded-md px-2 py-1 text-[0.75rem] text-[#2a2118] focus:outline-none focus:border-[#d4622a] focus:ring-1 focus:ring-[#d4622a]/20"
+                    >
+                      <option value="new">New</option>
+                      <option value="reviewed">Reviewed</option>
+                      <option value="contacted">Contacted</option>
+                      <option value="archived">Archived</option>
+                    </select>
                   </div>
+                </div>
+
+                {/* Message */}
+                <p className="text-[0.82rem] text-[#4a3728] font-body leading-relaxed mb-3">
+                  {inquiry.message.length > 200
+                    ? `${inquiry.message.substring(0, 200)}...`
+                    : inquiry.message}
+                </p>
+
+                {/* Footer */}
+                <div className="flex items-center gap-1.5 text-[0.72rem] text-[#8a7a6a] font-mono">
+                  <Calendar className="w-3 h-3" />
+                  {formatDate(inquiry.createdAt)}
                 </div>
               </div>
             );

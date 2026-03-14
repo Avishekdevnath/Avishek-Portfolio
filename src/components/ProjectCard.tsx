@@ -175,7 +175,7 @@ export default function ProjectCard({
         <h3 className="font-heading text-[1.1rem] font-semibold text-ink leading-[1.2] group-hover:text-accent-orange transition-colors duration-200">
           {title}
         </h3>
-        <p className="text-[0.79rem] leading-[1.65] text-text-muted font-light line-clamp-2 flex-1">
+        <p className="font-body text-[0.79rem] leading-[1.65] text-text-muted font-light line-clamp-2 flex-1">
           {getPreviewText()}
         </p>
         {/* Tech Tags */}
@@ -203,7 +203,7 @@ export default function ProjectCard({
             href={mainRepository.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-[0.28rem] text-[0.73rem] font-medium text-text-muted no-underline hover:text-ink transition-colors"
+            className="inline-flex items-center gap-[0.28rem] font-mono text-[0.63rem] tracking-[0.06em] uppercase text-text-muted no-underline hover:text-ink transition-colors"
           >
             {getRepositoryIcon(mainRepository.type)} Code
           </a>
@@ -215,7 +215,7 @@ export default function ProjectCard({
               href={mainDemo.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-[0.28rem] text-[0.73rem] font-medium text-text-muted no-underline hover:text-ink transition-colors"
+              className="inline-flex items-center gap-[0.28rem] font-mono text-[0.63rem] tracking-[0.06em] uppercase text-text-muted no-underline hover:text-ink transition-colors"
             >
               <FaExternalLinkAlt className="w-[11px] h-[11px]" /> Demo
             </a>
@@ -223,7 +223,7 @@ export default function ProjectCard({
         )}
         <Link
           href={`/projects/${_id}`}
-          className="ml-auto inline-flex items-center gap-[0.28rem] text-[0.73rem] font-medium text-accent-orange no-underline opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-250"
+          className="ml-auto inline-flex items-center gap-[0.28rem] font-mono text-[0.63rem] tracking-[0.06em] uppercase text-accent-orange no-underline opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-250"
         >
           View Details <FaArrowRight className="w-[11px] h-[11px]" />
         </Link>

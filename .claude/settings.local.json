@@ -14,7 +14,9 @@
       "Bash(for f:*)",
       "Bash(do echo:*)",
       "Read(//s/SDE/portfolio/Avishek-Portfolio/**)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(grep -r \"Senior CS Instructor\\\\|CS Instructor\\\\|teaching\\\\|instructor\" s:/SDE/portfolio/Avishek-Portfolio/src --include=*.tsx --include=*.ts --include=*.json -n)",
+      "Bash(grep -r \"Senior CS Instructor\\\\|CS Instructor\\\\|backend-focused\\\\|Backend\" s:/SDE/portfolio/Avishek-Portfolio/src --include=*.tsx --include=*.ts --include=*.json -n)"
     ],
     "additionalDirectories": [
       "S:\\SDE\\portfolio\\Avishek-Portfolio\\src\\components"

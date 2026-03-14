@@ -55,8 +55,8 @@ export default function HireMe() {
       accent: "bg-accent-orange",
       iconBg: "bg-accent-orange/10 text-accent-orange",
       icon: <FaCode className="w-5 h-5" />,
-      title: <>Senior CS Instructor at <a href="https://phitron.io/about-us" target="_blank" rel="noopener noreferrer" className="text-accent-orange hover:underline">Phitron</a></>,
-      description: <>Teaching DSA, OOP, databases, Django, React, and AI/ML. Guided numerous students through their programming journey and career development.</>,
+      title: <>Backend-Focused Software Engineer</>,
+      description: <>Designing, building, and maintaining backend systems — APIs, data models, auth, RBAC, and background processing — under real operational constraints.</>,
     },
     {
       accent: "bg-accent-teal",
@@ -89,7 +89,7 @@ export default function HireMe() {
     },
     {
       q: "What about mentoring and knowledge transfer?",
-      a: "As a Senior CS Instructor at Phitron, I specialise in knowledge transfer. I provide detailed code reviews and can conduct training sessions for your development team.",
+      a: "With experience mentoring 10,000+ students, I specialise in knowledge transfer. I provide detailed code reviews and can conduct training sessions for your development team.",
     },
   ];
 
@@ -105,10 +105,10 @@ export default function HireMe() {
 
           {/* ── Page header ── */}
           <div className="text-center">
-            <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-              <span className="w-8 h-px bg-accent-orange opacity-60" />
+            <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+              <span className="w-8 h-px bg-accent-orange opacity-50" />
               Available for Opportunities
-              <span className="w-8 h-px bg-accent-orange opacity-60" />
+              <span className="w-8 h-px bg-accent-orange opacity-50" />
             </p>
             <h1
               className="font-heading font-light text-ink mb-4 leading-none"
@@ -117,11 +117,7 @@ export default function HireMe() {
               Let&apos;s Build Something <em className="italic text-warm-brown">Together</em>
             </h1>
             <p className="font-body text-[0.9rem] text-text-muted max-w-[60ch] mx-auto leading-[1.7] font-light text-justify">
-              Senior CS Instructor at{" "}
-              <a href="https://phitron.io/about-us" target="_blank" rel="noopener noreferrer" className="text-accent-orange hover:underline">
-                Phitron
-              </a>{" "}
-              &amp; Full-Stack Developer with 500+ algorithm problems solved, extensive teaching experience, and a proven track record building scalable systems.
+              Software Engineer specializing in backend systems — with 500+ algorithm problems solved, 10,000+ students mentored, and a proven track record building scalable, production-grade platforms.
             </p>
 
             {/* CTA buttons */}
@@ -142,7 +138,7 @@ export default function HireMe() {
           </div>
 
           {/* ── Quick proof stats ── */}
-          <div className="grid grid-cols-3 gap-5">
+          <div className="grid grid-cols-3 gap-2 sm:gap-5">
             {[
               { num: "500+", label: "Algorithm Problems" },
               { num: "3+",   label: "Years Dev & Teaching" },
@@ -150,10 +146,10 @@ export default function HireMe() {
             ].map(({ num, label }) => (
               <div
                 key={label}
-                className="bg-off-white border border-cream-deeper rounded-[0.9rem] px-5 py-6 text-center hover:border-sand hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                className="bg-off-white border border-cream-deeper rounded-[0.9rem] px-2 sm:px-5 py-4 sm:py-6 text-center hover:border-sand hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
               >
-                <div className="font-heading text-[2.4rem] font-semibold text-ink leading-none mb-1.5">{num}</div>
-                <div className="font-mono text-[0.62rem] tracking-[0.1em] uppercase text-text-muted">{label}</div>
+                <div className="font-heading text-[1.6rem] sm:text-[2.4rem] font-semibold text-ink leading-none mb-1">{num}</div>
+                <div className="font-mono text-[0.55rem] sm:text-[0.62rem] tracking-[0.08em] sm:tracking-[0.1em] uppercase text-text-muted">{label}</div>
               </div>
             ))}
           </div>
@@ -164,16 +160,16 @@ export default function HireMe() {
           {/* ── Why hire me ── */}
           <div>
             <div className="text-center mb-10">
-              <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-                <span className="w-8 h-px bg-accent-orange opacity-60" />
+              <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+                <span className="w-8 h-px bg-accent-orange opacity-50" />
                 Why Choose Me
-                <span className="w-8 h-px bg-accent-orange opacity-60" />
+                <span className="w-8 h-px bg-accent-orange opacity-50" />
               </p>
               <h2
-                className="font-heading font-light text-ink mb-3 leading-none"
-                style={{ fontSize: "clamp(2rem,4vw,3rem)" }}
+                className="font-heading font-light text-ink mb-4 leading-[1.05]"
+                style={{ fontSize: "clamp(2.2rem,5vw,3.6rem)" }}
               >
-                Why Hire Me?
+                Why Hire <em className="italic text-warm-brown">Me?</em>
               </h2>
               <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
                 A unique combination of technical expertise, teaching experience, and proven problem-solving abilities.
@@ -207,8 +203,8 @@ export default function HireMe() {
             variant="detailed"
             showFeaturedOnly={false}
             limit={5}
-            title="Work Experience"
-            subtitle="My professional journey from Full-Stack Developer to Senior CS Instructor at Phitron, with a strong focus on mentoring and technical excellence."
+            title={<>Work <em className="italic text-warm-brown">Experience</em></>}
+            subtitle="My professional journey as a Software Engineer, with a strong focus on backend systems, system design, and technical excellence."
             className="bg-transparent py-0"
           />
 
@@ -218,7 +214,7 @@ export default function HireMe() {
             variant="detailed"
             showFeaturedOnly={false}
             limit={5}
-            title="Education"
+            title={<><em className="italic text-warm-brown">Education</em></>}
             subtitle="Strong academic foundation in Computer Science with ongoing advanced studies and practical application."
             className="bg-transparent py-0"
           />
@@ -226,16 +222,16 @@ export default function HireMe() {
           {/* ── FAQ ── */}
           <div>
             <div className="text-center mb-10">
-              <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-                <span className="w-8 h-px bg-accent-orange opacity-60" />
+              <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+                <span className="w-8 h-px bg-accent-orange opacity-50" />
                 Common Questions
-                <span className="w-8 h-px bg-accent-orange opacity-60" />
+                <span className="w-8 h-px bg-accent-orange opacity-50" />
               </p>
               <h2
-                className="font-heading font-light text-ink mb-3 leading-none"
-                style={{ fontSize: "clamp(2rem,4vw,3rem)" }}
+                className="font-heading font-light text-ink mb-4 leading-[1.05]"
+                style={{ fontSize: "clamp(2.2rem,5vw,3.6rem)" }}
               >
-                Frequently Asked Questions
+                Frequently Asked <em className="italic text-warm-brown">Questions</em>
               </h2>
               <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light text-justify">
                 Quick answers about working together and my availability.
@@ -269,16 +265,16 @@ export default function HireMe() {
             <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-orange rounded-l-[0.9rem]" />
 
             <div className="text-center mb-8">
-              <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-                <span className="w-8 h-px bg-accent-orange opacity-60" />
+              <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+                <span className="w-8 h-px bg-accent-orange opacity-50" />
                 Get in Touch
-                <span className="w-8 h-px bg-accent-orange opacity-60" />
+                <span className="w-8 h-px bg-accent-orange opacity-50" />
               </p>
               <h2
-                className="font-heading font-light text-ink mb-3 leading-none"
-                style={{ fontSize: "clamp(1.8rem,3vw,2.4rem)" }}
+                className="font-heading font-light text-ink mb-4 leading-[1.05]"
+                style={{ fontSize: "clamp(2.2rem,5vw,3.6rem)" }}
               >
-                Interested in Hiring Me?
+                Interested in Hiring <em className="italic text-warm-brown">Me?</em>
               </h2>
               <p className="font-body text-[0.9rem] text-text-muted max-w-[50ch] mx-auto leading-[1.7] font-light text-justify">
                 Ready to discuss opportunities? Send me a message with details about the role and I&apos;ll get back to you promptly.

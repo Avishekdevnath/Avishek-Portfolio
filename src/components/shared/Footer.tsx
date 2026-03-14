@@ -18,7 +18,7 @@ export default function Footer() {
   ];
 
   const title       = settings?.websiteSettings?.title || 'Avishek Devnath';
-  const description = settings?.websiteSettings?.metaDescription || 'Backend Engineer · System Design';
+  const description = settings?.websiteSettings?.metaDescription || 'Software Engineer · Backend & Systems';
   const email       = settings?.contactInfo?.email;
 
   return (

@@ -14,6 +14,9 @@ const SOCIAL_PLATFORMS = [
   { platform: 'youtube', icon: Youtube, label: 'YouTube', placeholder: 'https://youtube.com/@username' },
 ] as const;
 
+const inputCls = 'w-full bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.875rem] text-[#2a2118] focus:outline-none focus:border-[#d4622a] focus:ring-1 focus:ring-[#d4622a]/20';
+const labelCls = 'block text-[0.75rem] font-mono tracking-[0.08em] uppercase text-[#8a7a6a] mb-1.5';
+
 export default function SettingsPage() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -44,28 +47,19 @@ export default function SettingsPage() {
     }
   });
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
+  useEffect(() => { fetchSettings(); }, []);
 
   const fetchSettings = async () => {
     try {
       const response = await fetch('/api/settings');
       const data = await response.json();
-      
       if (data.success) {
         setSettings(data.data);
       } else {
         throw new Error(data.message);
       }
     } catch (error) {
-      console.error('Failed to fetch settings:', error);
-      showToast({
-        title: 'Error',
-        description: 'Failed to load settings. Please try again.',
-        status: 'error',
-        duration: 5000
-      });
+      showToast({ title: 'Error', description: 'Failed to load settings. Please try again.', status: 'error', duration: 5000 });
     } finally {
       setLoading(false);
     }
@@ -76,21 +70,11 @@ export default function SettingsPage() {
     section?: 'contactInfo' | 'websiteSettings' | 'outreachSettings'
   ) => {
     const { name, value, type } = e.target;
-    
     setSettings(prev => {
       if (section) {
-        return {
-          ...prev,
-          [section]: {
-            ...(prev[section] as object || {}),
-            [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-          }
-        };
+        return { ...prev, [section]: { ...(prev[section] as object || {}), [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value } };
       }
-      return {
-        ...prev,
-        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-      };
+      return { ...prev, [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value };
     });
   };
 
@@ -98,16 +82,12 @@ export default function SettingsPage() {
     setSettings(prev => {
       const existingLinks = prev.socialLinks || [];
       const linkIndex = existingLinks.findIndex(link => link.platform === platform);
-      
       if (linkIndex >= 0) {
         const newLinks = [...existingLinks];
         newLinks[linkIndex] = { ...newLinks[linkIndex], url };
         return { ...prev, socialLinks: newLinks };
       } else {
-        return {
-          ...prev,
-          socialLinks: [...existingLinks, { platform, url } as ISocialLink]
-        };
+        return { ...prev, socialLinks: [...existingLinks, { platform, url } as ISocialLink] };
       }
     });
   };
@@ -115,61 +95,28 @@ export default function SettingsPage() {
   const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validate file type
     if (!file.type.startsWith('image/')) {
-      showToast({
-        title: 'Error',
-        description: 'Please select an image file',
-        status: 'error',
-        duration: 3000
-      });
+      showToast({ title: 'Error', description: 'Please select an image file', status: 'error', duration: 3000 });
       return;
     }
-
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      showToast({
-        title: 'Error',
-        description: 'Image size must be less than 5MB',
-        status: 'error',
-        duration: 3000
-      });
+      showToast({ title: 'Error', description: 'Image size must be less than 5MB', status: 'error', duration: 3000 });
       return;
     }
-
     setUploading(true);
-
     try {
       const formData = new FormData();
       formData.append('image', file);
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
+      const response = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await response.json();
-
       if (data.success) {
         setSettings(prev => ({ ...prev, profileImage: data.url }));
-        showToast({
-          title: 'Success',
-          description: 'Profile picture uploaded successfully',
-          status: 'success',
-          duration: 3000
-        });
+        showToast({ title: 'Success', description: 'Profile picture uploaded successfully', status: 'success', duration: 3000 });
       } else {
         throw new Error(data.error || 'Upload failed');
       }
     } catch (error) {
-      console.error('Failed to upload image:', error);
-      showToast({
-        title: 'Error',
-        description: 'Failed to upload image. Please try again.',
-        status: 'error',
-        duration: 5000
-      });
+      showToast({ title: 'Error', description: 'Failed to upload image. Please try again.', status: 'error', duration: 5000 });
     } finally {
       setUploading(false);
     }
@@ -178,36 +125,20 @@ export default function SettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-
     try {
       const response = await fetch('/api/settings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       });
-
       const data = await response.json();
-
       if (data.success) {
-        showToast({
-          title: 'Success',
-          description: 'Settings saved successfully',
-          status: 'success',
-          duration: 3000
-        });
+        showToast({ title: 'Success', description: 'Settings saved successfully', status: 'success', duration: 3000 });
       } else {
         throw new Error(data.message);
       }
     } catch (error) {
-      console.error('Failed to save settings:', error);
-      showToast({
-        title: 'Error',
-        description: 'Failed to save settings. Please try again.',
-        status: 'error',
-        duration: 5000
-      });
+      showToast({ title: 'Error', description: 'Failed to save settings. Please try again.', status: 'error', duration: 5000 });
     } finally {
       setSaving(false);
     }
@@ -216,374 +147,190 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <div className="w-6 h-6 border-2 border-[#e8e3db] border-t-[#d4622a] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your profile and website settings</p>
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-5 max-w-3xl">
 
       {/* Profile Settings */}
-      <div className="bg-white rounded-xl shadow-sm mb-6">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Profile Settings</h2>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                {settings.profileImage ? (
-                  <img
-                    src={settings.profileImage}
-                    alt={settings.fullName}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <User size={40} className="text-gray-400" />
-                )}
-              </div>
-              <div>
-                <input
-                  type="file"
-                  id="profileImage"
-                  accept="image/*"
-                  onChange={handleProfileImageUpload}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="profileImage"
-                  className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {uploading ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Uploading...
-                    </span>
-                  ) : (
-                    'Change Photo'
-                  )}
-                </label>
-                <p className="text-sm text-gray-500 mt-2">
-                  Recommended: Square JPG, PNG, or GIF, at least 500px (Max 5MB)
-                </p>
-              </div>
+      <div className="bg-white border border-[#e8e3db] rounded-xl shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#e8e3db]">
+          <p className="text-[0.875rem] font-semibold text-[#2a2118]">Profile</p>
+        </div>
+        <div className="p-5 space-y-5">
+          {/* Avatar */}
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-[#f3f1ee] border border-[#e8e3db] flex items-center justify-center overflow-hidden flex-shrink-0">
+              {settings.profileImage ? (
+                <img src={settings.profileImage} alt={settings.fullName} className="w-full h-full object-cover" />
+              ) : (
+                <User size={28} className="text-[#8a7a6a]" />
+              )}
             </div>
+            <div>
+              <input type="file" id="profileImage" accept="image/*" onChange={handleProfileImageUpload} className="hidden" />
+              <label
+                htmlFor="profileImage"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#2a2118] text-[#f0ece3] rounded-lg text-[0.82rem] font-medium hover:bg-[#d4622a] transition-colors cursor-pointer"
+              >
+                {uploading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading...</> : 'Change Photo'}
+              </label>
+              <p className="text-[0.72rem] text-[#8a7a6a] mt-1.5">Square JPG/PNG, at least 500px · Max 5MB</p>
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={settings.fullName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={settings.contactInfo?.email}
-                  onChange={(e) => handleInputChange(e, 'contactInfo')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="john@example.com"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={settings.contactInfo?.phone}
-                  onChange={(e) => handleInputChange(e, 'contactInfo')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="+1 (555) 123-4567"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={settings.contactInfo?.location}
-                  onChange={(e) => handleInputChange(e, 'contactInfo')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="City, Country"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Response Time
-                </label>
-                <input
-                  type="text"
-                  name="responseTime"
-                  value={settings.contactInfo?.responseTime}
-                  onChange={(e) => handleInputChange(e, 'contactInfo')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Within 24 hours"
-                  required
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  name="bio"
-                  value={settings.bio}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={4}
-                  placeholder="Write a short bio about yourself..."
-                  required
-                />
-              </div>
+          {/* Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Full Name</label>
+              <input type="text" name="fullName" value={settings.fullName} onChange={handleInputChange} className={inputCls} placeholder="John Doe" required />
+            </div>
+            <div>
+              <label className={labelCls}>Email</label>
+              <input type="email" name="email" value={settings.contactInfo?.email} onChange={(e) => handleInputChange(e, 'contactInfo')} className={inputCls} placeholder="john@example.com" required />
+            </div>
+            <div>
+              <label className={labelCls}>Phone</label>
+              <input type="tel" name="phone" value={settings.contactInfo?.phone} onChange={(e) => handleInputChange(e, 'contactInfo')} className={inputCls} placeholder="+1 (555) 123-4567" required />
+            </div>
+            <div>
+              <label className={labelCls}>Location</label>
+              <input type="text" name="location" value={settings.contactInfo?.location} onChange={(e) => handleInputChange(e, 'contactInfo')} className={inputCls} placeholder="City, Country" required />
+            </div>
+            <div>
+              <label className={labelCls}>Response Time</label>
+              <input type="text" name="responseTime" value={settings.contactInfo?.responseTime} onChange={(e) => handleInputChange(e, 'contactInfo')} className={inputCls} placeholder="Within 24 hours" required />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelCls}>Bio</label>
+              <textarea name="bio" value={settings.bio} onChange={handleInputChange} className={`${inputCls} resize-none`} rows={4} placeholder="Write a short bio about yourself..." required />
             </div>
           </div>
         </div>
       </div>
 
       {/* Social Links */}
-      <div className="bg-white rounded-xl shadow-sm mb-6">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Social Links</h2>
-          <div className="space-y-4">
-            {SOCIAL_PLATFORMS.map((social) => {
-              const Icon = social.icon;
-              const currentLink = settings.socialLinks?.find(
-                link => link.platform === social.platform
-              );
-              
-              return (
-                <div key={social.platform} className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
-                    <Icon size={20} className="text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {social.label}
-                    </label>
-                    <input
-                      type="url"
-                      value={currentLink?.url || ''}
-                      onChange={(e) => handleSocialLinkChange(social.platform, e.target.value)}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder={social.placeholder}
-                    />
-                  </div>
+      <div className="bg-white border border-[#e8e3db] rounded-xl shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#e8e3db]">
+          <p className="text-[0.875rem] font-semibold text-[#2a2118]">Social Links</p>
+        </div>
+        <div className="p-5 space-y-3">
+          {SOCIAL_PLATFORMS.map((social) => {
+            const Icon = social.icon;
+            const currentLink = settings.socialLinks?.find(link => link.platform === social.platform);
+            return (
+              <div key={social.platform} className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[#f3f1ee] flex items-center justify-center flex-shrink-0">
+                  <Icon size={16} className="text-[#6b5c4e]" />
                 </div>
-              );
-            })}
-          </div>
+                <div className="flex-1">
+                  <input
+                    type="url"
+                    value={currentLink?.url || ''}
+                    onChange={(e) => handleSocialLinkChange(social.platform, e.target.value)}
+                    className={inputCls}
+                    placeholder={social.placeholder}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Resume & Portfolio Links */}
-      <div className="bg-white rounded-xl shadow-sm mb-6">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Resume & Portfolio</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Resume URL
-              </label>
-              <input
-                type="text"
-                name="resumeUrl"
-                value={settings.resumeUrl || ''}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="/assets/resume.pdf or https://..."
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Path to your resume file (e.g., /assets/resume.pdf) or external URL
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Portfolio URL
-              </label>
-              <input
-                type="url"
-                name="portfolioUrl"
-                value={settings.portfolioUrl || ''}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="https://yourportfolio.com"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Link to your external portfolio or personal website
-              </p>
-            </div>
+      {/* Resume & Portfolio */}
+      <div className="bg-white border border-[#e8e3db] rounded-xl shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#e8e3db]">
+          <p className="text-[0.875rem] font-semibold text-[#2a2118]">Resume & Portfolio</p>
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <label className={labelCls}>Resume URL</label>
+            <input type="text" name="resumeUrl" value={settings.resumeUrl || ''} onChange={handleInputChange} className={inputCls} placeholder="/assets/resume.pdf or https://..." />
+            <p className="text-[0.72rem] text-[#8a7a6a] mt-1">Path to your resume file (e.g., /assets/resume.pdf) or external URL</p>
+          </div>
+          <div>
+            <label className={labelCls}>Portfolio URL</label>
+            <input type="url" name="portfolioUrl" value={settings.portfolioUrl || ''} onChange={handleInputChange} className={inputCls} placeholder="https://yourportfolio.com" />
           </div>
         </div>
       </div>
 
       {/* Website Settings */}
-      <div className="bg-white rounded-xl shadow-sm mb-6">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Website Settings</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Site Title
-              </label>
-              <input
-                type="text"
-                name="siteTitle"
-                value={settings.websiteSettings?.siteTitle}
-                onChange={(e) => handleInputChange(e, 'websiteSettings')}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Your Portfolio"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Meta Description
-              </label>
-              <textarea
-                name="metaDescription"
-                value={settings.websiteSettings?.metaDescription}
-                onChange={(e) => handleInputChange(e, 'websiteSettings')}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                rows={3}
-                placeholder="A brief description of your portfolio for search engines..."
-                required
-              />
-            </div>
-            <div>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="enableDarkMode"
-                  checked={settings.websiteSettings?.enableDarkMode}
-                  onChange={(e) => handleInputChange(e, 'websiteSettings')}
-                  className="rounded text-blue-500 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Enable dark mode</span>
-              </label>
-            </div>
+      <div className="bg-white border border-[#e8e3db] rounded-xl shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#e8e3db]">
+          <p className="text-[0.875rem] font-semibold text-[#2a2118]">Website Settings</p>
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <label className={labelCls}>Site Title</label>
+            <input type="text" name="siteTitle" value={settings.websiteSettings?.siteTitle} onChange={(e) => handleInputChange(e, 'websiteSettings')} className={inputCls} placeholder="Your Portfolio" required />
           </div>
+          <div>
+            <label className={labelCls}>Meta Description</label>
+            <textarea name="metaDescription" value={settings.websiteSettings?.metaDescription} onChange={(e) => handleInputChange(e, 'websiteSettings')} className={`${inputCls} resize-none`} rows={3} placeholder="A brief description for search engines..." required />
+          </div>
+          <label className="flex items-center gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              name="enableDarkMode"
+              checked={settings.websiteSettings?.enableDarkMode}
+              onChange={(e) => handleInputChange(e, 'websiteSettings')}
+              className="w-4 h-4 rounded"
+              style={{ accentColor: '#d4622a' }}
+            />
+            <span className="text-[0.82rem] text-[#4a3728]">Enable dark mode</span>
+          </label>
         </div>
       </div>
 
       {/* Outreach Settings */}
-      <div className="bg-white rounded-xl shadow-sm mb-6">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Outreach Settings
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Configure default settings for your cold outreach workflow.
-          </p>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Default Tone
-                </label>
-                <select
-                  name="defaultTone"
-                  value={settings.outreachSettings?.defaultTone || 'professional'}
-                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                >
-                  <option value="professional">Professional</option>
-                  <option value="friendly">Friendly</option>
-                </select>
-                <p className="text-sm text-gray-500 mt-1">
-                  Default tone for AI-generated emails
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Default Follow-up Gap (days)
-                </label>
-                <input
-                  type="number"
-                  name="defaultFollowUpGapDays"
-                  value={settings.outreachSettings?.defaultFollowUpGapDays || 7}
-                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  min={1}
-                  max={30}
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Days to wait before following up
-                </p>
-              </div>
+      <div className="bg-white border border-[#e8e3db] rounded-xl shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#e8e3db] flex items-center gap-2">
+          <Settings size={14} className="text-[#8a7a6a]" />
+          <p className="text-[0.875rem] font-semibold text-[#2a2118]">Outreach Settings</p>
+        </div>
+        <div className="p-5 space-y-4">
+          <p className="text-[0.78rem] text-[#8a7a6a]">Configure defaults for your cold outreach workflow.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Default Tone</label>
+              <select name="defaultTone" value={settings.outreachSettings?.defaultTone || 'professional'} onChange={(e) => handleInputChange(e, 'outreachSettings')} className={inputCls}>
+                <option value="professional">Professional</option>
+                <option value="friendly">Friendly</option>
+              </select>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Max Follow-ups
-                </label>
-                <input
-                  type="number"
-                  name="maxFollowUps"
-                  value={settings.outreachSettings?.maxFollowUps || 2}
-                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  min={0}
-                  max={5}
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Maximum follow-ups per email (ethical limit)
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Signature
-                </label>
-                <textarea
-                  name="signatureSnippet"
-                  value={settings.outreachSettings?.signatureSnippet || ''}
-                  onChange={(e) => handleInputChange(e, 'outreachSettings')}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                  placeholder="Best regards,&#10;John Doe&#10;Senior Developer&#10;https://johndoe.com"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Default signature appended to emails
-                </p>
-              </div>
+            <div>
+              <label className={labelCls}>Follow-up Gap (days)</label>
+              <input type="number" name="defaultFollowUpGapDays" value={settings.outreachSettings?.defaultFollowUpGapDays || 7} onChange={(e) => handleInputChange(e, 'outreachSettings')} className={inputCls} min={1} max={30} />
+            </div>
+            <div>
+              <label className={labelCls}>Max Follow-ups</label>
+              <input type="number" name="maxFollowUps" value={settings.outreachSettings?.maxFollowUps || 2} onChange={(e) => handleInputChange(e, 'outreachSettings')} className={inputCls} min={0} max={5} />
+            </div>
+            <div>
+              <label className={labelCls}>Email Signature</label>
+              <textarea name="signatureSnippet" value={settings.outreachSettings?.signatureSnippet || ''} onChange={(e) => handleInputChange(e, 'outreachSettings')} className={`${inputCls} resize-none`} rows={3} placeholder={`Best regards,\nJohn Doe`} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Save Button */}
-      <div className="mt-6 flex justify-end">
+      {/* Save */}
+      <div className="flex justify-end">
         <button
           type="submit"
           disabled={saving}
-          className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="flex items-center gap-2 px-5 py-2 bg-[#2a2118] text-[#f0ece3] rounded-lg text-[0.82rem] font-medium hover:bg-[#d4622a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+          {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
+
     </form>
   );
-} 
+}

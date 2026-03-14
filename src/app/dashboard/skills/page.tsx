@@ -44,10 +44,10 @@ function ProficiencyDots({ value }: { value: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className={`w-1.5 h-1.5 rounded-full ${i < value ? 'bg-blue-400' : 'bg-gray-200'}`}
+          className={`w-1.5 h-1.5 rounded-full ${i < value ? 'bg-[#d4622a]' : 'bg-[#e8e3db]'}`}
         />
       ))}
-      <span className="ml-1 text-xs text-gray-400">{value}/5</span>
+      <span className="ml-1 text-xs text-[#8a7a6a] font-mono">{value}/5</span>
     </div>
   );
 }
@@ -107,27 +107,27 @@ function AddSkillModal({
     if (e.target === backdropRef.current) onClose();
   };
 
-  const inputCls = "mt-1 block w-full text-sm rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all text-gray-800";
-  const labelCls = "block text-xs font-medium text-gray-500";
+  const inputCls = "bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.875rem] text-[#2a2118] focus:outline-none focus:border-[#d4622a] focus:ring-1 focus:ring-[#d4622a]/20 w-full transition-colors";
+  const labelCls = "block text-[0.72rem] font-mono tracking-[0.1em] uppercase text-[#8a7a6a] mb-1.5";
 
   return (
     <div
       ref={backdropRef}
       onClick={handleBackdrop}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     >
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
         {/* Modal header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e3db] shrink-0">
           <div>
-            <h2 className="text-base font-semibold text-gray-800">Add New Skill</h2>
+            <h2 className="text-[0.875rem] font-semibold text-[#2a2118]">Add New Skill</h2>
             {initialCategory && (
-              <p className="text-xs text-gray-400 mt-0.5">in {initialCategory}</p>
+              <p className="text-[0.75rem] text-[#8a7a6a] mt-0.5">in {initialCategory}</p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 text-[#8a7a6a] hover:text-[#2a2118] hover:bg-[#f7f5f1] rounded-lg transition-colors"
           >
             <FiX className="w-4 h-4" />
           </button>
@@ -153,23 +153,34 @@ function AddSkillModal({
           <div>
             <label className={labelCls}>Category *</label>
             {initialCategory ? (
-              <div className="mt-1 flex items-center justify-between h-9 px-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <span className="text-[13px] font-medium text-blue-700">{initialCategory}</span>
-                <span className="text-[10px] font-medium tracking-wide uppercase text-blue-400 bg-blue-100 px-2 py-0.5 rounded-full">locked</span>
+              <div className="flex items-center justify-between h-9 px-3 bg-[#fdf0eb] border border-[#f0c8b0] rounded-lg">
+                <span className="text-[0.8rem] font-medium text-[#4a3728]">{initialCategory}</span>
+                <span className="text-[0.65rem] font-mono tracking-[0.1em] uppercase text-[#d4622a] bg-[#fdf0eb] border border-[#f0c8b0] px-2 py-0.5 rounded-full">locked</span>
               </div>
             ) : (
-              <select name="category" value={form.category} onChange={handleChange} required className={inputCls}>
-                <option value="">Select category</option>
-                {skillCategories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <div className="relative">
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  required
+                  className={`${inputCls} appearance-none pr-8`}
+                >
+                  <option value="">Select category</option>
+                  {skillCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8a7a6a]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             )}
           </div>
 
           {/* Proficiency */}
           <div>
             <label className={labelCls}>
-              Proficiency * &nbsp;
-              <span className="font-semibold text-blue-500">{form.proficiency} / 5</span>
+              Proficiency *&nbsp;
+              <span className="font-semibold text-[#d4622a]">{form.proficiency} / 5</span>
             </label>
             <input
               type="range"
@@ -179,9 +190,10 @@ function AddSkillModal({
               step={1}
               value={form.proficiency}
               onChange={handleChange}
-              className="mt-2 w-full accent-blue-500"
+              className="mt-2 w-full"
+              style={{ accentColor: '#d4622a' }}
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-0.5 px-0.5">
+            <div className="flex justify-between text-[0.625rem] text-[#8a7a6a] mt-0.5 px-0.5 font-mono">
               {['0', '1', '2', '3', '4', '5'].map(n => <span key={n}>{n}</span>)}
             </div>
           </div>
@@ -224,9 +236,10 @@ function AddSkillModal({
                   name="featured"
                   checked={form.featured}
                   onChange={handleChange}
-                  className="w-4 h-4 accent-blue-500 rounded"
+                  className="w-4 h-4 rounded"
+                  style={{ accentColor: '#d4622a' }}
                 />
-                <span className="text-xs font-medium text-gray-500">Featured</span>
+                <span className="text-[0.75rem] font-mono tracking-[0.05em] uppercase text-[#8a7a6a]">Featured</span>
               </label>
             </div>
           </div>
@@ -236,14 +249,14 @@ function AddSkillModal({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#2a2118] text-[#f0ece3] rounded-lg text-[0.82rem] font-medium hover:bg-[#d4622a] transition-colors disabled:opacity-50"
             >
               {loading ? 'Adding...' : 'Add Skill'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 border border-[#ddd5c5] text-[#4a3728] rounded-lg text-[0.82rem] hover:border-[#2a2118] transition-colors"
             >
               Cancel
             </button>
@@ -304,161 +317,154 @@ export default function SkillsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500" />
+      <div className="flex justify-center items-center py-32">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#e8e3db] border-t-[#d4622a]" />
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="space-y-5">
 
-        {/* ── Sticky header ── */}
-        <div className="shrink-0 bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-800">Skills Management</h1>
-              <p className="text-xs text-gray-400 mt-0.5">{totalSkills} skills across {categoryCount} categories</p>
+        {/* ── Header row ── */}
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[0.65rem] font-mono tracking-[0.15em] uppercase text-[#8a7a6a]">
+            {totalSkills} skill{totalSkills !== 1 ? 's' : ''} · {categoryCount} categories
+          </p>
+
+          <div className="flex items-center gap-2">
+            {/* Search — desktop */}
+            <div className="relative hidden sm:block">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#8a7a6a] pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search skills…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="h-9 w-64 pl-8 pr-8 bg-[#faf8f4] border border-[#ddd5c5] rounded-lg text-[0.875rem] text-[#2a2118] placeholder:text-[#8a7a6a] focus:outline-none focus:border-[#d4622a] focus:ring-1 focus:ring-[#d4622a]/20 transition-colors"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8a7a6a] hover:text-[#2a2118] transition-colors"
+                >
+                  <FiX className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              {/* Search — desktop: plain input, mobile: icon toggle */}
-              <div className="relative">
-                {/* Desktop */}
-                <div className="hidden sm:block">
+
+            {/* Search — mobile */}
+            <div className="sm:hidden flex items-center">
+              {mobileSearch ? (
+                <div className="flex items-center gap-1">
                   <input
+                    autoFocus
                     type="text"
-                    placeholder="Search skills…"
+                    placeholder="Search…"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    className="h-9 w-72 pl-4 pr-8 text-[13px] font-medium text-gray-800 placeholder:text-gray-400 placeholder:font-normal bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-400 focus:bg-white transition-all duration-200"
+                    className="h-9 w-40 px-3 bg-[#faf8f4] border border-[#ddd5c5] rounded-lg text-[0.875rem] text-[#2a2118] placeholder:text-[#8a7a6a] focus:outline-none focus:border-[#d4622a] focus:ring-1 focus:ring-[#d4622a]/20 transition-colors"
                   />
-                  {search && (
-                    <button
-                      onClick={() => setSearch('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-                    >
-                      <FiX className="w-3 h-3 text-gray-500" />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => { setMobileSearch(false); setSearch(''); }}
+                    className="p-1.5 text-[#8a7a6a] hover:text-[#2a2118] hover:bg-[#f7f5f1] rounded-lg transition-colors"
+                  >
+                    <FiX className="w-4 h-4" />
+                  </button>
                 </div>
-                {/* Mobile */}
-                <div className="sm:hidden flex items-center">
-                  {mobileSearch ? (
-                    <div className="flex items-center gap-1">
-                      <input
-                        autoFocus
-                        type="text"
-                        placeholder="Search…"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        className="h-9 w-44 pl-3 pr-3 text-[13px] font-medium text-gray-800 placeholder:text-gray-400 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-400 focus:bg-white transition-all duration-200"
-                      />
-                      <button
-                        onClick={() => { setMobileSearch(false); setSearch(''); }}
-                        className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                      >
-                        <FiX className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setMobileSearch(true)}
-                      className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                    >
-                      <FiSearch className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="w-px h-5 bg-gray-200" />
-
-              {/* Add button */}
-              <button
-                onClick={() => setModalCategory('')}
-                className="h-9 flex items-center gap-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-medium pl-3.5 pr-4 rounded-lg transition-colors duration-150 shadow-sm shadow-blue-500/30 select-none"
-              >
-                <span className="flex items-center justify-center w-4 h-4 bg-white/20 rounded">
-                  <FiPlus className="w-3 h-3" />
-                </span>
-                Add Skill
-              </button>
+              ) : (
+                <button
+                  onClick={() => setMobileSearch(true)}
+                  className="p-2 border border-[#ddd5c5] bg-[#faf8f4] text-[#8a7a6a] hover:text-[#2a2118] hover:border-[#2a2118] rounded-lg transition-colors"
+                >
+                  <FiSearch className="w-4 h-4" />
+                </button>
+              )}
             </div>
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-[#e8e3db]" />
+
+            {/* Add Skill button */}
+            <button
+              onClick={() => setModalCategory('')}
+              className="flex items-center gap-2 px-4 py-2 bg-[#2a2118] text-[#f0ece3] rounded-lg text-[0.82rem] font-medium hover:bg-[#d4622a] transition-colors"
+            >
+              <FiPlus className="w-3.5 h-3.5" />
+              Add Skill
+            </button>
           </div>
         </div>
 
-        {/* ── Scrollable content ── */}
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          {Object.keys(filteredSkills).length === 0 ? (
-            <div className="text-center py-20 text-gray-400 text-sm">No skills found.</div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {Object.entries(filteredSkills).map(([category, categorySkills]) => (
-                <div key={category} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        {/* ── Category cards ── */}
+        {Object.keys(filteredSkills).length === 0 ? (
+          <div className="text-center py-20 text-[#8a7a6a] text-[0.875rem]">No skills found.</div>
+        ) : (
+          <div className="flex flex-col gap-5">
+            {Object.entries(filteredSkills).map(([category, categorySkills]) => (
+              <div key={category} className="bg-white border border-[#e8e3db] rounded-xl shadow-sm overflow-hidden">
 
-                  {/* Category header */}
-                  <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-100">
-                    <div className="flex items-center gap-2.5">
-                      <h2 className="text-sm font-semibold text-gray-700">{category}</h2>
-                      <span className="text-xs text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-full">
-                        {categorySkills.length} {categorySkills.length === 1 ? 'skill' : 'skills'}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setModalCategory(category)}
-                      className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-colors border border-blue-100"
-                      title={`Add skill to ${category}`}
-                    >
-                      <FiPlus className="w-3.5 h-3.5" />
-                      Add
-                    </button>
+                {/* Category header */}
+                <div className="flex items-center justify-between px-5 py-3 bg-[#f7f5f1] border-b border-[#e8e3db]">
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-[0.875rem] font-semibold text-[#2a2118]">{category}</h2>
+                    <span className="text-[0.7rem] font-mono text-[#8a7a6a] bg-white border border-[#e8e3db] px-2 py-0.5 rounded-full">
+                      {categorySkills.length} {categorySkills.length === 1 ? 'skill' : 'skills'}
+                    </span>
                   </div>
-
-                  {/* Table */}
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                        <th className="px-5 py-2.5 text-left font-medium">Name</th>
-                        <th className="px-5 py-2.5 text-left font-medium">Proficiency</th>
-                        <th className="px-5 py-2.5 text-left font-medium">Order</th>
-                        <th className="px-5 py-2.5 text-right font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {categorySkills.map((skill) => (
-                        <tr key={skill._id} className="hover:bg-gray-50/60 transition-colors group">
-                          <td className="px-5 py-3 font-medium text-gray-800">{skill.name}</td>
-                          <td className="px-5 py-3">
-                            <ProficiencyDots value={skill.proficiency ?? 0} />
-                          </td>
-                          <td className="px-5 py-3 text-gray-400 text-xs">{skill.order}</td>
-                          <td className="px-5 py-3">
-                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Link
-                                href={`/dashboard/skills/edit/${skill._id}`}
-                                className="p-1.5 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
-                              >
-                                <FiEdit2 className="w-4 h-4" />
-                              </Link>
-                              <button
-                                onClick={() => handleDelete(skill._id)}
-                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                              >
-                                <FiTrash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <button
+                    onClick={() => setModalCategory(category)}
+                    className="flex items-center gap-1 px-2.5 py-1 text-[0.72rem] border border-[#ddd5c5] text-[#4a3728] rounded-lg hover:border-[#d4622a] hover:text-[#d4622a] transition-colors"
+                    title={`Add skill to ${category}`}
+                  >
+                    <FiPlus className="w-3 h-3" />
+                    Add to {category.split(' ')[0]}
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+
+                {/* Table */}
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="bg-[#f7f5f1] text-[0.65rem] font-mono tracking-[0.12em] uppercase text-[#8a7a6a] px-4 py-2.5 font-medium text-left">Name</th>
+                      <th className="bg-[#f7f5f1] text-[0.65rem] font-mono tracking-[0.12em] uppercase text-[#8a7a6a] px-4 py-2.5 font-medium text-left">Proficiency</th>
+                      <th className="bg-[#f7f5f1] text-[0.65rem] font-mono tracking-[0.12em] uppercase text-[#8a7a6a] px-4 py-2.5 font-medium text-left">Order</th>
+                      <th className="bg-[#f7f5f1] text-[0.65rem] font-mono tracking-[0.12em] uppercase text-[#8a7a6a] px-4 py-2.5 font-medium text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categorySkills.map((skill) => (
+                      <tr key={skill._id} className="border-b border-[#e8e3db] hover:bg-[#faf8f4] transition-colors group">
+                        <td className="px-4 py-3 text-[0.875rem] text-[#2a2118] font-medium">{skill.name}</td>
+                        <td className="px-4 py-3">
+                          <ProficiencyDots value={skill.proficiency ?? 0} />
+                        </td>
+                        <td className="px-4 py-3 text-[0.875rem] text-[#8a7a6a] font-mono">{skill.order}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end gap-1">
+                            <Link
+                              href={`/dashboard/skills/edit/${skill._id}`}
+                              className="p-1.5 text-[#8a7a6a] hover:text-[#2a2118] hover:bg-[#f7f5f1] rounded-lg transition-colors"
+                            >
+                              <FiEdit2 className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(skill._id)}
+                              className="p-1.5 text-[#8a7a6a] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Modal ── */}

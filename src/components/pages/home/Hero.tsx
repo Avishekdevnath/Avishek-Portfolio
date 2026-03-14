@@ -89,7 +89,7 @@ export default function Hero() {
 
           {/* ── LEFT: PHOTO ── */}
           <div className="flex flex-col items-center gap-0 order-first md:order-none">
-            <div className={styles.photoRing}>
+            <div className={`${styles.photoRing} mx-auto`}>
               <div className={styles.photoCircle}>
                 <Image
                   src={profileImage}
@@ -124,7 +124,7 @@ export default function Hero() {
 
             <p className={`${styles.fadeUp3} font-body text-[clamp(.9rem,1.8vw,1.05rem)] font-medium tracking-[.01em] text-deep-brown mb-5 flex items-center gap-2.5 justify-center md:justify-start`}>
               <span className="w-[5px] h-[5px] rounded-full bg-accent-orange flex-shrink-0" />
-              Backend Engineer&ensp;·&ensp;System Design Ownership
+              Software Engineer&ensp;·&ensp;Backend & Systems
             </p>
 
             <p className={`${styles.fadeUp4} text-[.9rem] leading-[1.8] text-warm-brown font-light max-w-[46ch] mb-6 mx-auto md:mx-0`}>

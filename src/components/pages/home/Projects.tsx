@@ -80,18 +80,18 @@ export default function Projects() {
 
         {/* ── Section header ── */}
         <div className="text-center mb-12">
-          <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
-            <span className="w-8 h-px bg-accent-orange opacity-60" />
+          <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+            <span className="w-8 h-px bg-accent-orange opacity-50" />
             Shipped &amp; Maintained
-            <span className="w-8 h-px bg-accent-orange opacity-60" />
+            <span className="w-8 h-px bg-accent-orange opacity-50" />
           </p>
           <h2
-            className="font-heading font-light text-ink mb-3 leading-none"
-            style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
+            className="font-heading font-light text-ink leading-[1.05] mb-4"
+            style={{ fontSize: 'clamp(2.2rem,5vw,3.6rem)' }}
           >
-            Featured Projects
+            Featured <em className="italic text-warm-brown">Projects</em>
           </h2>
-          <p className="font-body text-[0.9rem] text-text-muted max-w-[55ch] mx-auto leading-[1.7] font-light">
+          <p className="text-[0.9rem] text-text-muted max-w-[54ch] mx-auto leading-[1.75] font-light">
             Selected systems where I owned backend architecture, data lifecycle, and reliability.
           </p>
         </div>

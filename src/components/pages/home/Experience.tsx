@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import LoadingScreen from "@/components/shared/LoadingScreen";
-import { Code, Palette, Server, Brain, FileText, Laptop, Briefcase } from "lucide-react";
+import { Code, Palette, Server, Brain, FileText, Laptop } from "lucide-react";
 import { SiMicrosoftoffice, SiGoogle, SiNotion, SiTrello, SiCanva } from "react-icons/si";
 import "../../../styles/skills.css";
 
@@ -23,27 +23,30 @@ interface ApiResponse {
   error?: string;
 }
 
-// Category icons mapping with improved icons
+const ACCENT_COLORS = ["bg-accent-orange", "bg-accent-teal", "bg-accent-blue", "bg-[#c4841a]"];
+const ICON_BG = [
+  "bg-accent-orange/10 text-accent-orange",
+  "bg-accent-teal/10 text-accent-teal",
+  "bg-accent-blue/10 text-accent-blue",
+  "bg-[rgba(196,132,26,0.10)] text-[#c4841a]",
+];
+
+// Category icons mapping
 const CategoryIcons: Record<string, JSX.Element> = {
-  "Frontend Development": <Palette className="text-blue-500" size={32} />,
-  "Backend Development": <Server className="text-emerald-500" size={32} />,
-  "AI & Machine Learning": <Brain className="text-purple-500" size={32} />,
-  "Graphics & Design": <Laptop className="text-pink-500" size={32} />,
-  "Office & Productivity": <FileText className="text-amber-500" size={32} />,
+  "Frontend Development": <Palette className="w-5 h-5" />,
+  "Backend Development": <Server className="w-5 h-5" />,
+  "AI & Machine Learning": <Brain className="w-5 h-5" />,
+  "Graphics & Design": <Laptop className="w-5 h-5" />,
+  "Office & Productivity": <FileText className="w-5 h-5" />,
 };
 
 // Skill-specific icons mapping
 const SkillIcons: Record<string, JSX.Element> = {
-  "Microsoft Office": <SiMicrosoftoffice className="text-blue-600" size={24} />,
-  "Google Workspace": <SiGoogle className="text-green-600" size={24} />,
-  "Notion": <SiNotion className="text-gray-800" size={24} />,
-  "Trello": <SiTrello className="text-blue-500" size={24} />,
-  "Canva": <SiCanva className="text-blue-400" size={24} />,
-};
-
-// Function to format category name for display
-const formatCategoryName = (category: string): string => {
-  return category;  // Categories are already properly formatted
+  "Microsoft Office": <SiMicrosoftoffice className="w-4 h-4" />,
+  "Google Workspace": <SiGoogle className="w-4 h-4" />,
+  "Notion": <SiNotion className="w-4 h-4" />,
+  "Trello": <SiTrello className="w-4 h-4" />,
+  "Canva": <SiCanva className="w-4 h-4" />,
 };
 
 export default function Experience() {
@@ -56,22 +59,20 @@ export default function Experience() {
     const fetchSkills = async () => {
       try {
         setLoading(true);
-        
-        const skillsResponse = await fetch('/api/skills');
+
+        const skillsResponse = await fetch("/api/skills");
         if (!skillsResponse.ok) {
-          throw new Error('Failed to fetch skills');
+          throw new Error("Failed to fetch skills");
         }
-        const skillsData = await skillsResponse.json() as ApiResponse;
+        const skillsData = (await skillsResponse.json()) as ApiResponse;
         if (!skillsData.success) {
-          throw new Error(skillsData.error || 'Failed to fetch skills');
+          throw new Error(skillsData.error || "Failed to fetch skills");
         }
         setSkillsByCategory(skillsData.data);
-        // Trigger animations after data is loaded
         setTimeout(() => setAnimate(true), 100);
-
       } catch (error) {
-        console.error('Error fetching skills:', error);
-        setError(error instanceof Error ? error.message : 'Failed to fetch skills');
+        console.error("Error fetching skills:", error);
+        setError(error instanceof Error ? error.message : "Failed to fetch skills");
       } finally {
         setLoading(false);
       }
@@ -86,83 +87,95 @@ export default function Experience() {
   const categoryEntries = Object.entries(skillsByCategory);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-gradient-to-br from-stone-50 to-orange-50 font-ui">
+    <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4 bg-cream font-body">
       {/* Header Section */}
-      <div className="text-center mb-12 transform transition-all duration-500 ease-out">
-        <h4 className="text-caption text-gray-500 mb-3 tracking-wider uppercase">Technical Expertise</h4>
-        <h2 className="text-h3 md:text-h2 weight-bold text-gray-900 mb-4">
-          Professional Skills
+      <div className="text-center mb-12">
+        <p className="font-mono text-[0.68rem] tracking-[0.25em] uppercase text-accent-orange mb-3 flex items-center justify-center gap-3">
+          <span className="w-8 h-px bg-accent-orange opacity-50" />
+          Technical Expertise
+          <span className="w-8 h-px bg-accent-orange opacity-50" />
+        </p>
+        <h2
+          className="font-heading font-light text-ink leading-[1.05] mb-4"
+          style={{ fontSize: "clamp(2.2rem,5vw,3.6rem)" }}
+        >
+          Professional <em className="italic text-warm-brown">Skills</em>
         </h2>
-        <p className="text-body-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          A clean, focused snapshot of the tools and domains I work with across backend, frontend, and product delivery.
+        <p className="text-[0.9rem] text-text-muted max-w-[54ch] mx-auto leading-[1.75] font-light">
+          A clean, focused snapshot of the tools and domains I work with across
+          backend, frontend, and product delivery.
         </p>
       </div>
 
       {/* Skills Grid */}
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="w-full max-w-[1100px] grid grid-cols-1 md:grid-cols-2 gap-5">
         {categoryEntries.map(([category, skills], index) => (
           <div
             key={category}
-            className={`bg-gradient-to-b from-gray-50 to-white p-6 rounded-2xl border border-gray-300 shadow-inner transition-all duration-300 transform ${
-              animate ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            className={`relative bg-off-white border border-cream-deeper rounded-[0.9rem] p-6 overflow-hidden transition-all duration-300 hover:border-sand hover:shadow-lg ${
+              animate ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
             }`}
-            style={{ 
-              transitionDelay: `${index * 80}ms`,
-              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1)'
-            }}
+            style={{ transitionDelay: `${index * 80}ms` }}
           >
+            {/* Left accent bar */}
+            <div
+              className={`absolute left-0 top-0 bottom-0 w-[3px] ${ACCENT_COLORS[index % ACCENT_COLORS.length]} rounded-l-[0.9rem]`}
+            />
+
             {/* Category Header */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-white border border-gray-200 shadow-sm">
-                  {CategoryIcons[category] || <Code className="text-gray-500" size={22} />}
+                <div
+                  className={`w-9 h-9 rounded-lg ${ICON_BG[index % ICON_BG.length]} flex items-center justify-center shrink-0`}
+                >
+                  {CategoryIcons[category] || <Code className="w-5 h-5" />}
                 </div>
                 <div>
-                  <h3 className="text-h5 weight-semibold text-gray-900">
-                    {formatCategoryName(category)}
+                  <h3 className="font-heading text-[1.1rem] font-semibold text-ink leading-none">
+                    {category}
                   </h3>
-                  <p className="text-caption text-gray-500">
-                    {skills.length} {skills.length === 1 ? 'Skill' : 'Skills'}
+                  <p className="font-mono text-[0.62rem] tracking-wider uppercase text-text-muted mt-0.5">
+                    {skills.length} {skills.length === 1 ? "Skill" : "Skills"}
                   </p>
                 </div>
               </div>
-              <span className="text-xs uppercase tracking-wide text-gray-500 bg-white border border-gray-200 px-2 py-1 rounded-full">
+              <span className="font-mono text-[0.6rem] tracking-wider uppercase text-text-muted bg-cream-dark px-2.5 py-0.5 rounded-full">
                 Focus Area
               </span>
             </div>
 
             {/* Skills List */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {skills
                 .sort((a, b) => a.order - b.order)
                 .map((skill) => (
                   <div
                     key={skill._id}
-                    className="rounded-xl border border-gray-200 bg-white/70 px-4 py-3 hover:bg-white transition-colors"
+                    className="bg-cream border border-cream-deeper rounded-[0.6rem] px-4 py-3 hover:border-sand hover:bg-off-white transition-all duration-200"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-2">
                         {SkillIcons[skill.name] && (
-                          <span className="text-gray-700">
+                          <span className="text-warm-brown">
                             {SkillIcons[skill.name]}
                           </span>
                         )}
-                        <span className="text-gray-800 font-medium text-sm">
+                        <span className="font-body text-[0.88rem] font-medium text-ink">
                           {skill.name}
                         </span>
                       </div>
-                      <span className="text-xs font-semibold text-gray-600">
+                      <span className="font-mono text-[0.6rem] font-semibold text-text-muted">
                         {skill.proficiency}/5
                       </span>
                     </div>
-                    <div className="mt-2 h-1.5 w-full rounded-full bg-gray-200">
+                    <div className="mt-2 h-1 w-full rounded-full bg-cream-deeper overflow-hidden">
                       <div
-                        className="h-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500"
+                        className="h-full rounded-full bg-gradient-to-r from-[#c4841a] to-accent-orange transition-all duration-1000"
                         style={{ width: `${(skill.proficiency / 5) * 100}%` }}
                       />
                     </div>
                     {skill.description && (
-                      <p className="mt-2 text-body-sm text-gray-500 leading-relaxed text-justify">
+                      <p className="mt-2 font-body text-[0.8rem] text-text-muted leading-[1.6] font-light">
                         {skill.description}
                       </p>
                     )}

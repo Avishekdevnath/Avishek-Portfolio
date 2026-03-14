@@ -7,14 +7,14 @@ import Projects from "@/components/pages/home/Projects";
 import Skills from "@/components/pages/home/Skills";
 import Stats from "@/components/pages/home/Stats";
 import Footer from "@/components/shared/Footer";
-import PageReadyOnMount from "@/components/shared/PageReadyOnMount";
+import HomePageReady from "@/components/shared/HomePageReady";
 // import ErrorBoundary from "@/components/ErrorBoundary";
 // ... other imports
 
 export default function Home() {
   return (
     <>
-      <PageReadyOnMount />
+      <HomePageReady />
       <Hero />
         <About />
         <Skills />

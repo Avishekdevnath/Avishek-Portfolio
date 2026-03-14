@@ -71,10 +71,10 @@ export default function About() {
           <div className="flex flex-col gap-5">
 
             {/* Bio Card */}
-            <div className="bg-off-white border border-cream-deeper rounded-[.85rem] p-8 relative overflow-hidden transition-all duration-300 hover:border-sand hover:shadow-[0_8px_28px_rgba(74,55,40,.09)] before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] before:bg-accent-orange before:rounded-l">
+            <div className="bg-off-white border border-cream-deeper rounded-[.85rem] p-5 sm:p-8 relative overflow-hidden transition-all duration-300 hover:border-sand hover:shadow-[0_8px_28px_rgba(74,55,40,.09)] before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] before:bg-accent-orange before:rounded-l">
               <p className="font-mono text-[.62rem] tracking-[.16em] uppercase text-accent-orange mb-2 flex items-center gap-2">
                 <span className="w-4 h-px bg-accent-orange" />
-                Backend Engineer · System Design Ownership
+                Software Engineer · Backend & Systems
               </p>
               <h3 className="font-heading text-[clamp(1.5rem,3vw,2.1rem)] font-semibold text-ink mb-4 leading-[1.1]">
                 Avishek <em className="italic text-warm-brown">Devnath</em>
@@ -88,11 +88,11 @@ export default function About() {
                 grow.
               </p>
               <p className="text-[.88rem] leading-[1.8] text-warm-brown font-light mb-3 text-justify">
-                Alongside engineering work, I serve as a Senior CS Instructor at
-                Phitron, where teaching sharpens my fundamentals and
-                communication. My primary professional focus remains building and
-                operating backend systems with real users, real trade-offs, and
-                long-term ownership.
+                Beyond engineering, I&apos;ve mentored 10,000+ students in DSA and
+                backend development — an experience that sharpens fundamentals
+                and communication. My primary professional focus remains building
+                and operating backend systems with real users, real trade-offs,
+                and long-term ownership.
               </p>
               <p className="text-[.88rem] leading-[1.8] text-warm-brown font-light text-justify">
                 I have worked across internal and public-facing platforms,
@@ -141,9 +141,9 @@ export default function About() {
                 </div>
                 <p className="text-[.88rem] leading-[1.65] text-warm-brown font-light text-justify">
                   <strong className="font-semibold text-ink">3+ years</strong>{" "}
-                  as a practicing backend-focused engineer and Senior CS
-                  Instructor at Phitron, teaching 10,000+ students across DSA,
-                  backend engineering, and system design.
+                  as a backend-focused software engineer, building production
+                  systems and mentoring 10,000+ students across DSA, backend
+                  engineering, and system design.
                 </p>
               </div>
 
@@ -159,7 +159,7 @@ export default function About() {
                 </div>
                 <div className="flex flex-col gap-3">
                   <div>
-                    <div className="text-[.88rem] font-semibold text-ink mb-0.5">
+                    <div className="font-body text-[.88rem] font-semibold text-ink mb-0.5">
                       MSc in CSE{" "}
                       <span className="font-normal text-text-muted">
                         (Ongoing)
@@ -171,7 +171,7 @@ export default function About() {
                   </div>
                   <div className="h-px bg-cream-deeper" />
                   <div>
-                    <div className="text-[.88rem] font-semibold text-ink mb-0.5">
+                    <div className="font-body text-[.88rem] font-semibold text-ink mb-0.5">
                       BSc in CSE{" "}
                       <span className="font-normal text-text-muted">
                         · 2020–2024
@@ -211,7 +211,7 @@ export default function About() {
                   <div className="font-heading text-[2rem] font-light leading-none text-cream-deeper mb-2">
                     {p.num}
                   </div>
-                  <div className="text-[.88rem] font-semibold text-ink mb-1">
+                  <div className="font-heading text-[.88rem] font-semibold text-ink mb-1">
                     {p.title}
                   </div>
                   <div className="text-[.78rem] text-text-muted leading-[1.55] font-light text-justify">

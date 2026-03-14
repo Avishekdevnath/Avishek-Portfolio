@@ -31,8 +31,8 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'),
-  title: 'Avishek Portfolio',
-  description: 'Welcome to my portfolio website',
+  title: 'Avishek Devnath | Software Engineer',
+  description: 'Software Engineer specializing in backend systems, API design, and system architecture. Portfolio of Avishek Devnath.',
 };
 
 export default function RootLayout({
