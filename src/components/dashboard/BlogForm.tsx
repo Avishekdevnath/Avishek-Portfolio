@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaSave, FaImage, FaTimes, FaEye, FaCode, FaPalette, FaPlus, FaUser, FaSearch } from 'react-icons/fa';
+import { FaSave, FaImage, FaTimes, FaEye, FaCode, FaPalette, FaPlus, FaUser, FaSearch, FaSync } from 'react-icons/fa';
+import { applyTitleToSlugDraft, applyManualSlugEdit, regenerateSlugDraft, createSlugDraft, type SlugMode } from '@/lib/slug-editor';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
@@ -13,6 +14,7 @@ interface BlogFormProps {
     _id?: string;
     title: string;
     slug: string;
+    slugMode?: 'auto' | 'manual';
     excerpt: string;
     content: string;
     coverImage?: string;
@@ -61,6 +63,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
   const [showAuthorFields, setShowAuthorFields] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [authorName, setAuthorName] = useState<string>('');
+  const [slugMode, setSlugMode] = useState<SlugMode>(initialData?.slugMode ?? 'auto');
   
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -151,16 +154,15 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
     }
   }, [authorName, initialData?.author?.name]);
 
-  // Auto-generate slug from title
+  // Auto-generate slug from title when in auto mode
   useEffect(() => {
-    if (mode === 'create' && formData.title) {
-      const slug = formData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      setFormData(prev => ({ ...prev, slug }));
+    if (slugMode === 'auto' && formData.title) {
+      const draft = createSlugDraft(formData.title);
+      const next = applyTitleToSlugDraft(draft, formData.title);
+      setFormData(prev => ({ ...prev, slug: next.slug }));
     }
-  }, [formData.title, mode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.title, slugMode]);
 
   // Calculate reading time
   useEffect(() => {
@@ -353,7 +355,7 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, slugMode }),
       });
 
       const data = await response.json();
@@ -399,6 +401,41 @@ export default function BlogForm({ initialData, mode, onClose }: BlogFormProps) 
         {!formData.title && (
           <p className="mt-1 text-sm text-red-500">Title is required</p>
         )}
+      </div>
+
+      {/* Slug field */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">URL Slug</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={formData.slug}
+            onChange={(e) => {
+              const next = applyManualSlugEdit({ title: formData.title, slug: formData.slug, slugMode }, e.target.value);
+              setSlugMode(next.slugMode);
+              setFormData(prev => ({ ...prev, slug: next.slug }));
+            }}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="auto-generated-from-title"
+          />
+          {slugMode === 'manual' && (
+            <button
+              type="button"
+              title="Regenerate from title"
+              onClick={() => {
+                const next = regenerateSlugDraft({ title: formData.title, slug: formData.slug, slugMode }, formData.title);
+                setSlugMode(next.slugMode);
+                setFormData(prev => ({ ...prev, slug: next.slug }));
+              }}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-1"
+            >
+              <FaSync className="w-3 h-3" /> Regenerate
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          {slugMode === 'manual' ? '🔒 Manual' : '⚡ Auto'} · Preview: <span className="font-mono">/blogs/{formData.slug || '…'}</span>
+        </p>
       </div>
 
       {/* Author Settings */}

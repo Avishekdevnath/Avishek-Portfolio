@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { FiUpload, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
-import { FaSave, FaTimes } from 'react-icons/fa';
+import { FaSave, FaTimes, FaSync } from 'react-icons/fa';
+import { applyTitleToSlugDraft, applyManualSlugEdit, regenerateSlugDraft, createSlugDraft, type SlugMode } from '@/lib/slug-editor';
 import dynamic from 'next/dynamic';
 
 const RichTextEditor = dynamic(() => import('@/components/shared/RichTextEditor'), { ssr: false });
@@ -85,6 +86,8 @@ interface ProjectFormProps {
   initialData?: {
     _id?: string;
     title?: string;
+    slug?: string;
+    slugMode?: 'auto' | 'manual';
     description?: string;
     shortDescription?: string;
     category?: string;
@@ -105,6 +108,8 @@ interface ProjectFormProps {
 export default function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [projectSlug, setProjectSlug] = useState(initialData?.slug || '');
+  const [slugMode, setSlugMode] = useState<SlugMode>(initialData?.slugMode ?? 'auto');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState(initialData?.image || '');
   const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
@@ -129,8 +134,17 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
 
   // Handle form field changes
   const handleChange = useCallback((field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
+    setFormData(prev => {
+      const next = { ...prev, [field]: value };
+      // Auto-update slug when title changes and slug is in auto mode
+      if (field === 'title' && slugMode === 'auto') {
+        const draft = applyTitleToSlugDraft({ title: prev.title, slug: projectSlug, slugMode }, value);
+        setProjectSlug(draft.slug);
+      }
+      return next;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slugMode, projectSlug]);
 
   // Handle array field changes (technologies, repositories, demoUrls)
   const handleArrayFieldChange = useCallback((field: string, index: number, key: string, value: string) => {
@@ -340,6 +354,8 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
       // Prepare data for submission
       const projectData = {
         ...formData,
+        slug: projectSlug || undefined,
+        slugMode,
         technologies: formData.technologies.filter(tech => tech.name.trim() !== ''),
         repositories: formData.repositories.filter(repo => repo.name.trim() !== '' && repo.url.trim() !== ''),
         demoUrls: formData.demoUrls.filter(demo => demo.name.trim() !== '' && demo.url.trim() !== ''),
@@ -424,6 +440,41 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
           placeholder="e.g., E-commerce Platform, AI Chatbot, Portfolio Website"
           required
         />
+      </div>
+
+      {/* Slug field */}
+      <div>
+        <label className="block text-body-sm weight-medium text-gray-700 mb-2">URL Slug</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={projectSlug}
+            onChange={(e) => {
+              const next = applyManualSlugEdit({ title: formData.title, slug: projectSlug, slugMode }, e.target.value);
+              setSlugMode(next.slugMode);
+              setProjectSlug(next.slug);
+            }}
+            className="flex-1 block px-4 py-2.5 text-body-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="auto-generated-from-title"
+          />
+          {slugMode === 'manual' && (
+            <button
+              type="button"
+              title="Regenerate from title"
+              onClick={() => {
+                const next = regenerateSlugDraft({ title: formData.title, slug: projectSlug, slugMode }, formData.title);
+                setSlugMode(next.slugMode);
+                setProjectSlug(next.slug);
+              }}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-1"
+            >
+              <FaSync className="w-3 h-3" /> Regenerate
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          {slugMode === 'manual' ? '🔒 Manual' : '⚡ Auto'} · Preview: <span className="font-mono">/projects/{projectSlug || '…'}</span>
+        </p>
       </div>
 
       {/* Short Description */}

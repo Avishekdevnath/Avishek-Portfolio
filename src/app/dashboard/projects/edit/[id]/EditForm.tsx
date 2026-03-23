@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Project, Technology, Repository, DemoURL } from '@/types/dashboard';
 import { Trash2, Plus } from 'lucide-react';
+import { FaSync } from 'react-icons/fa';
+import { applyManualSlugEdit, regenerateSlugDraft } from '@/lib/slug-editor';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
@@ -326,6 +328,45 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
           placeholder="Enter project title"
           required
         />
+      </div>
+
+      {/* Slug field */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">URL Slug</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={formData.slug || ''}
+            onChange={(e) => {
+              const next = applyManualSlugEdit(
+                { title: formData.title, slug: formData.slug || '', slugMode: formData.slugMode ?? 'auto' },
+                e.target.value
+              );
+              setFormData({ ...formData, slug: next.slug, slugMode: next.slugMode });
+            }}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="auto-generated-from-title"
+          />
+          {formData.slugMode === 'manual' && (
+            <button
+              type="button"
+              title="Regenerate from title"
+              onClick={() => {
+                const next = regenerateSlugDraft(
+                  { title: formData.title, slug: formData.slug || '', slugMode: 'manual' },
+                  formData.title
+                );
+                setFormData({ ...formData, slug: next.slug, slugMode: next.slugMode });
+              }}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-1"
+            >
+              <FaSync className="w-3 h-3" /> Regenerate
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          {formData.slugMode === 'manual' ? '🔒 Manual' : '⚡ Auto'} · Preview: <span className="font-mono">/projects/{formData.slug || '…'}</span>
+        </p>
       </div>
 
       {/* Description */}

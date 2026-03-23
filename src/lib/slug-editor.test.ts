@@ -31,3 +31,17 @@ test('regenerateSlugDraft returns the draft to auto mode', () => {
   assert.equal(next.slug, 'second-title');
   assert.equal(next.slugMode, 'auto');
 });
+
+test('regenerate resets a manual slug back to the title-derived slug', () => {
+  const draft = applyManualSlugEdit(createSlugDraft('My Post'), 'hand-written');
+  const reset = regenerateSlugDraft(draft);
+
+  assert.equal(reset.slug, 'my-post');
+  assert.equal(reset.slugMode, 'auto');
+});
+
+test('manual slug input is normalized before submission', () => {
+  const draft = applyManualSlugEdit(createSlugDraft('My Post'), '  Hello World!!  ');
+  assert.equal(draft.slug, 'hello-world');
+  assert.equal(draft.slugMode, 'manual');
+});
