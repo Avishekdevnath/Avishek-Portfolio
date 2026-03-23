@@ -97,6 +97,7 @@ export async function createCommentNotification(commentData: {
 export async function createLikeNotification(likeData: {
   projectTitle: string;
   projectId: string;
+  projectSlug?: string;
   likeCount: number;
 }) {
   return createNotification({
@@ -106,7 +107,7 @@ export async function createLikeNotification(likeData: {
     priority: 'low',
     relatedId: likeData.projectId,
     relatedType: 'project',
-    actionUrl: `/projects/${likeData.projectId}`,
+    actionUrl: `/projects/${likeData.projectSlug || likeData.projectId}`,
     metadata: {
       projectTitle: likeData.projectTitle,
       likeCount: likeData.likeCount
@@ -363,6 +364,7 @@ export async function createBlogNotification(data: {
 export async function createProjectNotification(data: {
   title: string;
   id: string;
+  slug?: string;
   action: 'created' | 'updated' | 'completed' | 'viewed';
   metadata?: Record<string, any>;
 }) {
@@ -376,7 +378,7 @@ export async function createProjectNotification(data: {
       priority: data.action === 'created' ? 'high' : 'medium',
       relatedType: 'project',
       relatedId: data.id,
-      actionUrl: `/projects/${data.id}`,
+      actionUrl: `/projects/${data.slug || data.id}`,
       metadata: data.metadata
     };
 

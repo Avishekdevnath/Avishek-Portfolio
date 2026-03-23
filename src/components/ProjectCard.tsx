@@ -67,6 +67,7 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   const {
     _id,
+    slug,
     title,
     shortDescription,
     description,
@@ -78,6 +79,8 @@ export default function ProjectCard({
     featured,
     status
   } = project;
+
+  const publicUrl = `/projects/${slug || _id}`;
 
   const mainRepository = repositories[0];
   const mainDemo = demoUrls[0];
@@ -222,7 +225,7 @@ export default function ProjectCard({
           </>
         )}
         <Link
-          href={`/projects/${_id}`}
+          href={publicUrl}
           className="ml-auto inline-flex items-center gap-[0.28rem] font-mono text-[0.63rem] tracking-[0.06em] uppercase text-accent-orange no-underline opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-250"
         >
           View Details <FaArrowRight className="w-[11px] h-[11px]" />

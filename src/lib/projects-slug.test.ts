@@ -46,3 +46,15 @@ test('unknown slug returns missing', async () => {
   const result = await resolvePublishedProjectRoute('totally-unknown', makeDeps());
   assert.equal(result.kind, 'missing');
 });
+
+test('resolved project includes slug for public link construction', async () => {
+  const result = await resolvePublishedProjectRoute('my-project', makeDeps({
+    findPublishedBySlug: async (slug) =>
+      slug === 'my-project' ? { _id: 'abc123', slug: 'my-project', slugHistory: [] } : null,
+  }));
+
+  assert.equal(result.kind, 'match');
+  if (result.kind === 'match') {
+    assert.equal(`/projects/${result.slug}`, '/projects/my-project');
+  }
+});

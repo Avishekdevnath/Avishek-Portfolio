@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { BaseQuery, SortConfig, PaginationOptions } from '@/types/api';
 import { Project as ProjectType } from '@/types/dashboard';
+import { resolveAutoSlug, assertManualSlugAvailable } from '@/lib/slug';
 
 // GET /api/projects - Get all projects with filters and pagination
 export async function GET(request: NextRequest) {
@@ -95,6 +96,22 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
+
+    // Generate slug from title unless a manual one is provided
+    const slugMode: 'auto' | 'manual' = body.slugMode === 'manual' ? 'manual' : 'auto';
+    if (slugMode === 'manual' && body.slug) {
+      body.slug = await assertManualSlugAvailable(
+        body.slug,
+        async (s) => !!(await Project.findOne({ slug: s }))
+      );
+    } else if (body.title) {
+      body.slug = await resolveAutoSlug(
+        body.slug || body.title,
+        async (s) => !!(await Project.findOne({ slug: s }))
+      );
+    }
+    body.slugMode = slugMode;
+    body.slugHistory = [];
 
     const project = new Project(body);
     await project.validate();

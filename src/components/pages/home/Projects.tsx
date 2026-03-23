@@ -143,7 +143,7 @@ export default function Projects() {
 
                     {/* Content */}
                     <div className="pl-6 pr-5 pt-5 pb-5 flex flex-col flex-grow">
-                      <Link href={`/projects/${project._id}`}>
+                      <Link href={`/projects/${project.slug || project._id}`}>
                         <h3 className="font-heading text-[1.12rem] font-semibold text-ink leading-snug mb-2 group-hover:text-accent-orange transition-colors duration-200 line-clamp-2">
                           {project.title}
                         </h3>
@@ -197,7 +197,7 @@ export default function Projects() {
                           </a>
                         )}
                         <Link
-                          href={`/projects/${project._id}`}
+                          href={`/projects/${project.slug || project._id}`}
                           className="ml-auto font-mono text-[0.63rem] tracking-[0.06em] uppercase text-accent-orange hover:text-ink transition-colors duration-200 flex items-center gap-1"
                         >
                           Details →

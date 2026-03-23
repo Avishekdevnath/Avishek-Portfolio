@@ -241,7 +241,7 @@ export default function ProjectsPage() {
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center justify-end gap-1">
-                      <Link href={`/projects/${project._id}`} target="_blank" className="p-1.5 text-[#8a7a6a] hover:text-[#2a2118] hover:bg-[#f3f1ee] rounded-lg transition-colors" title="View"><FaEye size={13} /></Link>
+                      <Link href={`/projects/${project.slug || project._id}`} target="_blank" className="p-1.5 text-[#8a7a6a] hover:text-[#2a2118] hover:bg-[#f3f1ee] rounded-lg transition-colors" title="View"><FaEye size={13} /></Link>
                       <Link href={`/dashboard/projects/edit/${project._id}`} className="p-1.5 text-[#8a7a6a] hover:text-[#2a2118] hover:bg-[#f3f1ee] rounded-lg transition-colors" title="Edit"><FaEdit size={13} /></Link>
                       <button onClick={() => handleDelete(project._id)} className="p-1.5 text-[#8a7a6a] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete"><FaTrash size={13} /></button>
                     </div>

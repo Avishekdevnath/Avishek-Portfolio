@@ -1,13 +1,13 @@
 import ProjectDetails from '@/components/ProjectDetails';
 import PageReadyOnMount from '@/components/shared/PageReadyOnMount';
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { getPublishedProjectById, listProjectIds } from '@/lib/projects';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { resolvePublishedProjectRouteFromDB, listProjectSlugs, getPublishedProjectById } from '@/lib/projects';
 import { getSiteUrl } from '@/lib/url';
 
 interface Props {
   params: {
-    id: string;
+    slug: string;
   };
 }
 
@@ -19,10 +19,8 @@ export const runtime = 'nodejs';
 
 export async function generateStaticParams() {
   try {
-    const projectIds = await listProjectIds(200);
-    return projectIds.map((id) => ({
-      id: String(id),
-    }));
+    const slugs = await listProjectSlugs(200);
+    return slugs.map((slug) => ({ slug }));
   } catch (error) {
     console.warn('Error generating static params for projects:', error);
     return [];
@@ -31,17 +29,17 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    // Validate params.id exists and is a string
-    if (!params?.id || typeof params.id !== 'string') {
+    const resolved = await resolvePublishedProjectRouteFromDB(params.slug);
+
+    if (resolved.kind === 'missing') {
       return {
-        title: 'Project Details',
-        description: 'Project details and information.',
+        title: 'Project Not Found',
+        description: 'The requested project could not be found.',
       };
     }
 
-    // Get project data directly from database (no HTTP calls)
-    const project = await getPublishedProjectById(params.id);
-    
+    const project = await getPublishedProjectById(resolved.project._id);
+
     if (!project) {
       return {
         title: 'Project Not Found',
@@ -52,8 +50,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = `${project.title} – Portfolio`;
     const description = project.shortDescription || project.description || 'Project details and information.';
     const siteUrl = getSiteUrl();
-    
-    // Build OpenGraph image URL
     const ogImage = project.image ? `${siteUrl}${project.image}` : undefined;
 
     return {
@@ -62,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title,
         description,
-        url: `${siteUrl}/projects/${params.id}`,
+        url: `${siteUrl}/projects/${resolved.slug}`,
         type: 'article',
         images: ogImage ? [{ url: ogImage }] : undefined,
       },
@@ -72,9 +68,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         images: ogImage ? [ogImage] : undefined,
       },
+      alternates: {
+        canonical: `${siteUrl}/projects/${resolved.slug}`,
+      },
     };
   } catch (error) {
-    console.warn(`Error generating metadata for project ${params?.id}:`, error);
+    console.warn(`Error generating metadata for project ${params?.slug}:`, error);
     return {
       title: 'Project Details',
       description: 'Project details and information.',
@@ -82,16 +81,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function ProjectPage({ params }: Props) {
-  // Validate params.id exists and is a string
-  if (!params?.id || typeof params.id !== 'string') {
+export default async function ProjectPage({ params }: Props) {
+  const resolved = await resolvePublishedProjectRouteFromDB(params.slug);
+
+  if (resolved.kind === 'missing') {
     notFound();
+  }
+
+  if (resolved.kind === 'redirect') {
+    permanentRedirect(`/projects/${resolved.slug}`);
   }
 
   return (
     <>
       <PageReadyOnMount />
-      <ProjectDetails id={params.id} />
+      <ProjectDetails id={resolved.project._id} />
     </>
   );
 }

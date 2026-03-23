@@ -3,6 +3,7 @@ import { isValidObjectId } from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { deleteImage } from '@/lib/cloudinary';
+import { resolveAutoSlug, assertManualSlugAvailable, buildNextSlugHistory } from '@/lib/slug';
 
 // Helper function to validate MongoDB ObjectId
 const validateId = (id: string) => {
@@ -121,6 +122,28 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         type: demo.type || 'live' // Set default type if not provided
       }));
     }
+
+    // Handle slug changes and history
+    const incomingMode: 'auto' | 'manual' = body.slugMode === 'manual' ? 'manual' : (existingProject.slugMode ?? 'auto');
+    const currentSlug = existingProject.slug;
+
+    if (incomingMode === 'manual' && body.slug && body.slug !== currentSlug) {
+      body.slug = await assertManualSlugAvailable(
+        body.slug,
+        async (s) => !!(await Project.findOne({ slug: s, _id: { $ne: params.id } })),
+        currentSlug
+      );
+    } else if (incomingMode === 'auto' && body.title && body.title !== existingProject.title) {
+      body.slug = await resolveAutoSlug(
+        body.title,
+        async (s) => !!(await Project.findOne({ slug: s, _id: { $ne: params.id } }))
+      );
+    }
+
+    if (body.slug && body.slug !== currentSlug) {
+      body.slugHistory = buildNextSlugHistory(currentSlug, body.slug, existingProject.slugHistory ?? []);
+    }
+    body.slugMode = incomingMode;
 
     // Update project
     const updateData = {

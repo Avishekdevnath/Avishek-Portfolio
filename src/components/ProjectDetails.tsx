@@ -372,7 +372,7 @@ export default async function ProjectDetails({ id }: ProjectDetailsProps) {
                 return (
                   <Link
                     key={p._id}
-                    href={`/projects/${p._id}`}
+                    href={`/projects/${p.slug || p._id}`}
                     className="group/rel bg-cream-dark border border-cream-deeper rounded-[0.75rem] overflow-hidden no-underline text-inherit transition-all duration-300 hover:border-sand hover:shadow-[0_6px_18px_rgba(74,55,40,0.09)] hover:-translate-y-[2px]"
                   >
                     {/* Thumbnail */}
