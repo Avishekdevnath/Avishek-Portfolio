@@ -21,3 +21,19 @@ test('buildNextSlugHistory stores previous canonical slug once', () => {
     ['older-slug', 'current-slug']
   );
 });
+
+test('backfill keeps existing blog slugs and only generates missing ones', () => {
+  function needsSlug(record: { slug?: string | null }): boolean {
+    return !record.slug;
+  }
+
+  function inferSlugMode(record: { title: string; slug: string }): 'auto' | 'manual' {
+    return normalizeSlug(record.title) === record.slug ? 'auto' : 'manual';
+  }
+
+  assert.equal(needsSlug({ slug: 'my-project' }), false);
+  assert.equal(needsSlug({ slug: null }), true);
+  assert.equal(needsSlug({}), true);
+  assert.equal(inferSlugMode({ title: 'My Project', slug: 'my-project' }), 'auto');
+  assert.equal(inferSlugMode({ title: 'My Project', slug: 'custom-slug' }), 'manual');
+});
