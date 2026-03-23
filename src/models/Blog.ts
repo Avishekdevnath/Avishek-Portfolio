@@ -60,6 +60,8 @@ interface IBlog extends Document {
   noIndex: boolean;
   structuredData?: Record<string, unknown>;
   lineSpacing?: string;
+  slugHistory: string[];
+  slugMode: 'auto' | 'manual';
   createdAt: Date;
   updatedAt: Date;
   likes: number;
@@ -175,6 +177,8 @@ const blogSchema = new mongoose.Schema({
   structuredData: { type: mongoose.Schema.Types.Mixed },
   // Restrict to UI-supported options
   lineSpacing: { type: String, enum: ['08', '10', '115', '125', '15', '20'], default: '10' },
+  slugHistory: { type: [String], default: [] },
+  slugMode: { type: String, enum: ['auto', 'manual'], default: 'auto' },
 }, {
   timestamps: true,
 });
