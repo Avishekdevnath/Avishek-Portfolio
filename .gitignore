@@ -43,6 +43,15 @@ next-env.d.ts
 .idea/
 .worktrees/
 
+# AI tooling
+.claude/
+.cursor/
+.copilot/
+.aider*
+.continue/
+.codeium/
+.windsurf/
+
 # Logs
 logs
 *.log
