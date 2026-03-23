@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
 import BlogStats from '@/models/BlogStats';
 import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
+import { resolveAutoSlug, assertManualSlugAvailable } from '@/lib/slug';
 
 interface MongoError {
   code: number;
@@ -22,16 +23,6 @@ interface BlogQuery {
   category?: string;
   tags?: string;
   featured?: boolean;
-}
-
-// Function to generate slug from title
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 // GET /api/blogs - Get all blogs
@@ -195,19 +186,25 @@ export async function POST(request: NextRequest) {
       return sendError(`Missing required fields: ${missingFields.join(', ')}`, 400);
     }
 
-    // Generate initial slug from title
-    let baseSlug = generateSlug(body.title);
-    let slug = baseSlug;
-    let counter = 0;
+    // Resolve slug using shared helpers
+    const slugMode: 'auto' | 'manual' = body.slugMode === 'manual' ? 'manual' : 'auto';
+    let slug: string;
 
-    // Check for existing slugs and append counter if needed
-    while (await Blog.findOne({ slug })) {
-      counter++;
-      slug = `${baseSlug}-${counter}`;
+    if (slugMode === 'manual' && body.slug) {
+      slug = await assertManualSlugAvailable(
+        body.slug,
+        async (s) => !!(await Blog.findOne({ slug: s }))
+      );
+    } else {
+      slug = await resolveAutoSlug(
+        body.slug || body.title,
+        async (s) => !!(await Blog.findOne({ slug: s }))
+      );
     }
 
-    // Add slug to body
     body.slug = slug;
+    body.slugMode = slugMode;
+    body.slugHistory = [];
 
     // Set publishedAt date if status is published
     if (body.status === 'published' && !body.publishedAt) {

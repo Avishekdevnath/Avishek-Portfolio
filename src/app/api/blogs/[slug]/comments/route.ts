@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: { slug: s
   try {
     await connectDB();
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
     if (!blog) {
       return NextResponse.json({
         success: false,

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 export const revalidate = 0;
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { connectDB } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
@@ -77,7 +77,8 @@ function extractTOC(html: string) {
 // Generate metadata for the page
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   await connectDB();
-  const blog = await Blog.findOne({ slug: params.slug });
+  const blog = await Blog.findOne({ slug: params.slug })
+    ?? await Blog.findOne({ slugHistory: params.slug });
 
   if (!blog) {
     return {
@@ -93,7 +94,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       title: blog.metaTitle || blog.title,
       description: blog.metaDescription || blog.excerpt,
       type: 'article',
-      url: `/blogs/${blog.slug}`,
+      url: `/blogs/${blog.slug}`,  // canonical slug, not params.slug
       images: blog.coverImage ? [blog.coverImage] : undefined,
       siteName: 'Avishek Portfolio',
       publishedTime: blog.publishedAt?.toISOString() || blog.createdAt.toISOString(),
@@ -118,9 +119,14 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   await connectDB();
-  const blog: any = await Blog.findOne({ slug: params.slug });
+  let blog: any = await Blog.findOne({ slug: params.slug });
 
   if (!blog) {
+    // Check slug history for a redirect
+    const redirectTarget = await Blog.findOne({ slugHistory: params.slug });
+    if (redirectTarget) {
+      permanentRedirect(`/blogs/${redirectTarget.slug}`);
+    }
     notFound();
   }
 

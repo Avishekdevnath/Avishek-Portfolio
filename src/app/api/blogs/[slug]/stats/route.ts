@@ -61,7 +61,7 @@ export async function GET(
   try {
     await connectDB();
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -109,7 +109,7 @@ export async function POST(
   try {
     await connectDB();
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
     if (!blog) {
       return NextResponse.json({
         success: false,

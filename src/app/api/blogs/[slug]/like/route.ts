@@ -84,7 +84,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
                      request.headers.get('x-real-ip') || 
                      'unknown';
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
     if (!blog) {
       return sendError('Blog not found', 404);
     }

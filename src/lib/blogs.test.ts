@@ -46,3 +46,17 @@ test('auto slug changes append the previous slug to history', async () => {
   const history = buildNextSlugHistory('old-slug', 'new-slug', []);
   assert.deepEqual(history, ['old-slug']);
 });
+
+test('buildNextSlugHistory deduplicates existing history entries', async () => {
+  const { buildNextSlugHistory } = await import('./slug');
+
+  const history = buildNextSlugHistory('current-slug', 'new-slug', ['older-slug', 'current-slug']);
+  assert.deepEqual(history, ['older-slug', 'current-slug']);
+});
+
+test('resolveAutoSlug generates unique slug by suffixing counter', async () => {
+  const { resolveAutoSlug } = await import('./slug');
+  const taken = new Set(['my-blog', 'my-blog-1']);
+  const slug = await resolveAutoSlug('My Blog', async (s) => taken.has(s));
+  assert.equal(slug, 'my-blog-2');
+});

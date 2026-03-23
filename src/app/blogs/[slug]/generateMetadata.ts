@@ -11,7 +11,8 @@ interface BlogPostPageProps {
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   await connectToDatabase();
-  const blog = await Blog.findOne({ slug: params.slug }).lean();
+  const blog = (await Blog.findOne({ slug: params.slug }).lean())
+    ?? (await Blog.findOne({ slugHistory: params.slug }).lean());
 
   if (!blog) {
     return {

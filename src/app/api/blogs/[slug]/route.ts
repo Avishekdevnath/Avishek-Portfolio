@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Blog from '@/models/Blog';
+import { resolveAutoSlug, assertManualSlugAvailable, buildNextSlugHistory } from '@/lib/slug';
+
+async function resolveBlog(slug: string) {
+  const blog = await Blog.findOne({ slug });
+  if (blog) return blog;
+  return Blog.findOne({ slugHistory: slug });
+}
 
 // GET /api/blogs/[slug] - Get a single blog
 export async function GET(
@@ -9,8 +16,8 @@ export async function GET(
 ) {
   try {
     await connectDB();
-    
-    const blog = await Blog.findOne({ slug: params.slug });
+
+    const blog = await resolveBlog(params.slug);
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -37,8 +44,8 @@ export async function PUT(
 ) {
   try {
     await connectDB();
-    
-    const blog = await Blog.findOne({ slug: params.slug });
+
+    const blog = await resolveBlog(params.slug);
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -47,7 +54,7 @@ export async function PUT(
     }
 
     const data = await request.json();
-    
+
     // Normalize lineSpacing to UI-supported values
     if (typeof data.lineSpacing === 'string') {
       const allowed = ['08', '10', '115', '125', '15', '20'];
@@ -56,23 +63,31 @@ export async function PUT(
       }
     }
 
-    // If title is being changed and slug not provided, regenerate unique slug
-    if (data.title && !data.slug) {
-      const baseSlug = data.title
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-      let newSlug = baseSlug;
-      let counter = 0;
-      // Ensure uniqueness
-      while (await Blog.findOne({ slug: newSlug, _id: { $ne: blog._id } })) {
-        counter++;
-        newSlug = `${baseSlug}-${counter}`;
-      }
-      data.slug = newSlug;
+    // Resolve slug using slugMode
+    const incomingMode: 'auto' | 'manual' = data.slugMode === 'manual' ? 'manual' : (blog.slugMode ?? 'auto');
+    const currentSlug = blog.slug;
+
+    if (incomingMode === 'manual' && data.slug && data.slug !== currentSlug) {
+      // Validate manual slug uniqueness
+      data.slug = await assertManualSlugAvailable(
+        data.slug,
+        async (s) => !!(await Blog.findOne({ slug: s, _id: { $ne: blog._id } })),
+        currentSlug
+      );
+    } else if (incomingMode === 'auto' && data.title && data.title !== blog.title) {
+      // Auto-regenerate slug from new title
+      data.slug = await resolveAutoSlug(
+        data.title,
+        async (s) => !!(await Blog.findOne({ slug: s, _id: { $ne: blog._id } }))
+      );
     }
+
+    // Track slug history when canonical slug changes
+    if (data.slug && data.slug !== currentSlug) {
+      data.slugHistory = buildNextSlugHistory(currentSlug, data.slug, blog.slugHistory ?? []);
+    }
+
+    data.slugMode = incomingMode;
 
     // Re-calculate readTime when content updated
     if (data.content) {
@@ -86,7 +101,7 @@ export async function PUT(
     }
 
     const updatedBlog = await Blog.findOneAndUpdate(
-      { slug: params.slug },
+      { _id: blog._id },
       { $set: data },
       { new: true }
     );
@@ -110,8 +125,8 @@ export async function DELETE(
 ) {
   try {
     await connectDB();
-    
-    const blog = await Blog.findOne({ slug: params.slug });
+
+    const blog = await resolveBlog(params.slug);
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -119,7 +134,7 @@ export async function DELETE(
       });
     }
 
-    await Blog.deleteOne({ slug: params.slug });
+    await Blog.deleteOne({ _id: blog._id });
 
     return NextResponse.json({
       success: true,
@@ -140,8 +155,8 @@ export async function PATCH(
 ) {
   try {
     await connectDB();
-    
-    const blog = await Blog.findOne({ slug: params.slug });
+
+    const blog = await resolveBlog(params.slug);
     if (!blog) {
       return NextResponse.json({
         success: false,
