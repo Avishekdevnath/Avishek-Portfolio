@@ -26,6 +26,9 @@ export interface ProjectImage {
 
 export interface Project extends Document {
   title: string;
+  slug: string;
+  slugHistory: string[];
+  slugMode: 'auto' | 'manual';
   description: string;
   shortDescription: string;
   category: string;
@@ -154,6 +157,13 @@ const projectImageSchema = new Schema<ProjectImage>({
 });
 
 const projectSchema = new Schema<Project>({
+  slug: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  slugHistory: { type: [String], default: [] },
+  slugMode: { type: String, enum: ['auto', 'manual'], default: 'auto' },
   title: {
     type: String,
     required: [true, 'Title is required'],
@@ -301,9 +311,9 @@ projectSchema.index({ status: 1, featured: 1 });
 projectSchema.index({ 'technologies.name': 1 });
 projectSchema.index({ order: 1, createdAt: -1 });
 
-// Virtual for project URL
+// Virtual for project URL (slug-based when available, fallback to _id for legacy)
 projectSchema.virtual('url').get(function(this: Project) {
-  return `/projects/${this._id}`;
+  return this.slug ? `/projects/${this.slug}` : `/projects/${this._id}`;
 });
 
 // Pre-save middleware to ensure order is set

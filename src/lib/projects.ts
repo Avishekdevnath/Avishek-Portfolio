@@ -1,6 +1,8 @@
 import connectDB from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { isValidObjectId } from 'mongoose';
+export type { ProjectSlugRecord, ProjectRouteResolverDeps, ProjectRouteResult } from './projects-resolver';
+export { resolvePublishedProjectRoute } from './projects-resolver';
 
 const toIsoString = (value: unknown) => {
   if (!value) return value;
@@ -36,9 +38,51 @@ const serializeProject = (project: any) => {
     })),
     completionDate: toIsoString(project.completionDate),
     createdAt: toIsoString(project.createdAt),
+    slug: project.slug,
+    slugHistory: project.slugHistory ?? [],
+    slugMode: project.slugMode ?? 'auto',
     updatedAt: toIsoString(project.updatedAt)
   };
 };
+
+import { resolvePublishedProjectRoute as _resolve } from './projects-resolver';
+
+/**
+ * DB-wired version of resolvePublishedProjectRoute for use in page handlers.
+ */
+export async function resolvePublishedProjectRouteFromDB(param: string) {
+  await connectDB();
+  return _resolve(param, {
+    findPublishedBySlug: async (slug) =>
+      Project.findOne({ slug, status: 'published' }).lean({ virtuals: false }) as any,
+    findPublishedBySlugHistory: async (slug) =>
+      Project.findOne({ slugHistory: slug, status: 'published' }).lean({ virtuals: false }) as any,
+    findPublishedById: async (id) =>
+      isValidObjectId(id)
+        ? (Project.findOne({ _id: id, status: 'published' }).lean({ virtuals: false }) as any)
+        : null,
+  });
+}
+
+/**
+ * Get list of project slugs for static generation
+ */
+export async function listProjectSlugs(limit = 100) {
+  try {
+    await connectDB();
+
+    const projects = await Project.find(
+      { status: 'published', slug: { $exists: true, $ne: null } },
+      { slug: 1 }
+    )
+      .limit(limit)
+      .lean();
+
+    return projects.map((p: any) => p.slug as string).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
 
 // Type definitions for better type safety
 export interface ProjectQueryOptions {

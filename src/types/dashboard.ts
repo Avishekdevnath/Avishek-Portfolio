@@ -66,6 +66,9 @@ export interface ProjectImage {
 export interface Project {
   _id: string;
   title: string;
+  slug?: string;
+  slugHistory?: string[];
+  slugMode?: 'auto' | 'manual';
   description: string;
   shortDescription: string;
   category: string;
