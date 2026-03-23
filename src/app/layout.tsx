@@ -7,6 +7,7 @@ import { PageReadyProvider } from '@/context/PageReadyContext';
 import MainLayout from '@/components/shared/MainLayout';
 import IntroLoader from '@/components/IntroLoader';
 import NavigationLoader from '@/components/NavigationLoader';
+import { getSiteUrl } from '@/lib/url';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -30,9 +31,44 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'),
+  metadataBase: new URL(getSiteUrl()),
   title: 'Avishek Devnath | Software Engineer',
   description: 'Software Engineer specializing in backend systems, API design, and system architecture. Portfolio of Avishek Devnath.',
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    url: '/',
+    title: 'Avishek Devnath | Software Engineer',
+    description: 'Software Engineer specializing in backend systems, API design, and system architecture. Portfolio of Avishek Devnath.',
+    siteName: 'Avishek Devnath Portfolio',
+    images: [
+      {
+        url: '/assets/home/profile-img.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Avishek Devnath',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Avishek Devnath | Software Engineer',
+    description: 'Software Engineer specializing in backend systems, API design, and system architecture. Portfolio of Avishek Devnath.',
+    images: ['/assets/home/profile-img.jpg'],
+  },
 };
 
 export default function RootLayout({

@@ -13,6 +13,10 @@ export function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL;
   }
+
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return process.env.NEXT_PUBLIC_BASE_URL;
+  }
   
   // Fallback to localhost for development
   return 'http://localhost:3000';
@@ -23,5 +27,10 @@ export function getBaseUrl(): string {
  * @returns Canonical site URL
  */
 export function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL || 'https://avishekdevnath.vercel.app';
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    getBaseUrl();
+
+  return raw.replace(/\/+$/, '');
 }

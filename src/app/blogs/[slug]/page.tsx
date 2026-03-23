@@ -17,6 +17,7 @@ import BlogTOC from '@/components/blog/BlogTOC';
 import Header from '@/components/shared/Header';
 import Footer from '@/components/shared/Footer';
 import PageReadyOnMount from '@/components/shared/PageReadyOnMount';
+import { getSiteUrl } from '@/lib/url';
 
 interface BlogPostPageProps {
   params: {
@@ -170,7 +171,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const shareData = {
     title: blog.title,
     description: blog.excerpt,
-    url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/blogs/${blog.slug}`,
+    url: `${getSiteUrl()}/blogs/${blog.slug}`,
     image: blog.coverImage,
     tags: blog.tags,
     author: blog.author.name,

@@ -1,4 +1,0 @@
-Contact: http://localhost:3000/contact
-Expires: 2027-03-23T23:59:59.000Z
-Preferred-Languages: en
-Canonical: http://localhost:3000/.well-known/security.txt
