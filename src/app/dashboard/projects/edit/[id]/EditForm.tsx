@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Project, Technology, Repository, DemoURL } from '@/types/dashboard';
 import { Trash2, Plus } from 'lucide-react';
 import { FaSync } from 'react-icons/fa';
-import { applyManualSlugEdit, regenerateSlugDraft } from '@/lib/slug-editor';
+import { applyManualSlugEdit, applyTitleToSlugDraft, regenerateSlugDraft } from '@/lib/slug-editor';
+import { normalizeSlug } from '@/lib/slug';
+import { resolveAutoSlugClient } from '@/lib/slug-client';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
@@ -66,6 +68,8 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
   const [formData, setFormData] = useState<Project>({
     _id: '',
     title: '',
+    slug: '',
+    slugMode: 'auto',
     description: '',
     shortDescription: '',
     image: '',
@@ -83,6 +87,42 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
   });
 
   const [lineSpacing, setLineSpacing] = useState('10');
+  const [checkingSlug, setCheckingSlug] = useState(false);
+  const slugDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-update slug when title changes and slug is in auto mode (with duplicate checking)
+  useEffect(() => {
+    if (formData.slugMode !== 'auto' || !formData.title) return;
+
+    // Update slug immediately for instant feedback
+    const immediateSlug = normalizeSlug(formData.title) || 'item';
+    setFormData(prev => ({ ...prev, slug: immediateSlug }));
+
+    // Clear previous timer
+    if (slugDebounceTimer.current) {
+      clearTimeout(slugDebounceTimer.current);
+    }
+
+    setCheckingSlug(true);
+
+    // Then check for duplicates in background (debounced by 300ms)
+    slugDebounceTimer.current = setTimeout(async () => {
+      try {
+        const resolvedSlug = await resolveAutoSlugClient(formData.title, formData._id);
+        setFormData(prev => ({ ...prev, slug: resolvedSlug }));
+      } catch (err) {
+        console.error('Error resolving slug:', err);
+      } finally {
+        setCheckingSlug(false);
+      }
+    }, 300);
+
+    return () => {
+      if (slugDebounceTimer.current) {
+        clearTimeout(slugDebounceTimer.current);
+      }
+    };
+  }, [formData.title, formData.slugMode, formData._id]);
 
   useEffect(() => {
     fetchProject();
@@ -334,29 +374,37 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">URL Slug</label>
         <div className="flex gap-2">
-          <input
-            type="text"
-            value={formData.slug || ''}
-            onChange={(e) => {
-              const next = applyManualSlugEdit(
-                { title: formData.title, slug: formData.slug || '', slugMode: formData.slugMode ?? 'auto' },
-                e.target.value
-              );
-              setFormData({ ...formData, slug: next.slug, slugMode: next.slugMode });
-            }}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-            placeholder="auto-generated-from-title"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={formData.slug || ''}
+              onChange={(e) => {
+                const next = applyManualSlugEdit(
+                  { title: formData.title, slug: formData.slug || '', slugMode: formData.slugMode ?? 'auto' },
+                  e.target.value
+                );
+                setFormData({ ...formData, slug: next.slug, slugMode: next.slugMode });
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="auto-generated-from-title"
+            />
+            {checkingSlug && formData.slugMode === 'auto' && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="animate-spin h-4 w-4 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+              </div>
+            )}
+          </div>
           {formData.slugMode === 'manual' && (
             <button
               type="button"
               title="Regenerate from title"
               onClick={() => {
-                const next = regenerateSlugDraft(
-                  { title: formData.title, slug: formData.slug || '', slugMode: 'manual' },
-                  formData.title
-                );
-                setFormData({ ...formData, slug: next.slug, slugMode: next.slugMode });
+                setCheckingSlug(true);
+                // Regenerate with duplicate checking
+                resolveAutoSlugClient(formData.title, formData._id).then(resolvedSlug => {
+                  setFormData({ ...formData, slug: resolvedSlug, slugMode: 'auto' });
+                  setCheckingSlug(false);
+                });
               }}
               className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-1"
             >
@@ -365,7 +413,7 @@ export default function EditProjectForm({ projectId }: EditProjectFormProps) {
           )}
         </div>
         <p className="mt-1 text-xs text-gray-500">
-          {formData.slugMode === 'manual' ? '🔒 Manual' : '⚡ Auto'} · Preview: <span className="font-mono">/projects/{formData.slug || '…'}</span>
+          {formData.slugMode === 'manual' ? '🔒 Manual' : '⚡ Auto'} {checkingSlug && formData.slugMode === 'auto' ? '(checking...)' : ''} · Preview: <span className="font-mono">/projects/{formData.slug || '…'}</span>
         </p>
       </div>
 

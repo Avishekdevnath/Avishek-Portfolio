@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { FiUpload, FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
 import { FaSave, FaTimes, FaSync } from 'react-icons/fa';
 import { applyTitleToSlugDraft, applyManualSlugEdit, regenerateSlugDraft, createSlugDraft, type SlugMode } from '@/lib/slug-editor';
+import { normalizeSlug } from '@/lib/slug';
+import { resolveAutoSlugClient } from '@/lib/slug-client';
 import dynamic from 'next/dynamic';
 
 const RichTextEditor = dynamic(() => import('@/components/shared/RichTextEditor'), { ssr: false });
@@ -108,11 +110,13 @@ interface ProjectFormProps {
 export default function ProjectForm({ initialData, isEdit = false }: ProjectFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [checkingSlug, setCheckingSlug] = useState(false);
   const [projectSlug, setProjectSlug] = useState(initialData?.slug || '');
   const [slugMode, setSlugMode] = useState<SlugMode>(initialData?.slugMode ?? 'auto');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState(initialData?.image || '');
   const [additionalImageFiles, setAdditionalImageFiles] = useState<File[]>([]);
+  const slugDebounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -138,13 +142,33 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
       const next = { ...prev, [field]: value };
       // Auto-update slug when title changes and slug is in auto mode
       if (field === 'title' && slugMode === 'auto') {
-        const draft = applyTitleToSlugDraft({ title: prev.title, slug: projectSlug, slugMode }, value);
-        setProjectSlug(draft.slug);
+        // Update slug immediately for instant feedback
+        const immediateSlug = normalizeSlug(value) || 'item';
+        setProjectSlug(immediateSlug);
+
+        // Clear previous timer
+        if (slugDebounceTimer.current) {
+          clearTimeout(slugDebounceTimer.current);
+        }
+
+        setCheckingSlug(true);
+
+        // Then check for duplicates in background (debounced by 300ms)
+        slugDebounceTimer.current = setTimeout(async () => {
+          try {
+            const resolvedSlug = await resolveAutoSlugClient(value, initialData?._id);
+            setProjectSlug(resolvedSlug);
+          } catch (err) {
+            console.error('Error resolving slug:', err);
+          } finally {
+            setCheckingSlug(false);
+          }
+        }, 300);
       }
       return next;
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slugMode, projectSlug]);
+  }, [slugMode, projectSlug, initialData?._id]);
 
   // Handle array field changes (technologies, repositories, demoUrls)
   const handleArrayFieldChange = useCallback((field: string, index: number, key: string, value: string) => {
@@ -446,25 +470,36 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
       <div>
         <label className="block text-body-sm weight-medium text-gray-700 mb-2">URL Slug</label>
         <div className="flex gap-2">
-          <input
-            type="text"
-            value={projectSlug}
-            onChange={(e) => {
-              const next = applyManualSlugEdit({ title: formData.title, slug: projectSlug, slugMode }, e.target.value);
-              setSlugMode(next.slugMode);
-              setProjectSlug(next.slug);
-            }}
-            className="flex-1 block px-4 py-2.5 text-body-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="auto-generated-from-title"
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={projectSlug}
+              onChange={(e) => {
+                const next = applyManualSlugEdit({ title: formData.title, slug: projectSlug, slugMode }, e.target.value);
+                setSlugMode(next.slugMode);
+                setProjectSlug(next.slug);
+              }}
+              className="w-full block px-4 py-2.5 text-body-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="auto-generated-from-title"
+            />
+            {checkingSlug && slugMode === 'auto' && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+              </div>
+            )}
+          </div>
           {slugMode === 'manual' && (
             <button
               type="button"
               title="Regenerate from title"
               onClick={() => {
-                const next = regenerateSlugDraft({ title: formData.title, slug: projectSlug, slugMode }, formData.title);
-                setSlugMode(next.slugMode);
-                setProjectSlug(next.slug);
+                setCheckingSlug(true);
+                // Regenerate with duplicate checking
+                resolveAutoSlugClient(formData.title, initialData?._id).then(resolvedSlug => {
+                  setProjectSlug(resolvedSlug);
+                  setSlugMode('auto');
+                  setCheckingSlug(false);
+                });
               }}
               className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-1"
             >
@@ -473,7 +508,7 @@ export default function ProjectForm({ initialData, isEdit = false }: ProjectForm
           )}
         </div>
         <p className="mt-1 text-xs text-gray-500">
-          {slugMode === 'manual' ? '🔒 Manual' : '⚡ Auto'} · Preview: <span className="font-mono">/projects/{projectSlug || '…'}</span>
+          {slugMode === 'manual' ? '🔒 Manual' : '⚡ Auto'} {checkingSlug && slugMode === 'auto' ? '(checking...)' : ''} · Preview: <span className="font-mono">/projects/{projectSlug || '…'}</span>
         </p>
       </div>
 
