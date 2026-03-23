@@ -61,8 +61,9 @@ This change should unify the blog and project behavior while preserving existing
 ### Redirect Policy
 
 - If a slug changes, the previous slug is stored in `slugHistory`.
-- Requests for an old slug should return a permanent redirect to the current slug.
+- Requests for an old page URL should return a permanent redirect to the current slug.
 - Legacy project `_id` URLs should temporarily redirect to the canonical slug route during migration.
+- API mutation endpoints should not redirect. They should resolve stale slugs internally and operate on the canonical document.
 
 ### Editor Workflow
 
@@ -93,7 +94,7 @@ Add the following fields to blog and project documents:
 
 ### Project Model
 
-- Add `slug` unique and indexed.
+- Add `slug` using a migration-safe unique sparse or partial index so existing records without slugs do not break index creation before backfill.
 - Add `slugHistory` with default `[]`.
 - Add `slugMode` with default `'auto'`.
 - Change the virtual/public URL shape to use slug-based URLs instead of `_id`.
@@ -148,14 +149,22 @@ Create a reusable slug module under `src/lib` that handles:
 
 ### Lookup
 
-- Blog/public API lookups should:
+- Blog page lookups should:
   - resolve current slug directly
   - if not found, check `slugHistory`
-  - redirect to current slug when matched via old slug
-- Project/public API lookups should:
+  - permanently redirect to current slug when matched via old slug
+- Blog API lookups should:
+  - resolve current slug directly
+  - if not found, check `slugHistory`
+  - use the canonical document internally rather than redirecting mutation requests
+- Project page lookups should:
   - resolve current slug directly
   - if not found, check `slugHistory`
   - temporarily support legacy `_id` redirects during transition
+  - permanently redirect to the canonical slug URL when matched via old slug or legacy `_id`
+- Project API lookups should:
+  - keep admin `_id` endpoints stable in this batch
+  - resolve any stale slug aliases internally where slug-based APIs exist later
 
 ## Routing Design
 
@@ -204,7 +213,10 @@ Create a reusable slug module under `src/lib` that handles:
 - Backfill slugs for all existing projects.
 - Backfill blog slugs only for records missing a slug.
 - Set `slugHistory` to `[]`.
-- Set `slugMode` to `'auto'` unless there is a reason to infer manual state later.
+- Infer legacy `slugMode` conservatively:
+  - if an existing slug differs from the normalized title, set `slugMode` to `'manual'`
+  - if a slug is missing and generated from title during backfill, set `slugMode` to `'auto'`
+  - if an existing slug already matches the normalized title, either keep or set `'auto'`
 
 ### Phase 3: Redirect Safety
 
@@ -214,7 +226,7 @@ Create a reusable slug module under `src/lib` that handles:
 
 ### Phase 4: Canonical Link Cleanup
 
-- Update project cards, related links, metadata, and dashboard preview links to use slug URLs.
+- Update project cards, homepage featured project links, related links, metadata, dashboard preview links, and project notification action URLs to use slug URLs.
 
 ## Testing Strategy
 
