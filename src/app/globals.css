@@ -174,7 +174,7 @@ label {
 /* Ultra-compact editor spacing - Word/Google Docs style */
 .ProseMirror p {
   margin: 0 !important;
-  line-height: 1.0 !important;
+  line-height: 1.5 !important;
   padding: 0 !important;
 }
 
@@ -197,26 +197,26 @@ label {
 
 .ProseMirror li {
   margin: 0 !important;
-  line-height: 1.0 !important;
+  line-height: 1.5 !important;
   padding: 0 !important;
 }
 
 .ProseMirror blockquote {
   margin: 0.25rem 0 !important;
   padding: 0.5rem 0.75rem !important;
-  line-height: 1.0 !important;
+  line-height: 1.45 !important;
 }
 
 .ProseMirror pre {
   margin: 0.25rem 0 !important;
   padding: 0.5rem !important;
-  line-height: 1.0 !important;
+  line-height: 1.45 !important;
 }
 
 .ProseMirror code {
   margin: 0 !important;
   padding: 0.125rem 0.25rem !important;
-  line-height: 1.0 !important;
+  line-height: 1.35 !important;
 }
 
 .ProseMirror img {
@@ -232,7 +232,7 @@ label {
 
 /* Ensure no extra spacing in editor container */
 .ProseMirror {
-  line-height: 1.0 !important;
+  line-height: 1.5 !important;
 }
 
 /* Override any remaining prose spacing */
@@ -253,7 +253,7 @@ label {
 .ProseMirror.line-spacing-10 li,
 .line-spacing-10 p,
 .line-spacing-10 li {
-  line-height: 1.0 !important;
+  line-height: 1.35 !important;
 }
 
 .ProseMirror.line-spacing-115 p,
@@ -295,7 +295,7 @@ label {
 .ProseMirror.line-spacing-custom li,
 .line-spacing-custom p,
 .line-spacing-custom li {
-  line-height: var(--custom-line-height, 1.0) !important;
+  line-height: var(--custom-line-height, 1.5) !important;
 }
 
 /* Typography System - Font Size Variables */

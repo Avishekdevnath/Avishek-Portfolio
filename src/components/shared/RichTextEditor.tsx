@@ -104,7 +104,7 @@ export default function RichTextEditor({
   lineSpacing: externalLineSpacing,
   onLineSpacingChange,
 }: RichTextEditorProps) {
-  const [lineSpacing, setLineSpacing] = useState(externalLineSpacing || '10');
+  const [lineSpacing, setLineSpacing] = useState(externalLineSpacing || '115');
   const [pasteWarnings, setPasteWarnings] = useState<string[]>([]);
   const { handlePasteEvent } = usePasteHandler();
   const editor = useEditor({
