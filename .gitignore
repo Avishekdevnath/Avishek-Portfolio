@@ -72,3 +72,11 @@ src/data/home-page-styling-plan.md
 
 # Theme documentation (private)
 src/data/theme-spec.private.md
+
+# Local-only feedback workspace
+feedback/
+
+# Non-deployment local artifacts
+docs/
+output/
+temp.html
