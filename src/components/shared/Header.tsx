@@ -86,7 +86,8 @@ export default function Header() {
 
   const isActive = useCallback((href: string) => {
     if (href.startsWith("http")) return false;
-    return href === "/" ? pathname === "/" : pathname.startsWith(href);
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
   }, [pathname]);
 
   return (

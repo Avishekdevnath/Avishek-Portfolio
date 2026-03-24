@@ -73,7 +73,7 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
   useEffect(() => {
     const toExpand: Record<string, boolean> = {};
     items.forEach(item => {
-      if (item.children?.some(c => pathname.startsWith(c.href))) {
+      if (item.children?.some(c => isChildActive(c.href, item.href))) {
         toExpand[item.href] = true;
       }
     });
@@ -83,9 +83,50 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
   }, [pathname, items]);
 
   const isActive = (href: string, hasChildren?: boolean) => {
+    // Exact match for dashboard
     if (href === '/dashboard') return pathname === href;
-    if (hasChildren) return pathname === href;
-    return pathname.startsWith(href);
+    // For parent items with children, check if any child is active
+    if (hasChildren) {
+      return false; // Parent is not "active" by itself
+    }
+    // For standalone items, match exact path or if pathname starts with href followed by /
+    if (pathname === href) return true;
+    return pathname.startsWith(href + '/');
+  };
+
+  // Check if a parent has any active children
+  const hasActiveChild = (item: NavItem): boolean => {
+    if (!item.children) return false;
+    return item.children.some((child) => isChildActive(child.href, item.href));
+  };
+
+  // Child route matching:
+  // - exact match is always active
+  // - nested match is active only for non-overview children
+  //   (prevents '/dashboard/job-hunt' overview from also matching '/dashboard/job-hunt/leads')
+  const isChildActive = (childHref: string, parentHref: string): boolean => {
+    if (pathname === childHref) return true;
+    if (childHref === parentHref) return false;
+    return pathname.startsWith(childHref + '/');
+  };
+
+  const handleChildLinkClick = () => {
+    // Close sidebar on mobile when a child link is clicked
+    if (window.innerWidth < 768) {
+      onToggle();
+    }
+  };
+
+  const handleMainLinkClick = (hasChildren: boolean, href: string) => {
+    if (!hasChildren) {
+      // Close sidebar on mobile when a main link (non-parent) is clicked
+      if (window.innerWidth < 768) {
+        onToggle();
+      }
+    } else {
+      // For parent items, just toggle expand
+      toggleExpand(href);
+    }
   };
 
   const toggleExpand = (href: string) => {
@@ -168,26 +209,28 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
               <div className="space-y-0.5">
                 {catItems.map(item => {
                   const active = isActive(item.href, !!item.children);
+                  const childActive = hasActiveChild(item);
                   const expanded = !!expandedItems[item.href];
                   const hasChildren = !!item.children?.length;
                   const Icon = item.icon;
+                  const shouldHighlight = active || childActive;
 
                   return (
                     <div key={item.href}>
                       {/* Nav item row */}
                       <div className="relative">
-                        {active && (
+                        {shouldHighlight && (
                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2.5px] h-[18px] rounded-r-full bg-accent-orange pointer-events-none" />
                         )}
                         <Link
                           href={hasChildren ? '#' : item.href}
                           onClick={
                             hasChildren
-                              ? e => { e.preventDefault(); toggleExpand(item.href); }
-                              : undefined
+                              ? e => { e.preventDefault(); handleMainLinkClick(true, item.href); }
+                              : () => handleMainLinkClick(false, item.href)
                           }
                           className={`flex items-center gap-2.5 px-3 py-[0.4rem] rounded-lg transition-all duration-150 ${
-                            active
+                            shouldHighlight
                               ? 'text-accent-orange bg-accent-orange/[0.09]'
                               : 'text-[#b0a89e] hover:text-[#e8e2da] hover:bg-white/[0.05]'
                           }`}
@@ -197,9 +240,9 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
                           {hasChildren && (
                             <ChevronDown
                               size={13}
-                              className={`flex-shrink-0 text-[#7a7268] transition-transform duration-200 ${
-                                expanded ? 'rotate-180' : ''
-                              }`}
+                              className={`flex-shrink-0 transition-transform duration-200 ${
+                                childActive ? 'text-accent-orange' : 'text-[#7a7268]'
+                              } ${expanded ? 'rotate-180' : ''}`}
                             />
                           )}
                         </Link>
@@ -211,22 +254,21 @@ function SidebarContent({ isOpen, onToggle, items }: SidebarProps) {
                           className="mt-0.5 ml-[22px] pl-3 space-y-0.5 border-l border-cream/[0.07]"
                         >
                           {item.children!.map(child => {
-                            const childActive =
-                              pathname === child.href ||
-                              (pathname.startsWith(child.href) && child.href !== item.href);
+                            const childIsActive = isChildActive(child.href, item.href);
                             return (
                               <Link
                                 key={child.href}
                                 href={child.href}
+                                onClick={handleChildLinkClick}
                                 className={`flex items-center gap-2 px-2 py-[0.3rem] rounded-md transition-all duration-150 text-[0.75rem] ${
-                                  childActive
-                                    ? 'text-accent-orange'
-                                    : 'text-[#918980] hover:text-[#d4cec8]'
+                                  childIsActive
+                                    ? 'text-accent-orange bg-accent-orange/[0.06]'
+                                    : 'text-[#918980] hover:text-[#d4cec8] hover:bg-white/[0.03]'
                                 }`}
                               >
                                 <span
                                   className={`w-[5px] h-[5px] rounded-full flex-shrink-0 ${
-                                    childActive ? 'bg-accent-orange' : 'bg-[#4a4440]'
+                                    childIsActive ? 'bg-accent-orange' : 'bg-[#4a4440]'
                                   }`}
                                 />
                                 {child.label}

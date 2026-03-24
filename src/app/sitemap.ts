@@ -1,9 +1,30 @@
 import type { MetadataRoute } from 'next';
 import { getSiteUrl } from '@/lib/url';
+import connectDB from '@/lib/mongodb';
+import { ResumeVariant } from '@/models/ResumeVariant';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
   const now = new Date();
+
+  let resumeEntries: MetadataRoute.Sitemap = [];
+
+  try {
+    await connectDB();
+    const publicResumes = await ResumeVariant.find(
+      { publicViewEnabled: true, status: 'ready', fileUrl: { $ne: null } },
+      { slug: 1, updatedAt: 1 }
+    ).lean();
+
+    resumeEntries = publicResumes.map((item: any) => ({
+      url: `${siteUrl}/resume/${item.slug}`,
+      lastModified: item.updatedAt || now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    }));
+  } catch (error) {
+    resumeEntries = [];
+  }
 
   return [
     {
@@ -42,5 +63,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
+    {
+      url: `${siteUrl}/resume`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    ...resumeEntries,
   ];
 }

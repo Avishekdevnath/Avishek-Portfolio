@@ -7,6 +7,7 @@ import { usePageReady } from '@/context/PageReadyContext';
 import {
   LayoutDashboard,
   Briefcase,
+  SearchCheck,
   GraduationCap,
   Code2,
   BookOpen,
@@ -19,6 +20,7 @@ import {
   Wrench,
   History,
   UserCheck,
+  FileText,
 } from 'lucide-react';
 import Sidebar, { NavItem } from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -46,6 +48,24 @@ const sidebarItems: NavItem[] = [
       { label: 'Follow-ups',  href: '/dashboard/outreach/follow-ups' },
       { label: 'Log',         href: '/dashboard/outreach/log' },
       { label: 'Analytics',   href: '/dashboard/outreach/analytics' },
+    ],
+  },
+  {
+    icon: SearchCheck,
+    label: 'Job Hunt',
+    href: '/dashboard/job-hunt',
+    description: 'Private job application tracker',
+    category: 'Main',
+    children: [
+      { label: 'Overview', href: '/dashboard/job-hunt' },
+      { label: 'Platform Store', href: '/dashboard/job-hunt/platforms' },
+      { label: 'Applications', href: '/dashboard/job-hunt/applications' },
+      { label: 'Job Leads', href: '/dashboard/job-hunt/leads' },
+      { label: 'Bookmarks', href: '/dashboard/job-hunt/bookmarks' },
+      { label: 'Activity Log', href: '/dashboard/job-hunt/activities' },
+      { label: 'Interviews', href: '/dashboard/job-hunt/interviews' },
+      { label: 'Contacts', href: '/dashboard/job-hunt/contacts' },
+      { label: 'Analytics', href: '/dashboard/job-hunt/analytics' },
     ],
   },
   {
@@ -102,6 +122,13 @@ const sidebarItems: NavItem[] = [
     label: 'Blog Posts',
     href: '/dashboard/posts',
     description: 'Manage blog content',
+    category: 'Content',
+  },
+  {
+    icon: FileText,
+    label: 'Resumes',
+    href: '/dashboard/resumes',
+    description: 'Manage public resume variants',
     category: 'Content',
   },
   {
