@@ -36,13 +36,22 @@ export function middleware(request: NextRequest, event: { waitUntil: (p: Promise
   // Skip dashboard routes — internal tool, not public traffic
   const isDashboard = pathname.startsWith('/dashboard');
 
-  // Skip non-navigation fetches.
-  // Sec-Fetch-Mode: "navigate" = real browser page load.
-  // "cors"/"same-origin"/"no-cors" = programmatic fetch (RSC, hydration, API).
-  // Absent entirely = bot/crawler — always count those.
+  // Two cases that represent a real page view:
+  //   1. Hard reload / direct URL: Sec-Fetch-Mode = "navigate"
+  //   2. Soft navigation (Next.js Link): RSC: 1 AND no prefetch header
+  // Bots/crawlers have no Sec-Fetch-* headers — they fall into case 1 path.
   const secFetchMode = request.headers.get('Sec-Fetch-Mode');
-  const isInternalNextRequest =
-    secFetchMode !== null && secFetchMode !== 'navigate';
+  const isRSC = request.headers.get('RSC') === '1';
+  const isPrefetch =
+    request.headers.get('Next-Router-Prefetch') === '1' ||
+    (request.headers.get('Purpose') ?? '') === 'prefetch';
+
+  const isRealPageView =
+    secFetchMode === 'navigate' ||   // hard load
+    secFetchMode === null ||          // bot/crawler (no Sec-Fetch-* headers)
+    (isRSC && !isPrefetch);          // soft navigation
+
+  const isInternalNextRequest = !isRealPageView;
 
   if (!isLocalhost && !isDashboard && !isInternalNextRequest) {
     const ua        = request.headers.get('user-agent');
