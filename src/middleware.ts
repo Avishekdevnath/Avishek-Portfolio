@@ -36,14 +36,13 @@ export function middleware(request: NextRequest, event: { waitUntil: (p: Promise
   // Skip dashboard routes — internal tool, not public traffic
   const isDashboard = pathname.startsWith('/dashboard');
 
-  // Skip Next.js internal requests (prefetch + RSC background fetches only)
-  // NOTE: Next-Router-State-Tree is intentionally NOT filtered — it's present
-  // on real navigations and filtering it would drop legitimate page views.
-  const purpose = request.headers.get('Purpose') ?? request.headers.get('purpose') ?? '';
+  // Skip non-navigation fetches.
+  // Sec-Fetch-Mode: "navigate" = real browser page load.
+  // "cors"/"same-origin"/"no-cors" = programmatic fetch (RSC, hydration, API).
+  // Absent entirely = bot/crawler — always count those.
+  const secFetchMode = request.headers.get('Sec-Fetch-Mode');
   const isInternalNextRequest =
-    purpose === 'prefetch' ||
-    request.headers.get('Next-Router-Prefetch') === '1' ||
-    request.headers.get('RSC') === '1';
+    secFetchMode !== null && secFetchMode !== 'navigate';
 
   if (!isLocalhost && !isDashboard && !isInternalNextRequest) {
     const ua        = request.headers.get('user-agent');
