@@ -29,13 +29,17 @@ export function middleware(request: NextRequest, event: { waitUntil: (p: Promise
   }
 
   // ── Public route tracking ─────────────────────────────────────────────────
+  // Skip localhost (dev environment)
+  const host = request.headers.get('host') ?? '';
+  const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+
   // Skip Next.js prefetch requests (would inflate counts)
   const purpose = request.headers.get('Purpose') ?? request.headers.get('purpose') ?? '';
   const isPrefetch =
     purpose === 'prefetch' ||
     request.headers.get('Next-Router-Prefetch') === '1';
 
-  if (!isPrefetch) {
+  if (!isLocalhost && !isPrefetch) {
     const ua        = request.headers.get('user-agent');
     const referer   = request.headers.get('referer') ?? '';
     const country   = request.headers.get('x-vercel-ip-country') ?? '';
