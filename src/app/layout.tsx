@@ -8,6 +8,7 @@ import MainLayout from '@/components/shared/MainLayout';
 import IntroLoader from '@/components/IntroLoader';
 import NavigationLoader from '@/components/NavigationLoader';
 import { getSiteUrl } from '@/lib/url';
+import PageViewTracker from '@/components/PageViewTracker';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -84,6 +85,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${cormorant.variable} ${dmSans.variable} ${dmMono.variable} ${dmSans.className}`}>
         <ToastProvider>
           <PageReadyProvider>
+            <PageViewTracker />
             <IntroLoader />
             <NavigationLoader />
             <MainLayout>

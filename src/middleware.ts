@@ -36,30 +36,19 @@ export function middleware(request: NextRequest, event: { waitUntil: (p: Promise
   // Skip dashboard routes — internal tool, not public traffic
   const isDashboard = pathname.startsWith('/dashboard');
 
-  // Two cases that represent a real page view:
-  //   1. Hard reload / direct URL: Sec-Fetch-Mode = "navigate"
-  //   2. Soft navigation (Next.js Link): RSC: 1 AND no prefetch header
-  // Bots/crawlers have no Sec-Fetch-* headers — they fall into case 1 path.
+  // Middleware only tracks bots — humans are tracked client-side via PageViewTracker.
+  // Bots don't execute JavaScript so they never call /api/track/view.
+  // Bots have no Sec-Fetch-* headers; browsers always send Sec-Fetch-Mode.
   const secFetchMode = request.headers.get('Sec-Fetch-Mode');
-  const isRSC = request.headers.get('RSC') === '1';
-  const isPrefetch =
-    request.headers.get('Next-Router-Prefetch') === '1' ||
-    (request.headers.get('Purpose') ?? '') === 'prefetch';
+  const ua = request.headers.get('user-agent');
+  const isBotRequest = secFetchMode === null && detectBot(ua);
 
-  const isRealPageView =
-    secFetchMode === 'navigate' ||   // hard load
-    secFetchMode === null ||          // bot/crawler (no Sec-Fetch-* headers)
-    (isRSC && !isPrefetch);          // soft navigation
-
-  const isInternalNextRequest = !isRealPageView;
-
-  if (!isLocalhost && !isDashboard && !isInternalNextRequest) {
-    const ua        = request.headers.get('user-agent');
+  if (!isLocalhost && !isDashboard && isBotRequest) {
     const referer   = request.headers.get('referer') ?? '';
     const country   = request.headers.get('x-vercel-ip-country') ?? '';
     const forwarded = request.headers.get('x-forwarded-for') ?? '';
     const ip        = forwarded.split(',')[0].trim();
-    const isBot     = detectBot(ua);
+    const isBot     = true;
 
     const payload = JSON.stringify({
       path:      pathname,
