@@ -2,10 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import PageView from '@/models/PageView';
 
+const OWN_HOSTNAMES = ['avishekdevnath.com', 'www.avishekdevnath.com'];
+
+function normalizeReferer(raw: string | undefined): string {
+  if (!raw) return '';
+  try {
+    const hostname = new URL(raw).hostname;
+    if (OWN_HOSTNAMES.includes(hostname)) return ''; // treat internal nav as direct
+    return hostname || '';
+  } catch {
+    return '';
+  }
+}
+
 export async function POST(request: NextRequest) {
-  // Validate internal token — return 200 silently on failure to avoid leaking endpoint
-  const token = request.headers.get('x-internal-token');
-  if (!token || token !== process.env.INTERNAL_TOKEN) {
+  // Validate internal token — INTERNAL_TOKEN must be set and match
+  const envToken = process.env.INTERNAL_TOKEN;
+  const reqToken = request.headers.get('x-internal-token');
+  if (!envToken || !reqToken || reqToken !== envToken) {
     return NextResponse.json({ success: false });
   }
 
@@ -32,9 +46,10 @@ export async function POST(request: NextRequest) {
 
   try {
     await connectDB();
+    const normalizedRef = normalizeReferer(referer);
     await PageView.create({
       path,
-      referer:   referer || undefined,
+      referer:   normalizedRef || undefined,
       country:   country || undefined,
       ip:        ip || undefined,
       userAgent: userAgent ? String(userAgent).slice(0, 500) : undefined,

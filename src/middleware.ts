@@ -33,13 +33,19 @@ export function middleware(request: NextRequest, event: { waitUntil: (p: Promise
   const host = request.headers.get('host') ?? '';
   const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1');
 
-  // Skip Next.js prefetch requests (would inflate counts)
-  const purpose = request.headers.get('Purpose') ?? request.headers.get('purpose') ?? '';
-  const isPrefetch =
-    purpose === 'prefetch' ||
-    request.headers.get('Next-Router-Prefetch') === '1';
+  // Skip dashboard routes — internal tool, not public traffic
+  const isDashboard = pathname.startsWith('/dashboard');
 
-  if (!isLocalhost && !isPrefetch) {
+  // Skip Next.js internal requests (prefetch + RSC background fetches only)
+  // NOTE: Next-Router-State-Tree is intentionally NOT filtered — it's present
+  // on real navigations and filtering it would drop legitimate page views.
+  const purpose = request.headers.get('Purpose') ?? request.headers.get('purpose') ?? '';
+  const isInternalNextRequest =
+    purpose === 'prefetch' ||
+    request.headers.get('Next-Router-Prefetch') === '1' ||
+    request.headers.get('RSC') === '1';
+
+  if (!isLocalhost && !isDashboard && !isInternalNextRequest) {
     const ua        = request.headers.get('user-agent');
     const referer   = request.headers.get('referer') ?? '';
     const country   = request.headers.get('x-vercel-ip-country') ?? '';

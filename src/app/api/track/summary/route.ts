@@ -9,16 +9,6 @@ function getRangeMs(range: string): number {
   return 7 * 24 * 60 * 60 * 1000; // default 7d
 }
 
-function normalizeReferer(raw: string | null | undefined): string {
-  if (!raw) return 'direct';
-  try {
-    const url = new URL(raw);
-    return url.hostname || 'direct';
-  } catch {
-    return 'unknown';
-  }
-}
-
 export async function GET(request: NextRequest) {
   const authError = ensureDashboardAuth();
   if (authError) return authError;
@@ -105,12 +95,6 @@ export async function GET(request: NextRequest) {
 
     const summary = totals[0] ?? { totalViews: 0, humanViews: 0, botViews: 0 };
 
-    // Normalize referrer hostnames
-    const normalizedReferrers = (topReferrers as Array<{ referer: string; views: number }>).map((r) => ({
-      referer: normalizeReferer(r.referer),
-      views: r.views,
-    }));
-
     return NextResponse.json({
       success: true,
       data: {
@@ -118,7 +102,7 @@ export async function GET(request: NextRequest) {
         humanViews:   summary.humanViews,
         botViews:     summary.botViews,
         topPages,
-        topReferrers: normalizedReferrers,
+        topReferrers,
         topCountries,
         dailyTrend:   dailyRaw,
       },
