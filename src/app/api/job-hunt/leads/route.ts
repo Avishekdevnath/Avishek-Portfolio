@@ -177,3 +177,51 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  const authError = ensureDashboardAuth();
+  if (authError) return authError;
+
+  try {
+    await connectDB();
+
+    const body = await request.json();
+    const lead = new JobLead({
+      title: body.title,
+      company: body.company,
+      location: body.location || undefined,
+      jobType: body.jobType || undefined,
+      source: body.source,
+      jobUrl: body.jobUrl,
+      status: body.status || 'New',
+      dateFound: body.dateFound ? new Date(body.dateFound) : new Date(),
+      synced: Boolean(body.synced),
+    });
+
+    await lead.validate();
+    await lead.save();
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          ...lead.toObject(),
+          _id: lead._id.toString(),
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    if ((error as any)?.code === 11000) {
+      return NextResponse.json(
+        { success: false, error: 'Lead already exists for this title/company/source' },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Failed to create lead' },
+      { status: 400 }
+    );
+  }
+}

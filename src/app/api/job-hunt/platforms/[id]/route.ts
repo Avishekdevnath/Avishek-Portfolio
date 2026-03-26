@@ -146,3 +146,58 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const authError = ensureDashboardAuth();
+  if (authError) return authError;
+
+  const { id } = await params;
+  if (!Types.ObjectId.isValid(id)) {
+    return invalidIdResponse();
+  }
+
+  try {
+    await connectDB();
+
+    const platform = await PlatformList.findById(id).lean();
+    if (!platform) {
+      return NextResponse.json(
+        { success: false, error: 'Platform not found' },
+        { status: 404 }
+      );
+    }
+
+    const linkedBookmarks = await BookmarkedJob.countDocuments({
+      platform: String(platform.name).toLowerCase(),
+    });
+
+    if (linkedBookmarks > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Cannot delete platform with linked bookmarked jobs. Remove/move related bookmarks first.',
+        },
+        { status: 409 }
+      );
+    }
+
+    await PlatformList.findByIdAndDelete(id);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Platform deleted',
+      data: { _id: id },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete platform',
+      },
+      { status: 500 }
+    );
+  }
+}

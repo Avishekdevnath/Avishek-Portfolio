@@ -1,14 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+
+interface BookmarkFormData {
+  _id?: string;
+  jobTitle: string;
+  company: string;
+  platform: string;
+  jobUrl: string;
+  notes: string;
+  bookmarkedDate: string;
+}
 
 interface CreateBookmarkModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   platforms: Array<{ _id: string; name: string }>;
+  mode?: 'create' | 'edit';
+  initialData?: Partial<BookmarkFormData> | null;
 }
 
 export default function CreateBookmarkModal({
@@ -16,9 +28,11 @@ export default function CreateBookmarkModal({
   onClose,
   onSuccess,
   platforms = [],
+  mode = 'create',
+  initialData = null,
 }: CreateBookmarkModalProps) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BookmarkFormData>({
     jobTitle: '',
     company: '',
     platform: '',
@@ -26,6 +40,34 @@ export default function CreateBookmarkModal({
     notes: '',
     bookmarkedDate: new Date().toISOString().split('T')[0],
   });
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (mode === 'edit' && initialData) {
+      setFormData({
+        _id: initialData._id,
+        jobTitle: initialData.jobTitle || '',
+        company: initialData.company || '',
+        platform: initialData.platform || '',
+        jobUrl: initialData.jobUrl || '',
+        notes: initialData.notes || '',
+        bookmarkedDate: initialData.bookmarkedDate
+          ? new Date(initialData.bookmarkedDate).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10),
+      });
+      return;
+    }
+
+    setFormData({
+      jobTitle: '',
+      company: '',
+      platform: '',
+      jobUrl: '',
+      notes: '',
+      bookmarkedDate: new Date().toISOString().split('T')[0],
+    });
+  }, [isOpen, initialData, mode]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -42,8 +84,8 @@ export default function CreateBookmarkModal({
     setLoading(true);
 
     try {
-      const response = await fetch('/api/job-hunt/bookmarks', {
-        method: 'POST',
+      const response = await fetch(mode === 'edit' ? `/api/job-hunt/bookmarks/${formData._id}` : '/api/job-hunt/bookmarks', {
+        method: mode === 'edit' ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -54,7 +96,7 @@ export default function CreateBookmarkModal({
       const result = await response.json();
 
       if (response.ok && result.success) {
-        toast.success('Bookmark created successfully');
+        toast.success(mode === 'edit' ? 'Bookmark updated successfully' : 'Bookmark created successfully');
         // Reset form with today's date
         setFormData({
           jobTitle: '',
@@ -67,10 +109,10 @@ export default function CreateBookmarkModal({
         onSuccess();
         onClose();
       } else {
-        toast.error(result.error || 'Failed to create bookmark');
+        toast.error(result.error || (mode === 'edit' ? 'Failed to update bookmark' : 'Failed to create bookmark'));
       }
     } catch (error) {
-      toast.error('Error creating bookmark');
+      toast.error(mode === 'edit' ? 'Error updating bookmark' : 'Error creating bookmark');
     } finally {
       setLoading(false);
     }
@@ -108,8 +150,8 @@ export default function CreateBookmarkModal({
         >
           <X size={20} />
         </button>
-        <h2 className="text-lg sm:text-xl font-semibold text-white pr-8">Add New Bookmark</h2>
-        <p className="text-xs sm:text-sm text-white/60 mt-1">Save a job opportunity you found</p>
+        <h2 className="text-lg sm:text-xl font-semibold text-white pr-8">{mode === 'edit' ? 'Edit Bookmark' : 'Add New Bookmark'}</h2>
+        <p className="text-xs sm:text-sm text-white/60 mt-1">{mode === 'edit' ? 'Update saved opportunity details' : 'Save a job opportunity you found'}</p>
       </div>
 
       {/* Form */}
@@ -238,7 +280,7 @@ export default function CreateBookmarkModal({
             disabled={loading}
             className="flex-1 px-4 py-2.5 sm:py-3 bg-gradient-to-r from-[#d4622a] to-[#c04d1a] text-sm text-white font-medium rounded-lg hover:from-[#c04d1a] hover:to-[#a83f15] transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg hover:shadow-xl order-1 sm:order-2"
           >
-            {loading ? 'Creating...' : 'Create Bookmark'}
+            {loading ? (mode === 'edit' ? 'Updating...' : 'Creating...') : (mode === 'edit' ? 'Update Bookmark' : 'Create Bookmark')}
           </button>
         </div>
       </form>

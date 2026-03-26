@@ -109,6 +109,17 @@ export const CONTACT_STATUSES = ['Active', 'Warm', 'Cold', 'Referred', 'Closed']
 
 export const REFERRAL_OPTIONS = ['Yes', 'No', 'Pending'] as const;
 
+// Company Store enums
+export const COMPANY_TIERS = ['Dream', 'Target', 'Safe'] as const;
+
+// HR Store enums
+export const HR_ROLE_TITLES = ['HR', 'Recruiter', 'Hiring Manager'] as const;
+export const HR_CONTACT_STATUSES = ['New', 'Contacted', 'Replied', 'Closed'] as const;
+
+export type CompanyTier = (typeof COMPANY_TIERS)[number];
+export type HRRoleTitle = (typeof HR_ROLE_TITLES)[number];
+export type HRContactStatus = (typeof HR_CONTACT_STATUSES)[number];
+
 export type FollowUpAlert = 'None' | 'Follow up Soon' | 'Overdue';
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 export type PriorityLevel = (typeof PRIORITY_LEVELS)[number];

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { JobLeadItem, PaginationData } from '@/types/job-hunt';
-import { LEAD_SOURCES, LEAD_STATUSES } from '@/lib/job-hunt-utils';
+import { LEAD_SOURCES, LEAD_STATUSES, LOCATION_TYPES } from '@/lib/job-hunt-utils';
 
 interface LeadsApiResponse {
   success: boolean;
@@ -33,6 +33,26 @@ interface FetchCriteria {
   remoteOnly: boolean;
   source: string;
 }
+
+interface LeadFormState {
+  title: string;
+  company: string;
+  location: string;
+  jobType: string;
+  source: string;
+  jobUrl: string;
+  status: string;
+}
+
+const initialLeadForm: LeadFormState = {
+  title: '',
+  company: '',
+  location: '',
+  jobType: 'Remote',
+  source: LEAD_SOURCES[0],
+  jobUrl: '',
+  status: 'New',
+};
 
 function formatDate(dateInput?: string) {
   if (!dateInput) return '—';
@@ -66,6 +86,9 @@ export default function JobLeadsPage() {
   const [runningDaily, setRunningDaily] = useState(false);
   const [bookmarkingId, setBookmarkingId] = useState<string | null>(null);
   const [isFetchModalOpen, setIsFetchModalOpen] = useState(false);
+  const [leadForm, setLeadForm] = useState<LeadFormState>(initialLeadForm);
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+  const [manualSaving, setManualSaving] = useState(false);
   const [fetchCriteria, setFetchCriteria] = useState<FetchCriteria>({
     title: '',
     role: '',
@@ -179,6 +202,77 @@ export default function JobLeadsPage() {
       setError(err instanceof Error ? err.message : 'Failed to update lead status');
     } finally {
       setSavingId(null);
+    }
+  };
+
+  const onSubmitLeadForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setManualSaving(true);
+    setError(null);
+    setSummary(null);
+
+    try {
+      const response = await fetch(editingLeadId ? `/api/job-hunt/leads/${editingLeadId}` : '/api/job-hunt/leads', {
+        method: editingLeadId ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: leadForm.title,
+          company: leadForm.company,
+          location: leadForm.location || undefined,
+          jobType: leadForm.jobType || undefined,
+          source: leadForm.source,
+          jobUrl: leadForm.jobUrl,
+          status: leadForm.status,
+        }),
+      });
+
+      const data = (await response.json()) as { success: boolean; error?: string };
+      if (!data.success) throw new Error(data.error || 'Failed to save lead');
+
+      setSummary(editingLeadId ? 'Lead updated successfully.' : 'Lead created successfully.');
+      setLeadForm(initialLeadForm);
+      setEditingLeadId(null);
+      await fetchLeads();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save lead');
+    } finally {
+      setManualSaving(false);
+    }
+  };
+
+  const onEditLead = (lead: JobLeadItem) => {
+    setEditingLeadId(lead._id);
+    setLeadForm({
+      title: lead.title || '',
+      company: lead.company || '',
+      location: lead.location || '',
+      jobType: lead.jobType || 'Remote',
+      source: lead.source,
+      jobUrl: lead.jobUrl || '',
+      status: lead.status,
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const onDeleteLead = async (id: string) => {
+    if (!window.confirm('Delete this lead?')) return;
+
+    setError(null);
+    setSummary(null);
+    try {
+      const response = await fetch(`/api/job-hunt/leads/${id}`, { method: 'DELETE' });
+      const data = (await response.json()) as { success: boolean; error?: string };
+      if (!data.success) throw new Error(data.error || 'Failed to delete lead');
+
+      if (editingLeadId === id) {
+        setEditingLeadId(null);
+        setLeadForm(initialLeadForm);
+      }
+
+      setSummary('Lead deleted successfully.');
+      await fetchLeads();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete lead');
     }
   };
 
@@ -480,6 +574,93 @@ export default function JobLeadsPage() {
       {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">{error}</div>}
       {summary && <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 text-sm">{summary}</div>}
 
+      <form onSubmit={onSubmitLeadForm} className="bg-white border border-[#e8e3db] rounded-xl p-4 shadow-sm space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-[0.9rem] font-semibold text-[#2a2118]">{editingLeadId ? 'Edit lead' : 'Add manual lead'}</h2>
+          {editingLeadId && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingLeadId(null);
+                setLeadForm(initialLeadForm);
+              }}
+              className="px-3 py-1.5 rounded-lg border border-[#ddd5c5] text-[0.75rem] text-[#4a3728]"
+            >
+              Cancel edit
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input
+            value={leadForm.title}
+            onChange={(e) => setLeadForm((prev) => ({ ...prev, title: e.target.value }))}
+            placeholder="Job title"
+            required
+            className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.82rem]"
+          />
+          <input
+            value={leadForm.company}
+            onChange={(e) => setLeadForm((prev) => ({ ...prev, company: e.target.value }))}
+            placeholder="Company"
+            required
+            className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.82rem]"
+          />
+          <input
+            value={leadForm.location}
+            onChange={(e) => setLeadForm((prev) => ({ ...prev, location: e.target.value }))}
+            placeholder="Location"
+            className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.82rem]"
+          />
+          <input
+            type="url"
+            value={leadForm.jobUrl}
+            onChange={(e) => setLeadForm((prev) => ({ ...prev, jobUrl: e.target.value }))}
+            placeholder="Job URL"
+            required
+            className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.82rem]"
+          />
+
+          <select
+            value={leadForm.source}
+            onChange={(e) => setLeadForm((prev) => ({ ...prev, source: e.target.value }))}
+            className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.82rem]"
+          >
+            {LEAD_SOURCES.map((source) => (
+              <option key={source} value={source}>{source}</option>
+            ))}
+          </select>
+
+          <select
+            value={leadForm.jobType}
+            onChange={(e) => setLeadForm((prev) => ({ ...prev, jobType: e.target.value }))}
+            className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.82rem]"
+          >
+            {LOCATION_TYPES.map((jobType) => (
+              <option key={jobType} value={jobType}>{jobType}</option>
+            ))}
+          </select>
+
+          <select
+            value={leadForm.status}
+            onChange={(e) => setLeadForm((prev) => ({ ...prev, status: e.target.value }))}
+            className="bg-[#faf8f4] border border-[#ddd5c5] rounded-lg px-3 py-2 text-[0.82rem]"
+          >
+            {LEAD_STATUSES.map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+
+          <button
+            type="submit"
+            disabled={manualSaving}
+            className="px-4 py-2 rounded-lg bg-[#2a2118] text-[#f0ece3] text-[0.82rem] font-medium hover:bg-[#d4622a] disabled:opacity-60"
+          >
+            {manualSaving ? 'Saving…' : editingLeadId ? 'Update Lead' : 'Add Lead'}
+          </button>
+        </div>
+      </form>
+
       <div className="bg-white border border-[#e8e3db] rounded-xl p-4 shadow-sm flex flex-wrap items-end gap-3">
         <div className="min-w-[220px] flex-1">
           <label className="block text-[0.65rem] font-mono tracking-[0.1em] uppercase text-[#8a7a6a] mb-1.5">Search</label>
@@ -674,7 +855,7 @@ export default function JobLeadsPage() {
                     aria-label="Select all leads on page"
                   />
                 </th>
-                {['Title', 'Company', 'Source', 'Found', 'Status', 'Fit', 'Synced'].map((heading) => (
+                {['Title', 'Company', 'Source', 'Found', 'Status', 'Fit', 'Synced', 'Actions'].map((heading) => (
                   <th key={heading} className="px-4 py-3 text-left text-[0.65rem] font-mono tracking-[0.12em] uppercase text-[#8a7a6a] font-medium">
                     {heading}
                   </th>
@@ -684,13 +865,13 @@ export default function JobLeadsPage() {
             <tbody className="divide-y divide-[#f3f1ee]">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-10 text-center">
+                  <td colSpan={9} className="py-10 text-center">
                     <div className="w-5 h-5 border-2 border-[#e8e3db] border-t-[#d4622a] rounded-full animate-spin mx-auto" />
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-[0.85rem] text-[#8a7a6a]">No leads found.</td>
+                  <td colSpan={9} className="py-12 text-center text-[0.85rem] text-[#8a7a6a]">No leads found.</td>
                 </tr>
               ) : (
                 items.map((item) => (
@@ -754,6 +935,20 @@ export default function JobLeadsPage() {
                       <span className={`text-[0.65rem] font-mono tracking-wide px-2.5 py-1 rounded-full ${item.synced ? 'bg-green-100 text-green-700' : 'bg-[#f3f1ee] text-[#6b5c4e]'}`}>
                         {item.synced ? 'Yes' : 'No'}
                       </span>
+                    </td>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <button
+                        onClick={() => onEditLead(item)}
+                        className="text-[0.74rem] text-[#2a2118] hover:text-[#d4622a] mr-3"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => onDeleteLead(item._id)}
+                        className="text-[0.74rem] text-red-700 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))

@@ -17,7 +17,15 @@ export default function OutreachTemplatesPage() {
     bodyTemplate: "",
     variables: "",
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const typeBadgeClasses: Record<string, string> = {
+    cold: "bg-sky-100 text-sky-700",
+    post_application: "bg-violet-100 text-violet-700",
+    follow_up: "bg-amber-100 text-amber-700",
+    referral: "bg-emerald-100 text-emerald-700",
+  };
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -55,8 +63,11 @@ export default function OutreachTemplatesPage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/outreach/templates", {
-        method: "POST",
+      const isEditing = Boolean(editingId);
+      const res = await fetch(
+        isEditing ? `/api/outreach/templates/${editingId}` : "/api/outreach/templates",
+        {
+          method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
@@ -66,9 +77,14 @@ export default function OutreachTemplatesPage() {
           bodyTemplate: form.bodyTemplate,
           variables: form.variables,
         }),
-      });
+        }
+      );
       const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Failed to create template");
+      if (!data.success) {
+        throw new Error(
+          data.error || (isEditing ? "Failed to update template" : "Failed to create template")
+        );
+      }
 
       setForm({
         name: "",
@@ -78,12 +94,44 @@ export default function OutreachTemplatesPage() {
         bodyTemplate: "",
         variables: "",
       });
+      setEditingId(null);
       await fetchTemplates();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create template");
+      setError(
+        err instanceof Error
+          ? err.message
+          : editingId
+            ? "Failed to update template"
+            : "Failed to create template"
+      );
     } finally {
       setSaving(false);
     }
+  };
+
+  const onEdit = (template: OutreachTemplate) => {
+    setEditingId(template._id);
+    setForm({
+      name: template.name,
+      type: template.type,
+      tone: template.tone,
+      subjectTemplate: template.subjectTemplate,
+      bodyTemplate: template.bodyTemplate,
+      variables: (template.variables || []).join(", "),
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const onCancelEdit = () => {
+    setEditingId(null);
+    setForm({
+      name: "",
+      type: "cold",
+      tone: "professional",
+      subjectTemplate: "",
+      bodyTemplate: "",
+      variables: "",
+    });
   };
 
   const onDelete = async (id: string) => {
@@ -113,7 +161,20 @@ export default function OutreachTemplatesPage() {
       )}
 
       <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <h2 className="font-semibold text-gray-900 mb-3">Add template</h2>
+        <div className="flex items-center justify-between mb-3 gap-3">
+          <h2 className="font-semibold text-gray-900">
+            {editingId ? "Edit template" : "Add template"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+            >
+              Cancel edit
+            </button>
+          )}
+        </div>
         <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="md:col-span-2">
             <label className="text-sm text-gray-700">Name</label>
@@ -190,7 +251,7 @@ export default function OutreachTemplatesPage() {
               disabled={saving}
               className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
             >
-              {saving ? "Saving..." : "Add template"}
+              {saving ? "Saving..." : editingId ? "Update template" : "Add template"}
             </button>
           </div>
         </form>
@@ -229,12 +290,26 @@ export default function OutreachTemplatesPage() {
                 {filtered.map((t) => (
                   <tr key={t._id} className="border-b last:border-b-0">
                     <td className="py-2 pr-4 font-medium text-gray-900">{t.name}</td>
-                    <td className="py-2 pr-4 text-gray-700">{t.type}</td>
-                    <td className="py-2 pr-4 text-gray-700">{t.tone}</td>
+                    <td className="py-2 pr-4 text-gray-700">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs ${
+                          typeBadgeClasses[t.type] || "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {t.type}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-4 text-gray-700 capitalize">{t.tone}</td>
                     <td className="py-2 pr-4 text-gray-700 max-w-[420px] truncate">
                       {t.subjectTemplate}
                     </td>
-                    <td className="py-2 text-right">
+                    <td className="py-2 text-right space-x-3">
+                      <button
+                        onClick={() => onEdit(t)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => onDelete(t._id)}
                         className="text-red-600 hover:text-red-700"

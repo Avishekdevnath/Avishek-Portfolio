@@ -9,25 +9,28 @@ import IntroLoader from '@/components/IntroLoader';
 import NavigationLoader from '@/components/NavigationLoader';
 import { getSiteUrl } from '@/lib/url';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['300', '400', '600'],
   style: ['normal', 'italic'],
   variable: '--font-heading',
+  display: 'swap',
 });
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
   variable: '--font-body',
+  display: 'swap',
 });
 
 const dmMono = DM_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
   variable: '--font-mono',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {

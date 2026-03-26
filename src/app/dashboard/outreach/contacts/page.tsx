@@ -24,7 +24,15 @@ export default function OutreachContactsPage() {
     status: "new",
     notes: "",
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const statusPillClasses: Record<string, string> = {
+    new: "bg-slate-100 text-slate-700",
+    contacted: "bg-blue-100 text-blue-700",
+    replied: "bg-emerald-100 text-emerald-700",
+    closed: "bg-zinc-200 text-zinc-700",
+  };
 
   const fetchCompanies = async () => {
     const res = await fetch("/api/outreach/companies");
@@ -86,18 +94,28 @@ export default function OutreachContactsPage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/outreach/contacts", {
-        method: "POST",
+      const payload = {
+        ...form,
+        roleTitle: form.roleTitle || undefined,
+        linkedinUrl: form.linkedinUrl || undefined,
+        notes: form.notes || undefined,
+      };
+
+      const isEditing = Boolean(editingId);
+      const res = await fetch(
+        isEditing ? `/api/outreach/contacts/${editingId}` : "/api/outreach/contacts",
+        {
+          method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          roleTitle: form.roleTitle || undefined,
-          linkedinUrl: form.linkedinUrl || undefined,
-          notes: form.notes || undefined,
-        }),
-      });
+          body: JSON.stringify(payload),
+        }
+      );
       const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Failed to create contact");
+      if (!data.success) {
+        throw new Error(
+          data.error || (isEditing ? "Failed to update contact" : "Failed to create contact")
+        );
+      }
 
       setForm({
         companyId: "",
@@ -108,12 +126,46 @@ export default function OutreachContactsPage() {
         status: "new",
         notes: "",
       });
+      setEditingId(null);
       await fetchContacts();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create contact");
+      setError(
+        err instanceof Error
+          ? err.message
+          : editingId
+            ? "Failed to update contact"
+            : "Failed to create contact"
+      );
     } finally {
       setSaving(false);
     }
+  };
+
+  const onEdit = (contact: OutreachContact) => {
+    setEditingId(contact._id);
+    setForm({
+      companyId: contact.companyId,
+      name: contact.name,
+      email: contact.email,
+      roleTitle: contact.roleTitle || "",
+      linkedinUrl: contact.linkedinUrl || "",
+      status: contact.status,
+      notes: contact.notes || "",
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const onCancelEdit = () => {
+    setEditingId(null);
+    setForm({
+      companyId: "",
+      name: "",
+      email: "",
+      roleTitle: "",
+      linkedinUrl: "",
+      status: "new",
+      notes: "",
+    });
   };
 
   const onDelete = async (id: string) => {
@@ -154,7 +206,20 @@ export default function OutreachContactsPage() {
       )}
 
       <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <h2 className="font-semibold text-gray-900 mb-3">Add contact</h2>
+        <div className="flex items-center justify-between mb-3 gap-3">
+          <h2 className="font-semibold text-gray-900">
+            {editingId ? "Edit contact" : "Add contact"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+            >
+              Cancel edit
+            </button>
+          )}
+        </div>
         <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="md:col-span-2">
             <label className="text-sm text-gray-700">Company</label>
@@ -248,7 +313,7 @@ export default function OutreachContactsPage() {
               disabled={saving}
               className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
             >
-              {saving ? "Saving..." : "Add contact"}
+              {saving ? "Saving..." : editingId ? "Update contact" : "Add contact"}
             </button>
           </div>
         </form>
@@ -303,11 +368,21 @@ export default function OutreachContactsPage() {
                     <td className="py-2 pr-4 text-gray-700">{c.email}</td>
                     <td className="py-2 pr-4 text-gray-700">{c.company?.name || "—"}</td>
                     <td className="py-2 pr-4">
-                      <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs ${
+                          statusPillClasses[c.status] || "bg-gray-100 text-gray-700"
+                        }`}
+                      >
                         {c.status}
                       </span>
                     </td>
-                    <td className="py-2 text-right">
+                    <td className="py-2 text-right space-x-3">
+                      <button
+                        onClick={() => onEdit(c)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => onDelete(c._id)}
                         className="text-red-600 hover:text-red-700"

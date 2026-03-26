@@ -22,6 +22,10 @@ interface Bookmark {
   daysBookmarked?: number;
 }
 
+interface EditableBookmark extends Bookmark {
+  _id: string;
+}
+
 interface FetchResponse {
   success: boolean;
   data: Bookmark[];
@@ -61,6 +65,7 @@ export default function BookmarksPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [convertingBookmark, setConvertingBookmark] = useState<Bookmark | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBookmark, setEditingBookmark] = useState<EditableBookmark | null>(null);
 
   const prettifyPlatformName = (name: string) =>
     name
@@ -255,7 +260,10 @@ export default function BookmarksPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Bookmarks</h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setEditingBookmark(null);
+            setIsModalOpen(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-[#d4622a] text-white rounded-md hover:bg-[#2a2118] transition-colors shadow-md hover:shadow-lg"
         >
           <FiPlus size={18} /> Add Bookmark
@@ -265,9 +273,14 @@ export default function BookmarksPage() {
       {/* Create Bookmark Modal */}
       <CreateBookmarkModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingBookmark(null);
+        }}
         onSuccess={fetched}
         platforms={platformOptions}
+        mode={editingBookmark ? 'edit' : 'create'}
+        initialData={editingBookmark}
       />
 
       {/* Stats Widget */}
@@ -411,7 +424,12 @@ export default function BookmarksPage() {
               onStatusChange={handleStatusChange}
               onDelete={handleDelete}
               onConvert={handleConvert}
-              onEdit={(id) => console.log('Edit:', id)}
+              onEdit={(id) => {
+                const selected = bookmarks.find((item) => item._id === id);
+                if (!selected) return;
+                setEditingBookmark(selected as EditableBookmark);
+                setIsModalOpen(true);
+              }}
             />
           ))}
         </div>

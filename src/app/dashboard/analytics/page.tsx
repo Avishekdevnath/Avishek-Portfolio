@@ -1,109 +1,60 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
-  BarChart, 
-  LineChart, 
-  Bar, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend,
-  ResponsiveContainer 
-} from 'recharts';
-import { 
-  Users, 
-  Eye, 
-  ThumbsUp, 
-  Share2, 
-  Clock, 
-  TrendingUp,
-  Globe,
-  MessageCircle
-} from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 
-interface AnalyticsSummary {
+interface TrafficSummary {
   totalViews: number;
-  uniqueVisitors: number;
-  avgTimeSpent: number;
-  totalLikes: number;
-  totalShares: number;
-  topBlogs: Array<{title: string; views: number}>;
-  viewsByCountry: Array<{country: string; views: number}>;
-  dailyStats: Array<{
-    date: string;
-    views: number;
-    visitors: number;
-    likes: number;
-  }>;
+  humanViews: number;
+  botViews: number;
+  topPages: Array<{ path: string; views: number; humanViews: number }>;
+  topReferrers: Array<{ referer: string; views: number }>;
+  topCountries: Array<{ country: string; views: number }>;
+  dailyTrend: Array<{ date: string; humanViews: number; botViews: number }>;
 }
 
-interface MetricCardProps {
-  title: string;
-  value: string | number;
-  trend?: string;
-  icon: React.ElementType;
-  description?: string;
-}
-
-const MetricCard = ({ title, value, trend, icon: Icon, description }: MetricCardProps) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm">
-    <div className="flex justify-between items-start">
-      <div>
-        <div className="flex items-center">
-          <Icon size={20} className="text-blue-500 mr-2" />
-          <p className="text-sm text-gray-500">{title}</p>
-        </div>
-        <h3 className="text-2xl font-semibold mt-2">{value}</h3>
-        {trend && (
-          <p className={`text-sm flex items-center mt-2 ${trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-            <TrendingUp size={16} className="mr-1" />
-            {trend}
-          </p>
-        )}
-        {description && (
-          <p className="text-xs text-gray-500 mt-1">{description}</p>
-        )}
-      </div>
-    </div>
-  </div>
-);
+const EMPTY: TrafficSummary = {
+  totalViews: 0,
+  humanViews: 0,
+  botViews: 0,
+  topPages: [],
+  topReferrers: [],
+  topCountries: [],
+  dailyTrend: [],
+};
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState('7d');
-  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [range, setRange] = useState('7d');
+  const [data, setData] = useState<TrafficSummary>(EMPTY);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const response = await fetch(`/api/stats?range=${timeRange}`);
-        const data = await response.json();
-        setAnalytics(data);
-      } catch (error) {
-        console.error('Error fetching analytics:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/track/summary?range=${range}`);
+      const json = await res.json();
+      if (json.success) setData(json.data as TrafficSummary);
+      else setData(EMPTY);
+    } catch {
+      setData(EMPTY);
+    } finally {
+      setLoading(false);
+    }
+  }, [range]);
 
-    fetchAnalytics();
-  }, [timeRange]);
-
-  if (isLoading) {
-    return <div>Loading analytics...</div>;
-  }
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
-        <select 
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value)}
-          className="border rounded-md p-2"
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-[#8a7a6a] font-mono">Traffic</p>
+          <h1 className="text-2xl font-semibold text-[#2a2118] mt-1">Analytics</h1>
+        </div>
+        <select
+          value={range}
+          onChange={(e) => setRange(e.target.value)}
+          className="rounded-md border border-[#d8d0c5] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d4622a]/30"
         >
           <option value="7d">Last 7 days</option>
           <option value="30d">Last 30 days</option>
@@ -111,110 +62,116 @@ export default function AnalyticsPage() {
         </select>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Total Views"
-          value={analytics?.totalViews || 0}
-          trend="+12.3% vs last period"
-          icon={Eye}
-          description="Total page views across all content"
-        />
-        <MetricCard
-          title="Unique Visitors"
-          value={analytics?.uniqueVisitors || 0}
-          trend="+5.8% vs last period"
-          icon={Users}
-          description="Number of unique visitors"
-        />
-        <MetricCard
-          title="Avg. Time Spent"
-          value={`${analytics?.avgTimeSpent || 0}m`}
-          trend="+2.1% vs last period"
-          icon={Clock}
-          description="Average time spent per session"
-        />
-        <MetricCard
-          title="Engagement Rate"
-          value="68%"
-          trend="+8.4% vs last period"
-          icon={ThumbsUp}
-          description="Likes and shares per view"
-        />
-      </div>
-
-      {/* Traffic Overview */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Traffic Overview</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={analytics?.dailyStats || []}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="views" stroke="#2563eb" name="Views" />
-            <Line type="monotone" dataKey="visitors" stroke="#16a34a" name="Visitors" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Content Performance & Geographic Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Top Performing Content</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={analytics?.topBlogs || []}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="title" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="views" fill="#2563eb" />
-            </BarChart>
-          </ResponsiveContainer>
+      {loading ? (
+        <div className="rounded-xl border border-[#e8e3db] bg-white p-8 text-sm text-[#6b5c4e]">
+          Loading traffic data...
         </div>
+      ) : (
+        <>
+          {/* Summary strip */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[
+              { label: 'Total Views',    value: data.totalViews },
+              { label: 'Human Visitors', value: data.humanViews },
+              { label: 'Bot Traffic',    value: data.botViews   },
+            ].map(({ label, value }) => (
+              <div key={label} className="rounded-xl border border-[#e8e3db] bg-white p-5">
+                <p className="text-xs text-[#8a7a6a] uppercase tracking-wide">{label}</p>
+                <p className="text-3xl font-semibold text-[#2a2118] mt-1">{value.toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Geographic Distribution</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={analytics?.viewsByCountry || []}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="country" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="views" fill="#16a34a" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+          {/* Top Pages */}
+          <div className="rounded-xl border border-[#e8e3db] bg-white p-5">
+            <h2 className="text-base font-semibold text-[#2a2118] mb-3">Top Pages</h2>
+            {data.topPages.length === 0 ? (
+              <p className="text-sm text-[#6b5c4e]">No data yet.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-[#8a7a6a] uppercase tracking-wide border-b border-[#e8e3db]">
+                    <th className="pb-2 font-medium">Path</th>
+                    <th className="pb-2 font-medium text-right">Total</th>
+                    <th className="pb-2 font-medium text-right">Human</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.topPages.map((p) => (
+                    <tr key={p.path} className="border-b border-[#f3ede4] last:border-0">
+                      <td className="py-2 text-[#2a2118] font-mono text-xs">{p.path}</td>
+                      <td className="py-2 text-right text-[#4b3a2d]">{p.views}</td>
+                      <td className="py-2 text-right text-[#4b3a2d]">{p.humanViews}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
 
-      {/* Insights Section */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Key Insights</h2>
-        <div className="space-y-4">
-          <div className="flex items-start space-x-3">
-            <TrendingUp className="text-green-500" />
-            <div>
-              <h3 className="font-medium">Growing Engagement</h3>
-              <p className="text-sm text-gray-600">Your blog posts are receiving 23% more engagement compared to last month. Consider creating more content in similar topics.</p>
+          {/* Top Referrers + Top Countries */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-[#e8e3db] bg-white p-5">
+              <h2 className="text-base font-semibold text-[#2a2118] mb-3">Top Referrers</h2>
+              {data.topReferrers.length === 0 ? (
+                <p className="text-sm text-[#6b5c4e]">No referrer data yet.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {data.topReferrers.map((r) => (
+                    <li key={r.referer} className="flex justify-between text-sm">
+                      <span className="text-[#2a2118]">{r.referer}</span>
+                      <span className="text-[#6b5c4e]">{r.views}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-[#e8e3db] bg-white p-5">
+              <h2 className="text-base font-semibold text-[#2a2118] mb-3">Top Countries</h2>
+              {data.topCountries.length === 0 ? (
+                <p className="text-sm text-[#6b5c4e]">No country data yet.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {data.topCountries.map((c) => (
+                    <li key={c.country} className="flex justify-between text-sm">
+                      <span className="text-[#2a2118]">{c.country}</span>
+                      <span className="text-[#6b5c4e]">{c.views}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
-          <div className="flex items-start space-x-3">
-            <Globe className="text-blue-500" />
-            <div>
-              <h3 className="font-medium">International Reach</h3>
-              <p className="text-sm text-gray-600">Your content is gaining traction in new regions. Consider creating content in multiple languages to expand reach.</p>
-            </div>
+
+          {/* Daily Trend */}
+          <div className="rounded-xl border border-[#e8e3db] bg-white p-5">
+            <h2 className="text-base font-semibold text-[#2a2118] mb-3">Daily Trend</h2>
+            {data.dailyTrend.length === 0 ? (
+              <p className="text-sm text-[#6b5c4e]">No data yet.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-[#8a7a6a] uppercase tracking-wide border-b border-[#e8e3db]">
+                    <th className="pb-2 font-medium">Date</th>
+                    <th className="pb-2 font-medium text-right">Human</th>
+                    <th className="pb-2 font-medium text-right">Bot</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.dailyTrend.map((d) => (
+                    <tr key={d.date} className="border-b border-[#f3ede4] last:border-0">
+                      <td className="py-2 text-[#2a2118] font-mono text-xs">{d.date}</td>
+                      <td className="py-2 text-right text-[#4b3a2d]">{d.humanViews}</td>
+                      <td className="py-2 text-right text-[#4b3a2d]">{d.botViews}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-          <div className="flex items-start space-x-3">
-            <Clock className="text-purple-500" />
-            <div>
-              <h3 className="font-medium">Peak Traffic Times</h3>
-              <p className="text-sm text-gray-600">Your content receives most engagement between 2 PM and 6 PM UTC. Consider scheduling new posts during these hours.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

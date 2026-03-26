@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
 interface PlatformItem {
@@ -35,6 +35,7 @@ function prettifyPlatformName(value: string) {
 
 export default function PlatformDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [platform, setPlatform] = useState<PlatformItem | null>(null);
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,10 +87,12 @@ export default function PlatformDetailPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: platform.name,
           description: platform.description,
           url: platform.url,
           note: platform.note,
           needsReferral: !!platform.needsReferral,
+          isActive: !!platform.isActive,
         }),
       });
 
@@ -102,6 +105,29 @@ export default function PlatformDetailPage() {
       toast.success('Platform updated');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update platform');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeletePlatform = async () => {
+    if (!platform?._id) return;
+    if (!window.confirm('Delete this platform? This cannot be undone.')) return;
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/job-hunt/platforms/${platform._id}`, {
+        method: 'DELETE',
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) {
+        throw new Error(json.error || 'Failed to delete platform');
+      }
+
+      toast.success('Platform deleted');
+      router.push('/dashboard/job-hunt/platforms');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete platform');
     } finally {
       setSaving(false);
     }
@@ -159,9 +185,10 @@ export default function PlatformDetailPage() {
           <div>
             <label className="block text-sm font-medium text-[#4c3f33] mb-1">Platform name</label>
             <input
-              value={headerName}
-              disabled
-              className="w-full rounded-md border border-[#ddd4c8] bg-[#f7f3ee] px-3 py-2 text-sm text-[#6b5c4e]"
+              value={platform.name}
+              onChange={(e) => setPlatform((prev) => (prev ? { ...prev, name: e.target.value } : prev))}
+              placeholder="e.g. linkedin"
+              className="w-full rounded-md border border-[#d8d0c5] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d4622a]/30"
             />
           </div>
 
@@ -197,23 +224,44 @@ export default function PlatformDetailPage() {
           />
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-[#4c3f33]">
-          <input
-            type="checkbox"
-            checked={!!platform.needsReferral}
-            onChange={(e) => setPlatform((prev) => (prev ? { ...prev, needsReferral: e.target.checked } : prev))}
-            className="h-4 w-4 rounded border-[#c9beb0] text-[#d4622a] focus:ring-[#d4622a]/30"
-          />
-          I need referral for this platform
-        </label>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 text-sm text-[#4c3f33]">
+            <input
+              type="checkbox"
+              checked={!!platform.needsReferral}
+              onChange={(e) => setPlatform((prev) => (prev ? { ...prev, needsReferral: e.target.checked } : prev))}
+              className="h-4 w-4 rounded border-[#c9beb0] text-[#d4622a] focus:ring-[#d4622a]/30"
+            />
+            I need referral for this platform
+          </label>
+          <label className="flex items-center gap-2 text-sm text-[#4c3f33]">
+            <input
+              type="checkbox"
+              checked={!!platform.isActive}
+              onChange={(e) => setPlatform((prev) => (prev ? { ...prev, isActive: e.target.checked } : prev))}
+              className="h-4 w-4 rounded border-[#c9beb0] text-[#d4622a] focus:ring-[#d4622a]/30"
+            />
+            Platform is active
+          </label>
+        </div>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-md bg-[#d4622a] px-4 py-2 text-sm font-medium text-white hover:bg-[#b85424] disabled:opacity-60"
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-md bg-[#d4622a] px-4 py-2 text-sm font-medium text-white hover:bg-[#b85424] disabled:opacity-60"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button
+            type="button"
+            onClick={handleDeletePlatform}
+            disabled={saving}
+            className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
+          >
+            Delete Platform
+          </button>
+        </div>
       </form>
 
       <div className="rounded-xl border border-[#e8e3db] bg-white p-5">

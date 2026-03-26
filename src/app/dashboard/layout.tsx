@@ -59,6 +59,8 @@ const sidebarItems: NavItem[] = [
     children: [
       { label: 'Overview', href: '/dashboard/job-hunt' },
       { label: 'Platform Store', href: '/dashboard/job-hunt/platforms' },
+      { label: 'Company Store', href: '/dashboard/job-hunt/companies' },
+      { label: 'HR Store', href: '/dashboard/job-hunt/hr' },
       { label: 'Applications', href: '/dashboard/job-hunt/applications' },
       { label: 'Job Leads', href: '/dashboard/job-hunt/leads' },
       { label: 'Bookmarks', href: '/dashboard/job-hunt/bookmarks' },
