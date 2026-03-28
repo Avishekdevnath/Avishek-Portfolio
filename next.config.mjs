@@ -1,10 +1,17 @@
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // Ignores all ESLint warnings during build
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    // Ignores all TypeScript errors during build
     ignoreBuildErrors: true,
   },
   images: {
@@ -15,26 +22,20 @@ const nextConfig = {
       },
     ],
   },
-  // Ensure API routes work properly on Vercel
-  experimental: {
-    serverComponentsExternalPackages: ['mongoose'],
-    serverActions: true,
-  },
-  // Runtime configuration for Vercel
+  serverExternalPackages: ['mongoose'],
   env: {
     MONGODB_URI: process.env.MONGODB_URI,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Don't resolve 'fs' module on the client to prevent this error
       config.resolve.fallback = {
         fs: false,
         net: false,
         tls: false,
-      }
+      };
     }
-    return config
+    return config;
   },
 };
 
-export default nextConfig; 
+export default withSerwist(nextConfig);

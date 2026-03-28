@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import HiringInquiry from '@/models/HiringInquiry';
+import { sendPushNotification } from '@/lib/push';
 
 // Simple in-memory rate limit by IP
 const rateLimiter = new Map<string, { count: number; ts: number }>();
@@ -80,6 +81,12 @@ export async function POST(request: NextRequest) {
       userAgent: request.headers.get('user-agent'),
       status: 'new',
     });
+
+    sendPushNotification({
+      title: 'New Hiring Inquiry',
+      body: `From: ${created.email}${created.company ? ` — ${created.company}` : ''}`,
+      url: '/dashboard/hiring-inquiries',
+    }).catch(console.error);
 
     return NextResponse.json({ success: true, data: created }, { status: 201 });
   } catch (error) {

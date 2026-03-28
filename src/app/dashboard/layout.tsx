@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import Sidebar, { NavItem } from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import PushNotificationSetup from '@/components/dashboard/PushNotificationSetup';
 
 const sidebarItems: NavItem[] = [
   {
@@ -188,6 +189,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f7f5f1] font-body">
       <DashboardPageReady />
+      <PushNotificationSetup />
 
       {/* Sidebar — fixed, always visible on md+, overlay on mobile */}
       <Sidebar

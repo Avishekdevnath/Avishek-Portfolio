@@ -7,12 +7,7 @@ import RichTextViewer from '@/components/shared/RichTextViewer';
 import { FaGithub, FaGitlab, FaBitbucket, FaGlobe, FaExternalLinkAlt, FaArrowRight } from 'react-icons/fa';
 import { getPublishedProjectById, getRelatedProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
-import dynamic from 'next/dynamic';
-
-const ProjectLightbox = dynamic(() => import('./ProjectLightbox'), {
-  ssr: false,
-  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-text-muted text-sm">Loading images...</div>
-});
+import ProjectLightbox from './ProjectLightboxClient';
 import { Technology, Repository, DemoURL } from '@/models/Project';
 
 interface ProjectDetailsProps {

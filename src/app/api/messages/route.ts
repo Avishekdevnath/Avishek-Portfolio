@@ -4,6 +4,7 @@ import connectDB from '@/lib/mongodb';
 import Message, { IMessage } from '@/models/Message';
 import { MessageCategory, MessageStatus } from '@/types/message';
 import { sendContactFormEmail } from '@/lib/email';
+import { sendPushNotification } from '@/lib/push';
 import { createMessageNotification } from '@/lib/notifications';
 import { Document, Types, Model } from 'mongoose';
 
@@ -166,6 +167,13 @@ export async function POST(request: NextRequest) {
         messagePreview: message.substring(0, 100)
       }
     });
+
+    // Send push notification
+    sendPushNotification({
+      title: 'New Message',
+      body: `From: ${name} — ${messageCategory}`,
+      url: '/dashboard/messages',
+    }).catch(console.error);
 
     // Send email notification
     try {

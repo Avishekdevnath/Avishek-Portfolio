@@ -36,7 +36,7 @@ interface ImageFile {
 }
 
 // Helper function to get Cloudinary URL without requiring the full package
-export const getImageUrl = (publicIdOrUrl: string, options: { width?: number; height?: number; quality?: string } = {}) => {
+export const getImageUrl = async (publicIdOrUrl: string, options: { width?: number; height?: number; quality?: string } = {}) => {
   if (!publicIdOrUrl) return '/placeholder-project.svg';
   
   // If it's already a full URL, check if it's a Cloudinary URL

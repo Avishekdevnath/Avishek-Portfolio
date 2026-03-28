@@ -82,7 +82,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${cormorant.variable} ${dmSans.variable} ${dmMono.variable} ${dmSans.className}`}>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0f0f0f" />
+        <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+      </head>
+      <body suppressHydrationWarning className={`${inter.variable} ${cormorant.variable} ${dmSans.variable} ${dmMono.variable} ${dmSans.className}`}>
         <ToastProvider>
           <PageReadyProvider>
             <PageViewTracker />

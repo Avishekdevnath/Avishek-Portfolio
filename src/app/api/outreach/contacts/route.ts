@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/mongodb';
 import OutreachContact from '@/models/OutreachContact';
 import OutreachCompany from '@/models/OutreachCompany';
 import { ensureDashboardAuth } from '../_auth';
+import { sendPushNotification } from '@/lib/push';
 
 export async function GET(request: NextRequest) {
   const authError = ensureDashboardAuth();
@@ -94,6 +95,12 @@ export async function POST(request: NextRequest) {
 
     await contact.validate();
     await contact.save();
+
+    sendPushNotification({
+      title: 'New Outreach Contact',
+      body: `${contact.name}${contact.roleTitle ? ` — ${contact.roleTitle}` : ''} added.`,
+      url: '/dashboard/outreach',
+    }).catch(console.error);
 
     return NextResponse.json({
       success: true,
