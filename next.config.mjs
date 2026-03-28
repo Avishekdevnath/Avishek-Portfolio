@@ -4,6 +4,17 @@ const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
+  globPublicPatterns: [],
+  exclude: [/^static\/chunks\/app\/api\/.*\.js$/],
+  manifestTransforms: [
+    async (manifestEntries) => ({
+      manifest: manifestEntries.map((entry) => ({
+        ...entry,
+        url: entry.url.replace(/\\/g, "/"),
+      })),
+      warnings: [],
+    }),
+  ],
 });
 
 /** @type {import('next').NextConfig} */
