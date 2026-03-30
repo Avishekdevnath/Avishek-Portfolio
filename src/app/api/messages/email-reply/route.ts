@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Message from '@/models/Message';
 import { parseIncomingEmailReply } from '@/lib/email';
 

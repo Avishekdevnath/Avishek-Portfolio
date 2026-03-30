@@ -4,7 +4,7 @@ import OutreachTemplate from '@/models/OutreachTemplate';
 import { ensureDashboardAuth } from '../_auth';
 
 export async function GET(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

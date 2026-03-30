@@ -11,7 +11,7 @@ interface RouteParams {
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -35,7 +35,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -65,7 +65,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

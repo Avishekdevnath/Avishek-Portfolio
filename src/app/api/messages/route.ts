@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Message, { IMessage } from '@/models/Message';
 import { MessageCategory, MessageStatus } from '@/types/message';
 import { sendContactFormEmail } from '@/lib/email';
@@ -208,15 +208,16 @@ export async function POST(request: NextRequest) {
 // PUT /api/messages/:id - Update message status
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
 
     const body = await request.json();
     const { status } = body;
 
-    const message = await Message.findById(params.id);
+    const message = await Message.findById(id);
     if (!message) {
       return NextResponse.json(
         { success: false, error: 'Message not found' },

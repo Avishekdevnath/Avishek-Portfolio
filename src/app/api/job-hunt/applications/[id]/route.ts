@@ -11,7 +11,7 @@ interface RouteParams {
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -43,7 +43,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -54,12 +54,32 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
+    const { status: newStatus, followUpReminderAt, ...rest } = body;
 
-    const updated = await JobApplication.findByIdAndUpdate(
-      params.id,
-      { ...body, updatedAt: new Date() },
-      { new: true, runValidators: true }
-    ).lean();
+    // Build the update object
+    const updateOps: Record<string, any> = { $set: { ...rest, updatedAt: new Date() } };
+
+    // Append to statusHistory if status is changing
+    if (newStatus) {
+      const current = await JobApplication.findById(params.id).select('status').lean();
+      if (current && current.status !== newStatus) {
+        updateOps.$push = { statusHistory: { status: newStatus, changedAt: new Date() } };
+      }
+      updateOps.$set.status = newStatus;
+    }
+
+    // Handle followUpReminderAt — reset reminderFired when a new date is set
+    if (followUpReminderAt !== undefined) {
+      updateOps.$set.followUpReminderAt = followUpReminderAt ? new Date(followUpReminderAt) : null;
+      if (followUpReminderAt) {
+        updateOps.$set.reminderFired = false;
+      }
+    }
+
+    const updated = await JobApplication.findByIdAndUpdate(params.id, updateOps, {
+      new: true,
+      runValidators: true,
+    }).lean();
 
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Application not found' }, { status: 404 });
@@ -82,7 +102,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidObjectId } from 'mongoose';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Project from '@/models/Project';
 import { deleteImage } from '@/lib/cloudinary';
 import { resolveAutoSlug, assertManualSlugAvailable, buildNextSlugHistory } from '@/lib/slug';
@@ -17,15 +17,16 @@ const validateId = (id: string) => {
 };
 
 // GET /api/projects/[id] - Get a single project
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     // Validate ID format first
-    const idValidation = validateId(params.id);
+    const idValidation = validateId(id);
     if (idValidation) return idValidation;
 
     await connectDB();
 
-    const project = await Project.findById(params.id).lean({ virtuals: true });
+    const project = await Project.findById(id).lean({ virtuals: true });
     if (!project) {
       return NextResponse.json({
         success: false,
@@ -64,7 +65,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 // PUT /api/projects/[id] - Update a project
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     await connectDB();
 
@@ -98,7 +100,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Get existing project
-    const existingProject = await Project.findById(params.id);
+    const existingProject = await Project.findById(id);
     if (!existingProject) {
       return NextResponse.json({
         success: false,
@@ -130,13 +132,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (incomingMode === 'manual' && body.slug && body.slug !== currentSlug) {
       body.slug = await assertManualSlugAvailable(
         body.slug,
-        async (s) => !!(await Project.findOne({ slug: s, _id: { $ne: params.id } })),
+        async (s) => !!(await Project.findOne({ slug: s, _id: { $ne: id } })),
         currentSlug
       );
     } else if (incomingMode === 'auto' && body.title && body.title !== existingProject.title) {
       body.slug = await resolveAutoSlug(
         body.title,
-        async (s) => !!(await Project.findOne({ slug: s, _id: { $ne: params.id } }))
+        async (s) => !!(await Project.findOne({ slug: s, _id: { $ne: id } }))
       );
     }
 
@@ -153,7 +155,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     };
 
     const updatedProject = await Project.findByIdAndUpdate(
-      params.id,
+      id,
       updateData,
       { new: true, runValidators: true }
     ).lean({ virtuals: true });
@@ -201,14 +203,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PATCH /api/projects/[id] - Partially update a project
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     await connectDB();
 
     const body = await request.json();
 
     // Get existing project
-    const existingProject = await Project.findById(params.id);
+    const existingProject = await Project.findById(id);
     if (!existingProject) {
       return NextResponse.json({
         success: false,
@@ -226,7 +229,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     // Update only provided fields
     const updatedProject = await Project.findByIdAndUpdate(
-      params.id,
+      id,
       { $set: body },
       { new: true, runValidators: true }
     ).lean({ virtuals: true });
@@ -274,12 +277,13 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 }
 
 // DELETE /api/projects/[id] - Delete a project
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   try {
     await connectDB();
 
     // Get project to delete
-    const project = await Project.findById(params.id);
+    const project = await Project.findById(id);
     if (!project) {
       return NextResponse.json({
         success: false,
@@ -297,7 +301,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
     }
 
     // Delete project
-    await Project.findByIdAndDelete(params.id);
+    await Project.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
@@ -309,4 +313,4 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
       error: error instanceof Error ? error.message : 'Failed to delete project'
     }, { status: 500 });
   }
-} 
+}

@@ -10,6 +10,14 @@ export interface IPlatformList extends Document {
   createdBy?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  // Reputation fields
+  publicReview?: string;
+  recommendation?: string;
+  reputationScore?: number;
+  remoteFocusScore?: number;
+  curationScore?: number;
+  payPotentialScore?: number;
+  priorityScore?: number;
 }
 
 const platformListSchema = new Schema<IPlatformList>(
@@ -64,6 +72,13 @@ const platformListSchema = new Schema<IPlatformList>(
       ref: 'User',
       sparse: true,
     },
+    publicReview: { type: String, trim: true, maxlength: [1000, 'Public review cannot exceed 1000 characters'] },
+    recommendation: { type: String, trim: true, maxlength: [500, 'Recommendation cannot exceed 500 characters'] },
+    reputationScore: { type: Number, min: 1, max: 5 },
+    remoteFocusScore: { type: Number, min: 1, max: 5 },
+    curationScore: { type: Number, min: 1, max: 5 },
+    payPotentialScore: { type: Number, min: 1, max: 5 },
+    priorityScore: { type: Number, min: 0, max: 100 },
   },
   {
     timestamps: true,

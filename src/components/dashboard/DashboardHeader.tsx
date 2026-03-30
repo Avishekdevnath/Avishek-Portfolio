@@ -6,6 +6,7 @@ import { LogOut, Menu, Settings } from 'lucide-react';
 
 interface HeaderProps {
   onMenuToggle: () => void;
+  sidebarCollapsed: boolean;
 }
 
 const PAGE_TITLES: Record<string, string> = {
@@ -44,7 +45,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/settings': 'Settings',
 };
 
-export default function DashboardHeader({ onMenuToggle }: HeaderProps) {
+export default function DashboardHeader({ onMenuToggle, sidebarCollapsed }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [fullName, setFullName] = useState('Admin');
@@ -84,7 +85,7 @@ export default function DashboardHeader({ onMenuToggle }: HeaderProps) {
     .toUpperCase();
 
   return (
-    <header className="fixed top-0 left-0 right-0 md:left-[240px] h-14 bg-[#f7f5f1] border-b border-[#e8e3db] z-20 flex items-center justify-between px-4 sm:px-6">
+    <header className={`fixed top-0 right-0 left-0 h-14 bg-[#f7f5f1] border-b border-[#e8e3db] z-20 flex items-center justify-between px-4 sm:px-6 transition-[left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:left-[60px]' : 'md:left-[240px]'}`}>
 
       {/* ── Left: hamburger + page title ── */}
       <div className="flex items-center gap-3">

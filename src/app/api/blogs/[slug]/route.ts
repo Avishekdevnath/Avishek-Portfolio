@@ -12,12 +12,13 @@ async function resolveBlog(slug: string) {
 // GET /api/blogs/[slug] - Get a single blog
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB();
 
-    const blog = await resolveBlog(params.slug);
+    const { slug } = await params;
+    const blog = await resolveBlog(slug);
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -40,12 +41,13 @@ export async function GET(
 // PUT /api/blogs/[slug] - Update a blog
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB();
 
-    const blog = await resolveBlog(params.slug);
+    const { slug } = await params;
+    const blog = await resolveBlog(slug);
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -121,12 +123,13 @@ export async function PUT(
 // DELETE /api/blogs/[slug] - Delete a blog
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB();
 
-    const blog = await resolveBlog(params.slug);
+    const { slug } = await params;
+    const blog = await resolveBlog(slug);
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -151,12 +154,13 @@ export async function DELETE(
 // PATCH /api/blogs/[slug] - Handle blog actions (like, unlike, etc.)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB();
 
-    const blog = await resolveBlog(params.slug);
+    const { slug } = await params;
+    const blog = await resolveBlog(slug);
     if (!blog) {
       return NextResponse.json({
         success: false,

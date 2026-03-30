@@ -9,7 +9,7 @@ import { ensureDashboardAuth } from '../../_auth';
 import { generateAIContent, buildFollowUpPrompt, parseAIResponse } from '@/lib/outreach-ai';
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -117,6 +117,8 @@ export async function POST(request: NextRequest) {
     const suggestedFollowUpDate = new Date();
     suggestedFollowUpDate.setDate(suggestedFollowUpDate.getDate() + followUpGapDays);
 
+    const modelUsed = process.env.OPENAI_API_KEY ? (process.env.OPENAI_MODEL || 'gpt-5.4') : 'gemini-pro';
+
     // Save as draft
     const draft = await OutreachDraft.create({
       contactId: emailDoc.contactId,
@@ -126,7 +128,7 @@ export async function POST(request: NextRequest) {
       jobTitle: '',
       subject,
       body: followUpBody,
-      modelUsed: 'gemini-pro',
+      modelUsed,
     });
 
     return NextResponse.json({

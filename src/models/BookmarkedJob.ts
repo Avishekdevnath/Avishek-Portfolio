@@ -2,12 +2,26 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export type BookmarkStatus = 'saved' | 'applied' | 'discarded';
 
+export interface IBookmarkAIAnalysis {
+  relevanceScore: number;
+  relevanceSummary: string;
+  interviewPrep: string[];
+  resumeTips: string[];
+  skillGaps: string[];
+  generatedAt: Date;
+}
+
 export interface IBookmarkedJob extends Document {
   jobTitle: string;
   company: string;
   platform: string;
   jobUrl: string;
   notes?: string;
+  jobDescription?: string;
+  resumeLink?: string;
+  followUpDate?: Date;
+  followUpDone: boolean;
+  aiAnalysis?: IBookmarkAIAnalysis;
   status: BookmarkStatus;
   linkedApplicationId?: Types.ObjectId;
   bookmarkedDate: Date;
@@ -93,6 +107,32 @@ const bookmarkedJobSchema = new Schema<IBookmarkedJob>(
       ref: 'User',
       index: true,
       sparse: true,
+    },
+    jobDescription: {
+      type: String,
+      trim: true,
+      maxlength: [20000, 'Job description cannot exceed 20000 characters'],
+    },
+    resumeLink: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Resume link cannot exceed 500 characters'],
+    },
+    followUpDate: {
+      type: Date,
+      default: null,
+    },
+    followUpDone: {
+      type: Boolean,
+      default: false,
+    },
+    aiAnalysis: {
+      relevanceScore: { type: Number, min: 0, max: 100 },
+      relevanceSummary: { type: String },
+      interviewPrep: { type: [String], default: [] },
+      resumeTips: { type: [String], default: [] },
+      skillGaps: { type: [String], default: [] },
+      generatedAt: { type: Date },
     },
   },
   {

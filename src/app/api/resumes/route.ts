@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { ResumeVariant } from '@/models/ResumeVariant';
 import { buildUniqueSlug, isValidResumeSlug, normalizeResumeSlug } from '@/lib/resume-slug';
 import { ensureDashboardAuth } from '../job-hunt/_auth';
 
 export async function GET() {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -29,7 +29,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

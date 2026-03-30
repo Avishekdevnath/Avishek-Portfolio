@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { Education } from '@/models/Experience';
 
 // GET /api/experience/education/[id] - Get a specific education entry
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
-    
-    const education = await Education.findById(params.id);
+    await connectDB();
+
+    const { id } = await params;
+    const education = await Education.findById(id);
     
     if (!education) {
       return NextResponse.json({
@@ -29,12 +30,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PUT /api/experience/education/[id] - Update an education entry
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
-    
+    await connectDB();
+
+    const { id } = await params;
     const body = await request.json();
-    
+
     // Convert string dates to Date objects
     if (body.startDate) {
       body.startDate = new Date(body.startDate);
@@ -45,7 +47,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Update education entry
     const education = await Education.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true, runValidators: true }
     );
@@ -71,17 +73,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // PATCH /api/experience/education/[id] - Partially update an education entry
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
+    const { id } = await params;
     const body = await request.json();
 
     if (body.startDate) body.startDate = new Date(body.startDate);
     if (body.endDate) body.endDate = new Date(body.endDate);
 
     const education = await Education.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true, runValidators: true }
     );
@@ -100,11 +103,12 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 }
 
 // DELETE /api/experience/education/[id] - Delete an education entry
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await connectToDatabase();
-    
-    const education = await Education.findByIdAndDelete(params.id);
+    await connectDB();
+
+    const { id } = await params;
+    const education = await Education.findByIdAndDelete(id);
     
     if (!education) {
       return NextResponse.json({

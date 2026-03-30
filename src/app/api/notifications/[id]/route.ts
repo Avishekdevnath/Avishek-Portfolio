@@ -11,12 +11,13 @@ interface NotificationModel extends Model<INotification> {
 // GET /api/notifications/[id] - Get specific notification
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const notification = await (Notification as any).findById(params.id);
+    const { id } = await params;
+    const notification = await (Notification as any).findById(id);
 
     if (!notification) {
       return NextResponse.json(
@@ -45,15 +46,16 @@ export async function GET(
 // PUT /api/notifications/[id] - Update notification (mark as read/unread)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
+    const { id } = await params;
     const body = await request.json();
     const { action, ...updateData } = body;
 
-    const notification = await Notification.findById(params.id);
+    const notification = await Notification.findById(id);
 
     if (!notification) {
       return NextResponse.json(
@@ -93,12 +95,13 @@ export async function PUT(
 // DELETE /api/notifications/[id] - Delete specific notification
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const notification = await (Notification as any).findByIdAndDelete(params.id);
+    const { id } = await params;
+    const notification = await (Notification as any).findByIdAndDelete(id);
 
     if (!notification) {
       return NextResponse.json(

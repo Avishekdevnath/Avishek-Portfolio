@@ -10,7 +10,7 @@ import { ensureDashboardAuth } from '../../_auth';
 import { generateAIContent, buildDraftPrompt, parseAIResponse } from '@/lib/outreach-ai';
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -108,6 +108,8 @@ export async function POST(request: NextRequest) {
     const aiResponse = await generateAIContent(prompt);
     const { subject, body: emailBody } = parseAIResponse(aiResponse);
 
+    const modelUsed = process.env.OPENAI_API_KEY ? (process.env.OPENAI_MODEL || 'gpt-5.4') : 'gemini-pro';
+
     // Save draft
     const draft = await OutreachDraft.create({
       contactId,
@@ -120,7 +122,7 @@ export async function POST(request: NextRequest) {
       selectedSkillIds: skills.map((s: any) => s._id),
       subject,
       body: emailBody,
-      modelUsed: 'gemini-pro',
+      modelUsed,
     });
 
     return NextResponse.json({
@@ -144,7 +146,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

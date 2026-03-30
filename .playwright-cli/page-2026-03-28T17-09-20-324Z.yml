@@ -1,0 +1,246 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e15]:
+      - generic [ref=e16]: Portfolio
+      - img "Avishek Devnath" [ref=e23]
+      - generic [ref=e25]: Avishek
+      - generic [ref=e27]: Devnath
+      - generic [ref=e28]: Software Engineer · Backend & System Design
+      - generic [ref=e33]: 6%
+    - generic [ref=e34]: “Building systems that last.”
+  - generic [ref=e35]:
+    - generic [ref=e36]:
+      - banner [ref=e39]:
+        - generic [ref=e40]:
+          - link "Avishek Devnath Avishek" [ref=e41] [cursor=pointer]:
+            - /url: /
+            - img "Avishek Devnath" [ref=e43]
+            - generic [ref=e44]: Avishek
+          - navigation "Main navigation" [ref=e45]:
+            - list [ref=e46]:
+              - listitem [ref=e47]:
+                - link "Home" [ref=e48] [cursor=pointer]:
+                  - /url: /
+                  - text: Home
+              - listitem [ref=e50]:
+                - link "About" [ref=e51] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e52]:
+                - link "Projects" [ref=e53] [cursor=pointer]:
+                  - /url: /projects
+              - listitem [ref=e54]:
+                - link "Blog" [ref=e55] [cursor=pointer]:
+                  - /url: /blogs
+              - listitem [ref=e56]:
+                - link "Tools" [ref=e57] [cursor=pointer]:
+                  - /url: https://aitoolbox-v1.vercel.app/
+                  - text: Tools
+                  - img [ref=e58]
+              - listitem [ref=e60]:
+                - link "Contact" [ref=e61] [cursor=pointer]:
+                  - /url: /contact
+              - listitem [ref=e62]:
+                - link "Hire Me" [ref=e63] [cursor=pointer]:
+                  - /url: /hire-me
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - img "Avishek Devnath" [ref=e69]
+            - generic [ref=e70]: Available for work
+          - generic [ref=e72]:
+            - paragraph [ref=e73]: Hello, I'm
+            - heading "Avishek Devnath" [level=1] [ref=e75]:
+              - text: Avishek
+              - emphasis [ref=e76]: Devnath
+            - paragraph [ref=e77]: Software Engineer · Backend & Systems
+            - paragraph [ref=e79]: Designing and operating backend systems with real users, real constraints, and long-term ownership.
+            - generic [ref=e81]: ~/
+            - generic [ref=e83]:
+              - link "Resume" [ref=e84] [cursor=pointer]:
+                - /url: https://drive.google.com/file/d/1Gn6SkgBT3oA7EVKMFJiM4boAASnwH8T5/view
+                - img [ref=e85]
+                - text: Resume
+              - link "Contact Me" [ref=e87] [cursor=pointer]:
+                - /url: "#contact"
+                - img [ref=e88]
+                - text: Contact Me
+            - generic [ref=e90]:
+              - generic [ref=e91]: Find me
+              - link "LinkedIn" [ref=e92] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/avishek-devnath/
+                - img [ref=e93]
+              - link "GitHub" [ref=e95] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath
+                - img [ref=e96]
+        - generic [ref=e99]:
+          - generic [ref=e100]: · NestJS
+          - generic [ref=e101]: · TypeScript
+          - generic [ref=e102]: · PostgreSQL
+          - generic [ref=e103]: · MongoDB
+          - generic [ref=e104]: · Python
+          - generic [ref=e105]: · REST APIs
+          - generic [ref=e106]: · System Design
+          - generic [ref=e107]: · React
+          - generic [ref=e108]: · Next.js
+          - generic [ref=e109]: · Node.js
+          - generic [ref=e110]: · RBAC
+          - generic [ref=e111]: · Auth Systems
+          - generic [ref=e112]: · C++
+          - generic [ref=e113]: · DSA
+          - generic [ref=e114]: · NestJS
+          - generic [ref=e115]: · TypeScript
+          - generic [ref=e116]: · PostgreSQL
+          - generic [ref=e117]: · MongoDB
+          - generic [ref=e118]: · Python
+          - generic [ref=e119]: · REST APIs
+          - generic [ref=e120]: · System Design
+          - generic [ref=e121]: · React
+          - generic [ref=e122]: · Next.js
+          - generic [ref=e123]: · Node.js
+          - generic [ref=e124]: · RBAC
+          - generic [ref=e125]: · Auth Systems
+          - generic [ref=e126]: · C++
+          - generic [ref=e127]: · DSA
+    - generic [ref=e129]:
+      - generic [ref=e130]:
+        - paragraph [ref=e131]: Get to Know More
+        - heading "About Me" [level=2] [ref=e134]:
+          - text: About
+          - emphasis [ref=e135]: Me
+        - paragraph [ref=e136]: Learn more about my background, experience, and educational journey in computer science and software development.
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - img "Avishek Devnath" [ref=e140]
+            - generic [ref=e141]: Available for work
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]: 3+
+              - generic [ref=e146]: Years
+            - generic [ref=e147]:
+              - generic [ref=e148]: 10k+
+              - generic [ref=e149]: Students
+            - generic [ref=e150]:
+              - generic [ref=e151]: 500+
+              - generic [ref=e152]: DSA
+        - generic [ref=e153]:
+          - generic [ref=e154]:
+            - paragraph [ref=e155]: Software Engineer · Backend & Systems
+            - heading "Avishek Devnath" [level=3] [ref=e157]:
+              - text: Avishek
+              - emphasis [ref=e158]: Devnath
+            - paragraph [ref=e159]: I'm a backend-focused software engineer with hands-on experience designing, building, and maintaining systems under real operational constraints. My work centers on owning system design decisions across APIs, data models, authorization, and background processing, and evolving those systems as requirements and usage grow.
+            - paragraph [ref=e160]: Beyond engineering, I've mentored 10,000+ students in DSA and backend development — an experience that sharpens fundamentals and communication. My primary professional focus remains building and operating backend systems with real users, real trade-offs, and long-term ownership.
+            - paragraph [ref=e161]: I have worked across internal and public-facing platforms, balancing scalability, security, and maintainability rather than optimizing for frameworks or short-term delivery.
+            - generic [ref=e162]:
+              - generic [ref=e163]: NestJS
+              - generic [ref=e164]: TypeScript
+              - generic [ref=e165]: PostgreSQL
+              - generic [ref=e166]: MongoDB
+              - generic [ref=e167]: Python
+              - generic [ref=e168]: System Design
+              - generic [ref=e169]: RBAC
+              - generic [ref=e170]: REST APIs
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - generic [ref=e173]:
+                - generic [ref=e174]: 💼
+                - generic [ref=e175]: Experience
+              - paragraph [ref=e176]:
+                - strong [ref=e177]: 3+ years
+                - text: as a backend-focused software engineer, building production systems and mentoring 10,000+ students across DSA, backend engineering, and system design.
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e180]: 🎓
+                - generic [ref=e181]: Education
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - generic [ref=e184]: MSc in CSE (Ongoing)
+                  - generic [ref=e185]: 📍 University of Dhaka
+                - generic [ref=e187]:
+                  - generic [ref=e188]: BSc in CSE · 2020–2024
+                  - generic [ref=e189]: 📍 BGC Trust University Bangladesh
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - generic [ref=e192]: "01"
+              - generic [ref=e193]: Own the system
+              - generic [ref=e194]: Delivery is the floor, not the ceiling. I care about what happens after the PR merges.
+            - generic [ref=e195]:
+              - generic [ref=e196]: "02"
+              - generic [ref=e197]: Teach to understand
+              - generic [ref=e198]: Explaining to 10,000 students forces you to actually understand — teaching debugs your knowledge.
+            - generic [ref=e199]:
+              - generic [ref=e200]: "03"
+              - generic [ref=e201]: Constraints clarify
+              - generic [ref=e202]: Real systems operate under real constraints. I work well under them — time, infra, or team size.
+    - generic [ref=e204]:
+      - paragraph [ref=e205]: Technical Expertise
+      - heading "Professional Skills" [level=2] [ref=e208]:
+        - text: Professional
+        - emphasis [ref=e209]: Skills
+      - paragraph [ref=e210]: A clean, focused snapshot of the tools and domains I work with across backend, frontend, and product delivery.
+    - generic [ref=e301]:
+      - generic [ref=e302]:
+        - paragraph [ref=e303]: Get in Touch
+        - heading "Let's Work Together" [level=2] [ref=e306]:
+          - text: Let's Work
+          - emphasis [ref=e307]: Together
+        - paragraph [ref=e308]: Have a project in mind or just want to chat? I'd love to hear from you.
+      - generic [ref=e309]:
+        - generic [ref=e310]:
+          - generic [ref=e311]:
+            - paragraph [ref=e313]: Contact Information
+            - paragraph [ref=e315]: Feel free to reach out through any of these channels.
+          - paragraph [ref=e339]: Connect With Me
+        - generic [ref=e346]:
+          - paragraph [ref=e348]: Send a Message
+          - generic [ref=e350]:
+            - generic [ref=e351]:
+              - generic [ref=e352]: Your Name
+              - generic [ref=e353]:
+                - img
+                - textbox "Avishek Devnath" [ref=e354]
+            - generic [ref=e355]:
+              - generic [ref=e356]: Email Address
+              - generic [ref=e357]:
+                - img
+                - textbox "you@example.com" [ref=e358]
+            - generic [ref=e359]:
+              - generic [ref=e360]: Subject
+              - generic [ref=e361]:
+                - img
+                - combobox [ref=e362] [cursor=pointer]:
+                  - option "Job opportunity"
+                  - option "Project collaboration"
+                  - option "General inquiry" [selected]
+            - generic [ref=e363]:
+              - generic [ref=e364]: Message
+              - textbox "Tell me about your project, ideas, or questions…" [ref=e365]
+            - button "Send Message" [ref=e366] [cursor=pointer]:
+              - img [ref=e367]
+              - text: Send Message
+    - contentinfo [ref=e370]:
+      - generic [ref=e372]:
+        - generic [ref=e373]:
+          - generic [ref=e374]:
+            - link "Avishek Devnath" [ref=e375] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=e376]: Software Engineer · Backend & Systems
+          - generic [ref=e377]:
+            - paragraph [ref=e378]: Navigation
+            - navigation [ref=e379]:
+              - link "Home" [ref=e380] [cursor=pointer]:
+                - /url: /
+              - link "About" [ref=e381] [cursor=pointer]:
+                - /url: /about
+              - link "Projects" [ref=e382] [cursor=pointer]:
+                - /url: /projects
+              - link "Blog" [ref=e383] [cursor=pointer]:
+                - /url: /blogs
+              - link "Contact" [ref=e384] [cursor=pointer]:
+                - /url: /contact
+          - paragraph [ref=e386]: Connect
+        - generic [ref=e393]:
+          - paragraph [ref=e394]: © 2026 Avishek Devnath. All rights reserved.
+          - paragraph [ref=e395]: “Building systems that last.”
+  - alert [ref=e396]

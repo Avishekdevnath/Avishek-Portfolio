@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import CompanyCombobox from './CompanyCombobox';
+import PlatformCombobox from './PlatformCombobox';
 
 interface BookmarkFormData {
   _id?: string;
@@ -175,18 +177,12 @@ export default function CreateBookmarkModal({
 
         {/* Company */}
         <div className="space-y-1.5">
-          <label htmlFor="company" className="block text-xs sm:text-sm font-medium text-[#2a2118]">
+          <label className="block text-xs sm:text-sm font-medium text-[#2a2118]">
             Company <span className="text-red-500">*</span>
           </label>
-          <input
-            id="company"
-            type="text"
-            name="company"
+          <CompanyCombobox
             value={formData.company}
-            onChange={handleInputChange}
-            placeholder="e.g., Tech Corp Inc."
-            required
-            className="w-full px-3 sm:px-3.5 py-2 sm:py-2.5 border border-[#e8e3db] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d4622a] focus:border-transparent transition-all text-sm text-[#2a2118] placeholder-gray-400"
+            onChange={(value) => setFormData((prev) => ({ ...prev, company: value }))}
           />
         </div>
 
@@ -195,24 +191,13 @@ export default function CreateBookmarkModal({
 
           {/* Platform */}
           <div className="space-y-1.5">
-            <label htmlFor="platform" className="block text-xs sm:text-sm font-medium text-[#2a2118]">
+            <label className="block text-xs sm:text-sm font-medium text-[#2a2118]">
               Platform <span className="text-red-500">*</span>
             </label>
-            <select
-              id="platform"
-              name="platform"
+            <PlatformCombobox
               value={formData.platform}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 sm:px-3.5 py-2 sm:py-2.5 border border-[#e8e3db] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d4622a] focus:border-transparent transition-all text-sm text-[#2a2118] bg-white"
-            >
-              <option value="">Select a platform...</option>
-              {platforms.map((p) => (
-                <option key={p._id} value={p.name}>
-                  {prettifyPlatformName(p.name)}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setFormData((prev) => ({ ...prev, platform: value }))}
+            />
           </div>
 
           {/* Job URL */}
@@ -233,22 +218,6 @@ export default function CreateBookmarkModal({
           </div>
         </div>
 
-        {/* Bookmarked Date */}
-        <div className="space-y-1.5 bg-gradient-to-r from-[#f7f3ea] to-white p-3 sm:p-3.5 rounded-lg border border-[#d4622a]/20">
-          <label htmlFor="bookmarkedDate" className="block text-xs sm:text-sm font-medium text-[#2a2118]">
-            📅 Bookmarked Date <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="bookmarkedDate"
-            type="date"
-            name="bookmarkedDate"
-            value={formData.bookmarkedDate}
-            onChange={handleInputChange}
-            required
-            className="w-full px-3 sm:px-3.5 py-2 sm:py-2.5 border border-[#d4622a]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d4622a] focus:border-transparent transition-all text-sm text-[#2a2118] bg-white"
-          />
-          <p className="text-xs text-gray-500 mt-1">This will help you track when you bookmarked this job</p>
-        </div>
 
         {/* Notes */}
         <div className="space-y-1.5">

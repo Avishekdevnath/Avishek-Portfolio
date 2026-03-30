@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Message from '@/models/Message';
 import { IReply } from '@/types/message';
 import { sendReply } from '@/lib/email';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     const { replyMessage } = await request.json();
 
     // Find the message

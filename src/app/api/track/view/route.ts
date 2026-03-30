@@ -34,6 +34,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false });
   }
 
+  // Skip tracking for owner's IP
+  const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip')
+    || '';
+  const excludedIps = (process.env.EXCLUDED_IPS ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  if (clientIp && excludedIps.includes(clientIp)) {
+    return NextResponse.json({ success: true, skipped: true });
+  }
+
   try {
     await connectDB();
     await PageView.create({

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import PushSubscription from '@/models/PushSubscription';
 
 export async function POST(request: NextRequest) {

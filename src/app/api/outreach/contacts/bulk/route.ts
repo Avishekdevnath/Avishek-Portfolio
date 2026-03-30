@@ -26,7 +26,7 @@ interface BulkContactRow extends CsvRow {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

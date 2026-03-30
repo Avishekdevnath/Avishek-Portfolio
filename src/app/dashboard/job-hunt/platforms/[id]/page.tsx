@@ -14,6 +14,13 @@ interface PlatformItem {
   needsReferral?: boolean;
   curatedJobsCount: number;
   isActive?: boolean;
+  publicReview?: string;
+  recommendation?: string;
+  reputationScore?: number | '';
+  remoteFocusScore?: number | '';
+  curationScore?: number | '';
+  payPotentialScore?: number | '';
+  priorityScore?: number | '';
 }
 
 interface BookmarkItem {
@@ -93,6 +100,13 @@ export default function PlatformDetailPage() {
           note: platform.note,
           needsReferral: !!platform.needsReferral,
           isActive: !!platform.isActive,
+          publicReview: platform.publicReview || null,
+          recommendation: platform.recommendation || null,
+          reputationScore: platform.reputationScore === '' ? null : platform.reputationScore,
+          remoteFocusScore: platform.remoteFocusScore === '' ? null : platform.remoteFocusScore,
+          curationScore: platform.curationScore === '' ? null : platform.curationScore,
+          payPotentialScore: platform.payPotentialScore === '' ? null : platform.payPotentialScore,
+          priorityScore: platform.priorityScore === '' ? null : platform.priorityScore,
         }),
       });
 
@@ -243,6 +257,95 @@ export default function PlatformDetailPage() {
             />
             Platform is active
           </label>
+        </div>
+
+        {/* ── Reputation & Scoring ── */}
+        <div className="border-t border-[#f0ece5] pt-4 space-y-4">
+          <p className="text-[0.6rem] font-mono tracking-[0.18em] uppercase text-[#8a7a6a]">Reputation &amp; Scoring</p>
+
+          <div>
+            <label className="block text-sm font-medium text-[#4c3f33] mb-1">Public Review / Reputation Snapshot</label>
+            <textarea
+              rows={3}
+              value={platform.publicReview || ''}
+              onChange={(e) => setPlatform((prev) => (prev ? { ...prev, publicReview: e.target.value } : prev))}
+              placeholder="e.g. Public reviews are generally strong; users praise screened listings and legitimacy…"
+              className="w-full rounded-md border border-[#d8d0c5] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d4622a]/30 resize-y"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#4c3f33] mb-1">Recommendation</label>
+            <textarea
+              rows={2}
+              value={platform.recommendation || ''}
+              onChange={(e) => setPlatform((prev) => (prev ? { ...prev, recommendation: e.target.value } : prev))}
+              placeholder="e.g. Primary board if you want vetted listings and lower scam risk."
+              className="w-full rounded-md border border-[#d8d0c5] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d4622a]/30 resize-y"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {([
+              { key: 'reputationScore', label: 'Reputation' },
+              { key: 'remoteFocusScore', label: 'Remote Focus' },
+              { key: 'curationScore', label: 'Curation / Vetting' },
+              { key: 'payPotentialScore', label: 'Pay Potential' },
+              { key: 'priorityScore', label: 'Priority Score' },
+            ] as const).map(({ key, label }) => (
+              <div key={key}>
+                <label className="block text-[0.68rem] font-mono tracking-wide uppercase text-[#8a7a6a] mb-1">
+                  {label}
+                  <span className="normal-case tracking-normal ml-1 text-[#b0a89e]">
+                    {key === 'priorityScore' ? '(0–100)' : '(1–5)'}
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  min={key === 'priorityScore' ? 0 : 1}
+                  max={key === 'priorityScore' ? 100 : 5}
+                  step={key === 'priorityScore' ? 1 : 0.1}
+                  value={platform[key] ?? ''}
+                  onChange={(e) => setPlatform((prev) => (prev ? { ...prev, [key]: e.target.value === '' ? '' : Number(e.target.value) } : prev))}
+                  placeholder={key === 'priorityScore' ? '0–100' : '1–5'}
+                  className="w-full rounded-md border border-[#d8d0c5] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d4622a]/30"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Score display bar when all 4 ratings are filled */}
+          {platform.reputationScore && platform.remoteFocusScore && platform.curationScore && platform.payPotentialScore && (
+            <div className="flex items-center gap-4 bg-[#faf8f4] rounded-xl border border-[#e8e3db] px-4 py-3 flex-wrap">
+              {[
+                { label: 'Reputation', val: platform.reputationScore },
+                { label: 'Remote', val: platform.remoteFocusScore },
+                { label: 'Curation', val: platform.curationScore },
+                { label: 'Pay', val: platform.payPotentialScore },
+              ].map(({ label, val }) => (
+                <div key={label} className="flex items-center gap-1.5">
+                  <span className="text-[0.65rem] font-mono text-[#8a7a6a] uppercase tracking-wide">{label}</span>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((dot) => (
+                      <span
+                        key={dot}
+                        className={`w-2 h-2 rounded-full ${Number(val) >= dot ? 'bg-[#d4622a]' : 'bg-[#e8e3db]'}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[0.72rem] font-mono font-medium text-[#2a2118]">{val}</span>
+                </div>
+              ))}
+              {platform.priorityScore !== undefined && platform.priorityScore !== '' && (
+                <div className="ml-auto flex items-center gap-2">
+                  <span className="text-[0.65rem] font-mono text-[#8a7a6a] uppercase tracking-wide">Priority</span>
+                  <span className={`text-lg font-bold font-mono ${Number(platform.priorityScore) >= 80 ? 'text-[#2e7d52]' : Number(platform.priorityScore) >= 60 ? 'text-[#d97706]' : 'text-[#d4622a]'}`}>
+                    {platform.priorityScore}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

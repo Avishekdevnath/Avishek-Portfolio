@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Stats from '@/models/Stats';
 import Project from '@/models/Project';
 import Skill from '@/models/Skill';

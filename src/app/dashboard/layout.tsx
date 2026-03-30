@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense, useEffect, useRef } from 'react';
+import { useState, Suspense, useEffect, useRef, useCallback } from 'react';
 import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { usePageReady } from '@/context/PageReadyContext';
@@ -185,20 +185,34 @@ function DashboardPageReady() {
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Persist sidebar collapsed state
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebar-collapsed');
+    if (saved === 'true') setCollapsed(true);
+  }, []);
+
+  const handleCollapseToggle = () => {
+    setCollapsed(v => {
+      localStorage.setItem('sidebar-collapsed', String(!v));
+      return !v;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#f7f5f1] font-body">
       <DashboardPageReady />
       <PushNotificationSetup />
 
-      {/* Sidebar — fixed, always visible on md+, overlay on mobile */}
       <Sidebar
         isOpen={mobileOpen}
         onToggle={() => setMobileOpen(false)}
+        collapsed={collapsed}
+        onCollapseToggle={handleCollapseToggle}
         items={sidebarItems}
       />
 
-      {/* Mobile overlay backdrop */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-20 md:hidden"
@@ -207,18 +221,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         />
       )}
 
-      {/* Header — fixed, offset by sidebar on md+ */}
-      <DashboardHeader onMenuToggle={() => setMobileOpen(v => !v)} />
+      <DashboardHeader
+        onMenuToggle={() => setMobileOpen(v => !v)}
+        sidebarCollapsed={collapsed}
+      />
 
-      {/* Main content — offset by sidebar + header */}
-      <main className="md:ml-[240px] pt-14 min-h-screen">
-        <div className="p-5 lg:p-6 max-w-[1200px] mx-auto">
+      <main className={`pt-14 min-h-screen transition-[margin-left] duration-300 ease-in-out ${collapsed ? 'md:ml-[60px]' : 'md:ml-[240px]'}`}>
+        <div className="py-2 max-w-[1200px] mx-auto">
           <Suspense>
             {children}
           </Suspense>
         </div>
       </main>
-
     </div>
   );
 }

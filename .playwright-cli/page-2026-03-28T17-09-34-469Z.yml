@@ -1,0 +1,730 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e35]:
+    - generic [ref=e36]:
+      - banner [ref=e39]:
+        - generic [ref=e40]:
+          - link "Avishek Devnath Avishek" [ref=e41] [cursor=pointer]:
+            - /url: /
+            - img "Avishek Devnath" [ref=e43]
+            - generic [ref=e44]: Avishek
+          - navigation "Main navigation" [ref=e45]:
+            - list [ref=e46]:
+              - listitem [ref=e47]:
+                - link "Home" [ref=e48] [cursor=pointer]:
+                  - /url: /
+                  - text: Home
+              - listitem [ref=e50]:
+                - link "About" [ref=e51] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e52]:
+                - link "Projects" [ref=e53] [cursor=pointer]:
+                  - /url: /projects
+              - listitem [ref=e54]:
+                - link "Blog" [ref=e55] [cursor=pointer]:
+                  - /url: /blogs
+              - listitem [ref=e56]:
+                - link "Tools" [ref=e57] [cursor=pointer]:
+                  - /url: https://aitoolbox-v1.vercel.app/
+                  - text: Tools
+                  - img [ref=e58]
+              - listitem [ref=e60]:
+                - link "Contact" [ref=e61] [cursor=pointer]:
+                  - /url: /contact
+              - listitem [ref=e62]:
+                - link "Hire Me" [ref=e63] [cursor=pointer]:
+                  - /url: /hire-me
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - img "Avishek Devnath" [ref=e69]
+            - generic [ref=e70]: Available for work
+          - generic [ref=e72]:
+            - paragraph [ref=e73]: Hello, I'm
+            - heading "Avishek Devnath" [level=1] [ref=e75]:
+              - text: Avishek
+              - emphasis [ref=e76]: Devnath
+            - paragraph [ref=e77]: Software Engineer · Backend & Systems
+            - paragraph [ref=e79]: Designing and operating backend systems with real users, real constraints, and long-term ownership.
+            - generic [ref=e80]:
+              - generic [ref=e81]: ~/
+              - generic [ref=e397]: Teaching 10,000+ CS students
+            - generic [ref=e83]:
+              - link "Resume" [ref=e84] [cursor=pointer]:
+                - /url: https://drive.google.com/file/d/1Gn6SkgBT3oA7EVKMFJiM4boAASnwH8T5/view?usp=sharing
+                - img [ref=e85]
+                - text: Resume
+              - link "Contact Me" [ref=e87] [cursor=pointer]:
+                - /url: "#contact"
+                - img [ref=e88]
+                - text: Contact Me
+            - generic [ref=e90]:
+              - generic [ref=e91]: Find me
+              - link "LinkedIn" [ref=e92] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/avishek-devnath-cse
+                - img [ref=e93]
+              - link "GitHub" [ref=e95] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath
+                - img [ref=e96]
+              - link "Twitter/X" [ref=e398] [cursor=pointer]:
+                - /url: https://x.com/avishek_devnath
+                - img [ref=e399]
+        - generic [ref=e99]:
+          - generic [ref=e100]: · NestJS
+          - generic [ref=e101]: · TypeScript
+          - generic [ref=e102]: · PostgreSQL
+          - generic [ref=e103]: · MongoDB
+          - generic [ref=e104]: · Python
+          - generic [ref=e105]: · REST APIs
+          - generic [ref=e106]: · System Design
+          - generic [ref=e107]: · React
+          - generic [ref=e108]: · Next.js
+          - generic [ref=e109]: · Node.js
+          - generic [ref=e110]: · RBAC
+          - generic [ref=e111]: · Auth Systems
+          - generic [ref=e112]: · C++
+          - generic [ref=e113]: · DSA
+          - generic [ref=e114]: · NestJS
+          - generic [ref=e115]: · TypeScript
+          - generic [ref=e116]: · PostgreSQL
+          - generic [ref=e117]: · MongoDB
+          - generic [ref=e118]: · Python
+          - generic [ref=e119]: · REST APIs
+          - generic [ref=e120]: · System Design
+          - generic [ref=e121]: · React
+          - generic [ref=e122]: · Next.js
+          - generic [ref=e123]: · Node.js
+          - generic [ref=e124]: · RBAC
+          - generic [ref=e125]: · Auth Systems
+          - generic [ref=e126]: · C++
+          - generic [ref=e127]: · DSA
+    - generic [ref=e129]:
+      - generic [ref=e130]:
+        - paragraph [ref=e131]: Get to Know More
+        - heading "About Me" [level=2] [ref=e134]:
+          - text: About
+          - emphasis [ref=e135]: Me
+        - paragraph [ref=e136]: Learn more about my background, experience, and educational journey in computer science and software development.
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - img "Avishek Devnath" [ref=e140]
+            - generic [ref=e141]: Available for work
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]: 3+
+              - generic [ref=e146]: Years
+            - generic [ref=e147]:
+              - generic [ref=e148]: 10k+
+              - generic [ref=e149]: Students
+            - generic [ref=e150]:
+              - generic [ref=e151]: 500+
+              - generic [ref=e152]: DSA
+        - generic [ref=e153]:
+          - generic [ref=e154]:
+            - paragraph [ref=e155]: Software Engineer · Backend & Systems
+            - heading "Avishek Devnath" [level=3] [ref=e157]:
+              - text: Avishek
+              - emphasis [ref=e158]: Devnath
+            - paragraph [ref=e159]: I'm a backend-focused software engineer with hands-on experience designing, building, and maintaining systems under real operational constraints. My work centers on owning system design decisions across APIs, data models, authorization, and background processing, and evolving those systems as requirements and usage grow.
+            - paragraph [ref=e160]: Beyond engineering, I've mentored 10,000+ students in DSA and backend development — an experience that sharpens fundamentals and communication. My primary professional focus remains building and operating backend systems with real users, real trade-offs, and long-term ownership.
+            - paragraph [ref=e161]: I have worked across internal and public-facing platforms, balancing scalability, security, and maintainability rather than optimizing for frameworks or short-term delivery.
+            - generic [ref=e162]:
+              - generic [ref=e163]: NestJS
+              - generic [ref=e164]: TypeScript
+              - generic [ref=e165]: PostgreSQL
+              - generic [ref=e166]: MongoDB
+              - generic [ref=e167]: Python
+              - generic [ref=e168]: System Design
+              - generic [ref=e169]: RBAC
+              - generic [ref=e170]: REST APIs
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - generic [ref=e173]:
+                - generic [ref=e174]: 💼
+                - generic [ref=e175]: Experience
+              - paragraph [ref=e176]:
+                - strong [ref=e177]: 3+ years
+                - text: as a backend-focused software engineer, building production systems and mentoring 10,000+ students across DSA, backend engineering, and system design.
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e180]: 🎓
+                - generic [ref=e181]: Education
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - generic [ref=e184]: MSc in CSE (Ongoing)
+                  - generic [ref=e185]: 📍 University of Dhaka
+                - generic [ref=e187]:
+                  - generic [ref=e188]: BSc in CSE · 2020–2024
+                  - generic [ref=e189]: 📍 BGC Trust University Bangladesh
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - generic [ref=e192]: "01"
+              - generic [ref=e193]: Own the system
+              - generic [ref=e194]: Delivery is the floor, not the ceiling. I care about what happens after the PR merges.
+            - generic [ref=e195]:
+              - generic [ref=e196]: "02"
+              - generic [ref=e197]: Teach to understand
+              - generic [ref=e198]: Explaining to 10,000 students forces you to actually understand — teaching debugs your knowledge.
+            - generic [ref=e199]:
+              - generic [ref=e200]: "03"
+              - generic [ref=e201]: Constraints clarify
+              - generic [ref=e202]: Real systems operate under real constraints. I work well under them — time, infra, or team size.
+    - generic [ref=e203]:
+      - generic [ref=e204]:
+        - paragraph [ref=e205]: Technical Expertise
+        - heading "Professional Skills" [level=2] [ref=e208]:
+          - text: Professional
+          - emphasis [ref=e209]: Skills
+        - paragraph [ref=e210]: A clean, focused snapshot of the tools and domains I work with across backend, frontend, and product delivery.
+      - generic [ref=e401]:
+        - generic [ref=e402]:
+          - generic [ref=e403]:
+            - generic [ref=e404]:
+              - generic [ref=e405]: 🤖
+              - generic [ref=e406]:
+                - generic [ref=e407]: AI & Machine Learning
+                - generic [ref=e408]: 5 Skills
+            - generic [ref=e409]: Focus Area
+          - generic [ref=e410]:
+            - generic [ref=e411]:
+              - generic [ref=e412]:
+                - generic [ref=e413]:
+                  - generic [ref=e414]: 🔶
+                  - generic [ref=e415]: TensorFlow
+                - generic [ref=e417]: 3.5 / 5
+              - paragraph [ref=e425]: Building and training neural networks
+            - generic [ref=e426]:
+              - generic [ref=e427]:
+                - generic [ref=e428]:
+                  - generic [ref=e429]: 🔥
+                  - generic [ref=e430]: PyTorch
+                - generic [ref=e432]: 3 / 5
+              - paragraph [ref=e440]: Developing deep learning models
+            - generic [ref=e441]:
+              - generic [ref=e442]:
+                - generic [ref=e443]:
+                  - generic [ref=e444]: 📊
+                  - generic [ref=e445]: Scikit-learn
+                - generic [ref=e447]: 4 / 5
+              - paragraph [ref=e455]: Implementing machine learning algorithms
+            - generic [ref=e456]:
+              - generic [ref=e457]:
+                - generic [ref=e458]:
+                  - generic [ref=e459]: 👁️
+                  - generic [ref=e460]: OpenCV
+                - generic [ref=e462]: 3.5 / 5
+              - paragraph [ref=e470]: Computer vision and image processing
+            - generic [ref=e471]:
+              - generic [ref=e472]:
+                - generic [ref=e473]:
+                  - generic [ref=e474]: 🐼
+                  - generic [ref=e475]: Pandas
+                - generic [ref=e477]: 4 / 5
+              - paragraph [ref=e485]: Data manipulation and analysis
+        - generic [ref=e486]:
+          - generic [ref=e487]:
+            - generic [ref=e488]:
+              - generic [ref=e489]: ⚙️
+              - generic [ref=e490]:
+                - generic [ref=e491]: Backend Development
+                - generic [ref=e492]: 7 Skills
+            - generic [ref=e493]: Focus Area
+          - generic [ref=e494]:
+            - generic [ref=e496]:
+              - generic [ref=e497]:
+                - generic [ref=e498]: ⚡
+                - generic [ref=e499]: FastAPI
+              - generic [ref=e501]: 3 / 5
+            - generic [ref=e510]:
+              - generic [ref=e511]:
+                - generic [ref=e512]: 🐍
+                - generic [ref=e513]: Django
+              - generic [ref=e515]: 3 / 5
+            - generic [ref=e523]:
+              - generic [ref=e524]:
+                - generic [ref=e525]:
+                  - generic [ref=e526]: 🟢
+                  - generic [ref=e527]: Node.js
+                - generic [ref=e529]: 4 / 5
+              - paragraph [ref=e537]: Building scalable server-side applications
+            - generic [ref=e538]:
+              - generic [ref=e539]:
+                - generic [ref=e540]:
+                  - generic [ref=e541]: 🌐
+                  - generic [ref=e542]: Express.js
+                - generic [ref=e544]: 4 / 5
+              - paragraph [ref=e552]: Creating robust REST APIs with Express.js
+            - generic [ref=e553]:
+              - generic [ref=e554]:
+                - generic [ref=e555]:
+                  - generic [ref=e556]: 🍃
+                  - generic [ref=e557]: MongoDB
+                - generic [ref=e559]: 4 / 5
+              - paragraph [ref=e567]: Working with NoSQL databases and MongoDB Atlas
+            - generic [ref=e568]:
+              - generic [ref=e569]:
+                - generic [ref=e570]:
+                  - generic [ref=e571]: 🐘
+                  - generic [ref=e572]: PostgreSQL
+                - generic [ref=e574]: 3.5 / 5
+              - paragraph [ref=e582]: Managing relational databases with PostgreSQL
+            - generic [ref=e583]:
+              - generic [ref=e584]:
+                - generic [ref=e585]:
+                  - generic [ref=e586]: 🐍
+                  - generic [ref=e587]: Python
+                - generic [ref=e589]: 4 / 5
+              - paragraph [ref=e597]: Developing backend services with Python
+        - generic [ref=e598]:
+          - generic [ref=e599]:
+            - generic [ref=e600]:
+              - generic [ref=e601]: 🎨
+              - generic [ref=e602]:
+                - generic [ref=e603]: Frontend Development
+                - generic [ref=e604]: 5 Skills
+            - generic [ref=e605]: Focus Area
+          - generic [ref=e606]:
+            - generic [ref=e607]:
+              - generic [ref=e608]:
+                - generic [ref=e609]:
+                  - generic [ref=e610]: ⚛️
+                  - generic [ref=e611]: React
+                - generic [ref=e613]: 4.5 / 5
+              - paragraph [ref=e621]: Building modern web applications with React and its ecosystem
+            - generic [ref=e622]:
+              - generic [ref=e623]:
+                - generic [ref=e624]:
+                  - generic [ref=e625]: ▲
+                  - generic [ref=e626]: Next.js
+                - generic [ref=e628]: 4 / 5
+              - paragraph [ref=e636]: Creating full-stack React applications with Next.js framework
+            - generic [ref=e637]:
+              - generic [ref=e638]:
+                - generic [ref=e639]:
+                  - generic [ref=e640]: 🟦
+                  - generic [ref=e641]: TypeScript
+                - generic [ref=e643]: 4 / 5
+              - paragraph [ref=e651]: Developing type-safe applications with TypeScript
+            - generic [ref=e652]:
+              - generic [ref=e653]:
+                - generic [ref=e654]:
+                  - generic [ref=e655]: 💨
+                  - generic [ref=e656]: Tailwind CSS
+                - generic [ref=e658]: 4.5 / 5
+              - paragraph [ref=e666]: Crafting responsive designs with Tailwind CSS
+            - generic [ref=e667]:
+              - generic [ref=e668]:
+                - generic [ref=e669]:
+                  - generic [ref=e670]: 🌐
+                  - generic [ref=e671]: HTML5/CSS3
+                - generic [ref=e673]: 5 / 5
+              - paragraph [ref=e681]: Creating semantic and accessible web layouts
+        - generic [ref=e682]:
+          - generic [ref=e683]:
+            - generic [ref=e684]:
+              - generic [ref=e685]: 🖌️
+              - generic [ref=e686]:
+                - generic [ref=e687]: Graphics & Design
+                - generic [ref=e688]: 4 Skills
+            - generic [ref=e689]: Focus Area
+          - generic [ref=e690]:
+            - generic [ref=e691]:
+              - generic [ref=e692]:
+                - generic [ref=e693]:
+                  - generic [ref=e694]: 🖼️
+                  - generic [ref=e695]: Photoshop
+                - generic [ref=e697]: 3.5 / 5
+              - paragraph [ref=e705]: Photo editing and manipulation
+            - generic [ref=e706]:
+              - generic [ref=e707]:
+                - generic [ref=e708]:
+                  - generic [ref=e709]: 🎭
+                  - generic [ref=e710]: Figma
+                - generic [ref=e712]: 4 / 5
+              - paragraph [ref=e720]: UI/UX design and prototyping
+            - generic [ref=e721]:
+              - generic [ref=e722]:
+                - generic [ref=e723]:
+                  - generic [ref=e724]: ✏️
+                  - generic [ref=e725]: Illustrator
+                - generic [ref=e727]: 3 / 5
+              - paragraph [ref=e735]: Vector graphics and illustrations
+            - generic [ref=e736]:
+              - generic [ref=e737]:
+                - generic [ref=e738]:
+                  - generic [ref=e739]: 🟦
+                  - generic [ref=e740]: Canva
+                - generic [ref=e742]: 4.5 / 5
+              - paragraph [ref=e750]: Quick graphic design and social media content
+        - generic [ref=e751]:
+          - generic [ref=e752]:
+            - generic [ref=e753]:
+              - generic [ref=e754]: 📋
+              - generic [ref=e755]:
+                - generic [ref=e756]: Office & Productivity
+                - generic [ref=e757]: 4 Skills
+            - generic [ref=e758]: Focus Area
+          - generic [ref=e759]:
+            - generic [ref=e760]:
+              - generic [ref=e761]:
+                - generic [ref=e762]:
+                  - generic [ref=e763]: 📘
+                  - generic [ref=e764]: Microsoft Office
+                - generic [ref=e766]: 4 / 5
+              - paragraph [ref=e774]: Advanced use of Word, Excel, and PowerPoint
+            - generic [ref=e775]:
+              - generic [ref=e776]:
+                - generic [ref=e777]:
+                  - generic [ref=e778]: 🌐
+                  - generic [ref=e779]: Google Workspace
+                - generic [ref=e781]: 4.5 / 5
+              - paragraph [ref=e789]: Collaborative work with Docs, Sheets, and Slides
+            - generic [ref=e790]:
+              - generic [ref=e791]:
+                - generic [ref=e792]:
+                  - generic [ref=e793]: 📝
+                  - generic [ref=e794]: Notion
+                - generic [ref=e796]: 4 / 5
+              - paragraph [ref=e804]: Project management and documentation
+            - generic [ref=e805]:
+              - generic [ref=e806]:
+                - generic [ref=e807]:
+                  - generic [ref=e808]: 📋
+                  - generic [ref=e809]: Trello
+                - generic [ref=e811]: 4 / 5
+              - paragraph [ref=e819]: Task management and team collaboration
+    - generic [ref=e217]:
+      - generic [ref=e218]:
+        - paragraph [ref=e820]: Shipped & Maintained
+        - heading "Featured Projects" [level=2] [ref=e823]:
+          - text: Featured
+          - emphasis [ref=e824]: Projects
+        - paragraph [ref=e825]: Selected systems where I owned backend architecture, data lifecycle, and reliability.
+      - generic [ref=e826]:
+        - generic [ref=e827]:
+          - generic [ref=e829]:
+            - img "BrainScale-CRM" [ref=e830]
+            - generic [ref=e832]: Featured
+            - generic [ref=e833]: Web Development
+          - generic [ref=e834]:
+            - link "BrainScale-CRM" [ref=e835] [cursor=pointer]:
+              - /url: /projects/brainscale-crm
+              - heading "BrainScale-CRM" [level=3] [ref=e836]
+            - paragraph [ref=e837]: BrainScale CRM is a multi-tenant CRM for managing students/customers, call workflows, follow-ups, and team collaboration.
+            - generic [ref=e838]:
+              - generic [ref=e839]: Next.js 16
+              - generic [ref=e840]: Node.js
+              - generic [ref=e841]: Prisma
+              - generic [ref=e842]: "+3"
+            - generic [ref=e843]:
+              - link "Code" [ref=e844] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath/BrainScale-CRM
+                - img [ref=e845]
+                - text: Code
+              - link "Demo" [ref=e847] [cursor=pointer]:
+                - /url: https://brain-scale-crm.vercel.app/
+                - img [ref=e848]
+                - text: Demo
+              - link "Details →" [ref=e850] [cursor=pointer]:
+                - /url: /projects/brainscale-crm
+        - generic [ref=e851]:
+          - generic [ref=e853]:
+            - img "IdentiFace" [ref=e854]
+            - generic [ref=e856]: Featured
+            - generic [ref=e857]: Machine Learning
+          - generic [ref=e858]:
+            - link "IdentiFace" [ref=e859] [cursor=pointer]:
+              - /url: /projects/identiface
+              - heading "IdentiFace" [level=3] [ref=e860]
+            - paragraph [ref=e861]: IdentiFace is a closed‑set, consent‑based face recognition system that runs fully offline.
+            - generic [ref=e862]:
+              - generic [ref=e863]: MTCNN
+              - generic [ref=e864]: FaceNet
+              - generic [ref=e865]: FAISS
+              - generic [ref=e866]: "+3"
+            - generic [ref=e867]:
+              - link "Code" [ref=e868] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath/IdentiFace
+                - img [ref=e869]
+                - text: Code
+              - link "Details →" [ref=e871] [cursor=pointer]:
+                - /url: /projects/identiface
+        - generic [ref=e872]:
+          - generic [ref=e874]:
+            - img "Ai-Toolbox" [ref=e875]
+            - generic [ref=e877]: Featured
+            - generic [ref=e878]: Web Development
+          - generic [ref=e879]:
+            - link "Ai-Toolbox" [ref=e880] [cursor=pointer]:
+              - /url: /projects/ai-toolbox
+              - heading "Ai-Toolbox" [level=3] [ref=e881]
+            - paragraph [ref=e882]: Ai-Toolbox is a comprehensive AI tools platform built with Next.js 15 and TypeScript, featuring a professional user dashboard, robust admin management
+            - generic [ref=e883]:
+              - generic [ref=e884]: Next.js 15
+              - generic [ref=e885]: React
+              - generic [ref=e886]: TypeScriptJWT
+              - generic [ref=e887]: "+1"
+            - generic [ref=e888]:
+              - link "Code" [ref=e889] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath/Ai-Toolbox
+                - img [ref=e890]
+                - text: Code
+              - link "Demo" [ref=e892] [cursor=pointer]:
+                - /url: https://aitoolbox-v1.vercel.app/
+                - img [ref=e893]
+                - text: Demo
+              - link "Details →" [ref=e895] [cursor=pointer]:
+                - /url: /projects/ai-toolbox
+        - generic [ref=e896]:
+          - generic [ref=e898]:
+            - img "FoodMart-an ecommerce platform" [ref=e899]
+            - generic [ref=e901]: Featured
+            - generic [ref=e902]: Web Development
+          - generic [ref=e903]:
+            - link "FoodMart-an ecommerce platform" [ref=e904] [cursor=pointer]:
+              - /url: /projects/foodmart-an-ecommerce-platform
+              - heading "FoodMart-an ecommerce platform" [level=3] [ref=e905]
+            - paragraph [ref=e906]: A Next.js-based e-commerce frontend featuring product catalog, cart, coupons, orders, blogs, and an admin management UI.
+            - generic [ref=e907]:
+              - generic [ref=e908]: Next.js
+              - generic [ref=e909]: React
+              - generic [ref=e910]: JavaScript
+              - generic [ref=e911]: "+2"
+            - generic [ref=e912]:
+              - link "Code" [ref=e913] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath/FoodMart-client-side
+                - img [ref=e914]
+                - text: Code
+              - link "Demo" [ref=e916] [cursor=pointer]:
+                - /url: https://food-mart-web.vercel.app/
+                - img [ref=e917]
+                - text: Demo
+              - link "Details →" [ref=e919] [cursor=pointer]:
+                - /url: /projects/foodmart-an-ecommerce-platform
+        - generic [ref=e920]:
+          - generic [ref=e922]:
+            - img "package-detector" [ref=e923]
+            - generic [ref=e925]: Featured
+            - generic [ref=e926]: NPM Package
+          - generic [ref=e927]:
+            - link "package-detector" [ref=e928] [cursor=pointer]:
+              - /url: /projects/package-detector
+              - heading "package-detector" [level=3] [ref=e929]
+            - paragraph [ref=e930]: A fast Node.js CLI that analyzes package.json to find unused, outdated, duplicate, and heavy dependencies, with optional GitHub PR automation.
+            - generic [ref=e932]: Node Js
+            - generic [ref=e933]:
+              - link "Code" [ref=e934] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath/package-detector
+                - img [ref=e935]
+                - text: Code
+              - link "Demo" [ref=e937] [cursor=pointer]:
+                - /url: https://www.npmjs.com/package/package-detector
+                - img [ref=e938]
+                - text: Demo
+              - link "Details →" [ref=e940] [cursor=pointer]:
+                - /url: /projects/package-detector
+        - generic [ref=e941]:
+          - generic [ref=e943]:
+            - img "quickstore" [ref=e944]
+            - generic [ref=e946]: Featured
+            - generic [ref=e947]: Python Package (pip)
+          - generic [ref=e948]:
+            - link "quickstore" [ref=e949] [cursor=pointer]:
+              - /url: /projects/quickstore
+              - heading "quickstore" [level=3] [ref=e950]
+            - paragraph [ref=e951]: A zero-dependency key-value database for Python with TTL, file management, in-memory search, and optional auth—usable via CLI or as a library.
+            - generic [ref=e952]:
+              - generic [ref=e953]: Python
+              - generic [ref=e954]: Pip
+              - generic [ref=e955]: FileDB
+              - generic [ref=e956]: "+6"
+            - generic [ref=e957]:
+              - link "Code" [ref=e958] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath/quickstore
+                - img [ref=e959]
+                - text: Code
+              - link "Demo" [ref=e961] [cursor=pointer]:
+                - /url: https://pypi.org/project/quickstore/
+                - img [ref=e962]
+                - text: Demo
+              - link "Details →" [ref=e964] [cursor=pointer]:
+                - /url: /projects/quickstore
+      - link "View All Projects →" [ref=e966] [cursor=pointer]:
+        - /url: /projects
+    - generic [ref=e278]:
+      - generic [ref=e279]:
+        - paragraph [ref=e967]: Career Highlights
+        - heading "Achievement Numbers" [level=2] [ref=e970]:
+          - text: Achievement
+          - emphasis [ref=e971]: Numbers
+        - paragraph [ref=e972]: Key metrics that showcase my professional growth and impact in software development and education.
+      - generic [ref=e283]:
+        - generic [ref=e973]:
+          - generic [ref=e975]:
+            - paragraph [ref=e976]: Programming Languages
+            - img [ref=e978]
+          - generic [ref=e980]: 25+
+          - paragraph [ref=e981]: Languages mastered in programming
+        - generic [ref=e982]:
+          - generic [ref=e984]:
+            - paragraph [ref=e985]: Projects Completed
+            - img [ref=e987]
+          - generic [ref=e989]: 14+
+          - paragraph [ref=e990]: Projects successfully completed
+        - generic [ref=e991]:
+          - generic [ref=e993]:
+            - paragraph [ref=e994]: Students Mentored
+            - img [ref=e996]
+          - generic [ref=e998]: 1,000+
+          - paragraph [ref=e999]: Students mentored and guided
+        - generic [ref=e1000]:
+          - generic [ref=e1002]:
+            - paragraph [ref=e1003]: Work Experience
+            - img [ref=e1005]
+          - generic [ref=e1007]: 4+
+          - paragraph [ref=e1008]: Years of professional experience
+      - paragraph [ref=e1010]: “Passionate about creating impactful solutions and sharing knowledge”
+    - generic [ref=e301]:
+      - generic [ref=e302]:
+        - paragraph [ref=e303]: Get in Touch
+        - heading "Let's Work Together" [level=2] [ref=e306]:
+          - text: Let's Work
+          - emphasis [ref=e307]: Together
+        - paragraph [ref=e308]: Have a project in mind or just want to chat? I'd love to hear from you.
+      - generic [ref=e309]:
+        - generic [ref=e310]:
+          - generic [ref=e311]:
+            - paragraph [ref=e313]: Contact Information
+            - paragraph [ref=e315]: Feel free to reach out through any of these channels.
+            - generic [ref=e316]:
+              - generic [ref=e1011]:
+                - img [ref=e1013]
+                - generic [ref=e1015]:
+                  - paragraph [ref=e1016]: Email
+                  - generic [ref=e1017]:
+                    - link "avishekdevnath@gmail.com" [ref=e1018] [cursor=pointer]:
+                      - /url: mailto:avishekdevnath@gmail.com
+                    - button "Copy to clipboard" [ref=e1019] [cursor=pointer]:
+                      - img [ref=e1020]
+              - generic [ref=e317]:
+                - img [ref=e1022]
+                - generic [ref=e319]:
+                  - paragraph [ref=e1024]: Phone
+                  - generic [ref=e321]:
+                    - link "+8801874819713" [ref=e1025] [cursor=pointer]:
+                      - /url: tel:8801874819713
+                    - button "Copy to clipboard" [ref=e1026] [cursor=pointer]:
+                      - img [ref=e1027]
+              - generic [ref=e322]:
+                - img [ref=e1029]
+                - generic [ref=e324]:
+                  - paragraph [ref=e1031]: Location
+                  - link "Dhaka, Bangladesh." [ref=e1032] [cursor=pointer]:
+                    - /url: https://www.google.com/maps/search/Dhaka%2C%20Bangladesh.
+              - generic [ref=e327]:
+                - img [ref=e1033]
+                - generic [ref=e329]:
+                  - paragraph [ref=e1036]: Response Time
+                  - link "Within 24 hours" [ref=e1037] [cursor=pointer]:
+                    - /url: "#"
+          - generic [ref=e337]:
+            - paragraph [ref=e339]: Connect With Me
+            - generic [ref=e341]:
+              - link "Website" [ref=e1038] [cursor=pointer]:
+                - /url: https://www.avishekdevnath.com
+                - img [ref=e1039]
+                - generic [ref=e1041]: Website
+              - link "GitHub" [ref=e1042] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath
+                - img [ref=e1043]
+                - generic [ref=e1045]: GitHub
+              - link "LinkedIn" [ref=e1046] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/avishek-devnath-cse
+                - img [ref=e1047]
+                - generic [ref=e1049]: LinkedIn
+              - link "Twitter" [ref=e1050] [cursor=pointer]:
+                - /url: https://x.com/avishek_devnath
+                - img [ref=e1051]
+                - generic [ref=e1053]: Twitter
+              - link "Instagram" [ref=e1054] [cursor=pointer]:
+                - /url: https://www.instagram.com/avishekdevnath
+                - img [ref=e1055]
+                - generic [ref=e1057]: Instagram
+              - link "YouTube" [ref=e1058] [cursor=pointer]:
+                - /url: https://www.youtube.com/@AvishekDevnathOfficial
+                - img [ref=e1059]
+                - generic [ref=e1061]: YouTube
+        - generic [ref=e346]:
+          - paragraph [ref=e348]: Send a Message
+          - generic [ref=e350]:
+            - generic [ref=e351]:
+              - generic [ref=e352]: Your Name
+              - generic [ref=e353]:
+                - img
+                - textbox "Avishek Devnath" [ref=e354]
+            - generic [ref=e355]:
+              - generic [ref=e356]: Email Address
+              - generic [ref=e357]:
+                - img
+                - textbox "you@example.com" [ref=e358]
+            - generic [ref=e359]:
+              - generic [ref=e360]: Subject
+              - generic [ref=e361]:
+                - img
+                - combobox [ref=e362] [cursor=pointer]:
+                  - option "Job opportunity"
+                  - option "Project collaboration"
+                  - option "General inquiry" [selected]
+            - generic [ref=e363]:
+              - generic [ref=e364]: Message
+              - textbox "Tell me about your project, ideas, or questions…" [ref=e365]
+            - button "Send Message" [ref=e366] [cursor=pointer]:
+              - img [ref=e367]
+              - text: Send Message
+    - contentinfo [ref=e370]:
+      - generic [ref=e372]:
+        - generic [ref=e373]:
+          - generic [ref=e374]:
+            - link "Avishek Devnath" [ref=e375] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=e376]: Full-stack Software Engineer with 3+ years of hands-on experience in building scalable, production-grade systems and mentoring 10,000+ learners in software engineering. Specialized in MERN and Django stacks with a strong focus on AI automation, cybersecurity, and system design. Passionate about innovation, performance optimization, and clean architecture.
+            - link "avishekdevnath@gmail.com" [ref=e1062] [cursor=pointer]:
+              - /url: mailto:avishekdevnath@gmail.com
+          - generic [ref=e377]:
+            - paragraph [ref=e378]: Navigation
+            - navigation [ref=e379]:
+              - link "Home" [ref=e380] [cursor=pointer]:
+                - /url: /
+              - link "About" [ref=e381] [cursor=pointer]:
+                - /url: /about
+              - link "Projects" [ref=e382] [cursor=pointer]:
+                - /url: /projects
+              - link "Blog" [ref=e383] [cursor=pointer]:
+                - /url: /blogs
+              - link "Contact" [ref=e384] [cursor=pointer]:
+                - /url: /contact
+          - generic [ref=e385]:
+            - paragraph [ref=e386]: Connect
+            - generic [ref=e387]:
+              - link "Website" [ref=e1063] [cursor=pointer]:
+                - /url: https://www.avishekdevnath.com
+                - img [ref=e1064]
+              - link "GitHub" [ref=e1066] [cursor=pointer]:
+                - /url: https://github.com/Avishekdevnath
+                - img [ref=e1067]
+              - link "LinkedIn" [ref=e1069] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/avishek-devnath-cse
+                - img [ref=e1070]
+              - link "Twitter" [ref=e1072] [cursor=pointer]:
+                - /url: https://x.com/avishek_devnath
+                - img [ref=e1073]
+              - link "Instagram" [ref=e1075] [cursor=pointer]:
+                - /url: https://www.instagram.com/avishekdevnath
+                - img [ref=e1076]
+              - link "YouTube" [ref=e1078] [cursor=pointer]:
+                - /url: https://www.youtube.com/@AvishekDevnathOfficial
+                - img [ref=e1079]
+        - generic [ref=e393]:
+          - paragraph [ref=e394]: © 2026 Avishek Devnath. All rights reserved.
+          - paragraph [ref=e395]: “Building systems that last.”
+  - alert [ref=e396]

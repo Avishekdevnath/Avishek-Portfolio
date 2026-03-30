@@ -4,11 +4,11 @@ import { connectDB } from '@/lib/mongodb';
 import OutreachTemplate from '@/models/OutreachTemplate';
 import { ensureDashboardAuth } from '../../_auth';
 
-export async function GET(_: NextRequest, context: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function GET(_: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
-  const { id } = context.params;
+  const { id } = await context.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ success: false, error: 'Invalid template id' }, { status: 400 });
   }
@@ -39,11 +39,11 @@ export async function GET(_: NextRequest, context: { params: { id: string } }) {
   }
 }
 
-export async function PATCH(request: NextRequest, context: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
-  const { id } = context.params;
+  const { id } = await context.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ success: false, error: 'Invalid template id' }, { status: 400 });
   }
@@ -78,11 +78,11 @@ export async function PATCH(request: NextRequest, context: { params: { id: strin
   }
 }
 
-export async function DELETE(_: NextRequest, context: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function DELETE(_: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
-  const { id } = context.params;
+  const { id } = await context.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ success: false, error: 'Invalid template id' }, { status: 400 });
   }

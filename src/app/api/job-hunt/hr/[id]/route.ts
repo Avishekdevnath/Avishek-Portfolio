@@ -6,19 +6,20 @@ import { Types } from 'mongoose';
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
+  const { id } = await params;
 
   try {
     await connectDB();
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid HR contact ID' }, { status: 400 });
     }
 
-    const hrContact = (await JobHuntHRContact.findById(params.id)
+    const hrContact = (await JobHuntHRContact.findById(id)
       .populate('companyId', 'name')
       .lean()) as any;
 
@@ -61,22 +62,23 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
+  const { id } = await params;
 
   try {
     await connectDB();
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid HR contact ID' }, { status: 400 });
     }
 
     const body = await request.json();
     const { name, email, phone, linkedinUrl, roleTitle, status, lastContactedAt, nextFollowUpAt, notes } = body;
 
-    const hrContact = await JobHuntHRContact.findById(params.id);
+    const hrContact = await JobHuntHRContact.findById(id);
 
     if (!hrContact) {
       return NextResponse.json(
@@ -130,19 +132,20 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
+  const { id } = await params;
 
   try {
     await connectDB();
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid HR contact ID' }, { status: 400 });
     }
 
-    const hrContact = await JobHuntHRContact.findByIdAndDelete(params.id);
+    const hrContact = await JobHuntHRContact.findByIdAndDelete(id);
 
     if (!hrContact) {
       return NextResponse.json(

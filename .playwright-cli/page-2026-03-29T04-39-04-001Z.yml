@@ -1,0 +1,21 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e15]:
+      - generic [ref=e16]: Portfolio
+      - img "Avishek Devnath" [ref=e23]
+      - generic [ref=e25]: Avishek
+      - generic [ref=e27]: Devnath
+      - generic [ref=e28]: Software Engineer · Backend & System Design
+      - generic [ref=e32]: 0%
+    - generic [ref=e33]: “Building systems that last.”
+  - generic [ref=e37]:
+    - generic [ref=e38]:
+      - generic [ref=e40]: A
+      - heading "Welcome Back" [level=1] [ref=e41]
+      - paragraph [ref=e42]: Enter your password to access the dashboard
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]: Password
+        - textbox "Password" [ref=e46]:
+          - /placeholder: Enter your password
+      - button "Login" [ref=e47] [cursor=pointer]

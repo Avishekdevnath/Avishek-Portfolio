@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import HiringInquiry from '@/models/HiringInquiry';
 import { sendPushNotification } from '@/lib/push';
 

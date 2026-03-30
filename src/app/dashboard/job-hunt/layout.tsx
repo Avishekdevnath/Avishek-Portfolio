@@ -6,8 +6,8 @@ export default function JobHuntLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="bg-[#faf8f4] min-h-screen">
+      <div className="max-w-6xl mx-auto py-5">
         {children}
       </div>
     </div>

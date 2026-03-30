@@ -51,6 +51,8 @@ export function generateConvertToApplicationPayload(bookmark: IBookmarkedJob) {
     dateApplied: new Date(),
     status: 'Applied',
     notes: bookmark.notes ? `(Bookmarked: ${bookmark.notes})` : undefined,
+    jobDescription: bookmark.jobDescription || undefined,
+    resumeLink: bookmark.resumeLink || undefined,
   };
 }
 
@@ -95,6 +97,11 @@ export function formatBookmarkResponse(bookmark: IBookmarkedJob) {
     platform: bookmark.platform,
     jobUrl: bookmark.jobUrl,
     notes: bookmark.notes || null,
+    jobDescription: bookmark.jobDescription || null,
+    resumeLink: bookmark.resumeLink || null,
+    followUpDate: bookmark.followUpDate || null,
+    followUpDone: bookmark.followUpDone ?? false,
+    aiAnalysis: bookmark.aiAnalysis || null,
     status: bookmark.status,
     linkedApplicationId: bookmark.linkedApplicationId || null,
     bookmarkedDate: bookmark.bookmarkedDate,

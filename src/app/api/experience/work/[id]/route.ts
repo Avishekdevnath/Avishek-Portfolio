@@ -6,12 +6,13 @@ import { IWorkExperience } from '@/types/experience';
 // GET /api/experience/work/[id] - Get a specific work experience
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   try {
     await connectDB();
-    
-    const workExperience = await WorkExperience.findById(params.id);
+
+    const { id } = await params;
+    const workExperience = await WorkExperience.findById(id);
     
     if (!workExperience) {
       return NextResponse.json({
@@ -35,11 +36,12 @@ export async function GET(
 // PUT /api/experience/work/[id] - Update a work experience
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   try {
     await connectDB();
-    
+
+    const { id } = await params;
     const body = await request.json();
     
     // Validate required fields
@@ -66,7 +68,7 @@ export async function PUT(
 
     // Update work experience
     const workExperience = await WorkExperience.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true, runValidators: true }
     );
@@ -94,12 +96,13 @@ export async function PUT(
 // DELETE /api/experience/work/[id] - Delete a work experience
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   try {
     await connectDB();
-    
-    const workExperience = await WorkExperience.findByIdAndDelete(params.id);
+
+    const { id } = await params;
+    const workExperience = await WorkExperience.findByIdAndDelete(id);
     
     if (!workExperience) {
       return NextResponse.json({

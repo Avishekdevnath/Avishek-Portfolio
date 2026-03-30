@@ -16,7 +16,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   const { id } = await params;
@@ -50,6 +50,13 @@ export async function GET(
         needsReferral: Boolean(platform.needsReferral),
         isActive: Boolean(platform.isActive),
         curatedJobsCount,
+        publicReview: platform.publicReview,
+        recommendation: platform.recommendation,
+        reputationScore: platform.reputationScore,
+        remoteFocusScore: platform.remoteFocusScore,
+        curationScore: platform.curationScore,
+        payPotentialScore: platform.payPotentialScore,
+        priorityScore: platform.priorityScore,
       },
     });
   } catch (error) {
@@ -67,7 +74,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   const { id } = await params;
@@ -99,6 +106,17 @@ export async function PATCH(
     if (typeof body.isActive === 'boolean') {
       updates.isActive = body.isActive;
     }
+    if (typeof body.publicReview === 'string' || body.publicReview === null) {
+      updates.publicReview = body.publicReview || undefined;
+    }
+    if (typeof body.recommendation === 'string' || body.recommendation === null) {
+      updates.recommendation = body.recommendation || undefined;
+    }
+    for (const field of ['reputationScore', 'remoteFocusScore', 'curationScore', 'payPotentialScore', 'priorityScore']) {
+      if (body[field] !== undefined) {
+        updates[field] = body[field] === null || body[field] === '' ? undefined : Number(body[field]);
+      }
+    }
 
     const platform = await PlatformList.findByIdAndUpdate(id, updates, {
       new: true,
@@ -127,6 +145,13 @@ export async function PATCH(
         needsReferral: Boolean(platform.needsReferral),
         isActive: Boolean(platform.isActive),
         curatedJobsCount,
+        publicReview: platform.publicReview,
+        recommendation: platform.recommendation,
+        reputationScore: platform.reputationScore,
+        remoteFocusScore: platform.remoteFocusScore,
+        curationScore: platform.curationScore,
+        payPotentialScore: platform.payPotentialScore,
+        priorityScore: platform.priorityScore,
       },
     });
   } catch (error) {
@@ -151,7 +176,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   const { id } = await params;

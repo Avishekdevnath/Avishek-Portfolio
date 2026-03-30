@@ -6,7 +6,7 @@ import { ensureDashboardAuth } from '../_auth';
 import { seedPlatforms } from '@/lib/migrations/003-seed-platforms';
 
 export async function GET(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -15,11 +15,21 @@ export async function GET(request: NextRequest) {
     const includeInactive = request.nextUrl.searchParams.get('includeInactive') === 'true';
     const baseFilter = includeInactive ? {} : { isActive: true };
 
-    let platforms = await PlatformList.find(baseFilter).sort({ name: 1 }).lean();
+    // Add search filter
+    const search = (request.nextUrl.searchParams.get('search') || '').trim();
+    let filter = { ...baseFilter };
+    if (search) {
+      filter = {
+        ...filter,
+        name: { $regex: search, $options: 'i' },
+      };
+    }
 
-    if (platforms.length === 0) {
+    let platforms = await PlatformList.find(filter).sort({ name: 1 }).lean();
+
+    if (platforms.length === 0 && !search) {
       await seedPlatforms();
-      platforms = await PlatformList.find(baseFilter).sort({ name: 1 }).lean();
+      platforms = await PlatformList.find(filter).sort({ name: 1 }).lean();
     }
 
     const counts = await BookmarkedJob.aggregate([
@@ -46,6 +56,11 @@ export async function GET(request: NextRequest) {
         needsReferral: Boolean((p as any).needsReferral),
         isActive: Boolean((p as any).isActive),
         curatedJobsCount: countByPlatform.get(String(p.name).toLowerCase()) || 0,
+        priorityScore: (p as any).priorityScore,
+        reputationScore: (p as any).reputationScore,
+        remoteFocusScore: (p as any).remoteFocusScore,
+        curationScore: (p as any).curationScore,
+        payPotentialScore: (p as any).payPotentialScore,
       })),
     });
   } catch (error) {
@@ -60,16 +75,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
     await connectDB();
 
     const body = await request.json();
-    const { name, description, url, note, needsReferral } = body;
+    const { name, description, url, note, needsReferral, publicReview, recommendation, reputationScore, remoteFocusScore, curationScore, payPotentialScore, priorityScore } = body;
 
-    if (!name || typeof name !== 'string') {
+    if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json(
         { success: false, error: 'Platform name is required' },
         { status: 400 }
@@ -78,11 +93,18 @@ export async function POST(request: NextRequest) {
 
     const platform = new PlatformList({
       name: name.toLowerCase().trim(),
-      description,
-      url,
-      note,
+      description: description || undefined,
+      url: url || undefined,
+      note: note || undefined,
       needsReferral: Boolean(needsReferral),
       isActive: true,
+      publicReview: publicReview || undefined,
+      recommendation: recommendation || undefined,
+      reputationScore: reputationScore != null && reputationScore !== '' ? Number(reputationScore) : undefined,
+      remoteFocusScore: remoteFocusScore != null && remoteFocusScore !== '' ? Number(remoteFocusScore) : undefined,
+      curationScore: curationScore != null && curationScore !== '' ? Number(curationScore) : undefined,
+      payPotentialScore: payPotentialScore != null && payPotentialScore !== '' ? Number(payPotentialScore) : undefined,
+      priorityScore: priorityScore != null && priorityScore !== '' ? Number(priorityScore) : undefined,
     });
 
     await platform.validate();

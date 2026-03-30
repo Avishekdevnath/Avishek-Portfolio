@@ -1,0 +1,127 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e8]: AD
+        - generic [ref=e9]:
+          - paragraph [ref=e10]: Avishek Devnath
+          - paragraph [ref=e11]: Software Engineer
+      - link "View Portfolio" [ref=e13] [cursor=pointer]:
+        - /url: /
+        - img [ref=e14]
+        - generic [ref=e18]: View Portfolio
+      - navigation [ref=e20]:
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: Main
+          - generic [ref=e23]:
+            - link "Overview" [ref=e26] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e27]
+              - generic [ref=e32]: Overview
+            - link "Outreach" [ref=e35] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e36]
+              - generic [ref=e39]: Outreach
+              - img [ref=e40]
+            - link "Job Hunt" [ref=e44] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e45]
+              - generic [ref=e49]: Job Hunt
+              - img [ref=e50]
+            - link "Tools" [ref=e54] [cursor=pointer]:
+              - /url: /dashboard/tools
+              - img [ref=e55]
+              - generic [ref=e57]: Tools
+        - generic [ref=e58]:
+          - paragraph [ref=e59]: Content
+          - generic [ref=e60]:
+            - link "Projects" [ref=e63] [cursor=pointer]:
+              - /url: /dashboard/projects
+              - img [ref=e64]
+              - generic [ref=e67]: Projects
+            - link "Skills" [ref=e70] [cursor=pointer]:
+              - /url: /dashboard/skills
+              - img [ref=e71]
+              - generic [ref=e75]: Skills
+            - link "Experience" [ref=e78] [cursor=pointer]:
+              - /url: /dashboard/experience
+              - img [ref=e79]
+              - generic [ref=e83]: Experience
+            - link "Education" [ref=e86] [cursor=pointer]:
+              - /url: /dashboard/education
+              - img [ref=e87]
+              - generic [ref=e90]: Education
+            - link "Achievements" [ref=e93] [cursor=pointer]:
+              - /url: /dashboard/achievements
+              - img [ref=e94]
+              - generic [ref=e97]: Achievements
+            - link "Statistics" [ref=e100] [cursor=pointer]:
+              - /url: /dashboard/stats
+              - img [ref=e101]
+              - generic [ref=e103]: Statistics
+            - link "Blog Posts" [ref=e106] [cursor=pointer]:
+              - /url: /dashboard/posts
+              - img [ref=e107]
+              - generic [ref=e109]: Blog Posts
+            - link "Resumes" [ref=e112] [cursor=pointer]:
+              - /url: /dashboard/resumes
+              - img [ref=e113]
+              - generic [ref=e116]: Resumes
+        - generic [ref=e117]:
+          - paragraph [ref=e118]: Engagement
+          - generic [ref=e119]:
+            - link "Messages" [ref=e122] [cursor=pointer]:
+              - /url: /dashboard/messages
+              - img [ref=e123]
+              - generic [ref=e126]: Messages
+            - link "Hiring Inquiries" [ref=e129] [cursor=pointer]:
+              - /url: /dashboard/hiring-inquiries
+              - img [ref=e130]
+              - generic [ref=e134]: Hiring Inquiries
+            - link "Notifications" [ref=e137] [cursor=pointer]:
+              - /url: /dashboard/notifications
+              - img [ref=e138]
+              - generic [ref=e141]: Notifications
+        - generic [ref=e142]:
+          - paragraph [ref=e143]: System
+          - link "Settings" [ref=e147] [cursor=pointer]:
+            - /url: /dashboard/settings
+            - img [ref=e148]
+            - generic [ref=e151]: Settings
+      - generic [ref=e153]:
+        - generic [ref=e155]: AD
+        - generic [ref=e156]:
+          - paragraph [ref=e157]: Avishek Devnath
+          - paragraph [ref=e158]: Admin
+    - banner [ref=e159]:
+      - heading "Platform Store" [level=1] [ref=e161]
+      - generic [ref=e162]:
+        - button "Settings" [ref=e163] [cursor=pointer]:
+          - img [ref=e164]
+        - generic [ref=e168]:
+          - generic [ref=e170]: A
+          - generic [ref=e171]: Admin
+        - button "Logout" [ref=e173] [cursor=pointer]:
+          - img [ref=e174]
+          - generic [ref=e177]: Logout
+    - main [ref=e178]:
+      - generic [ref=e182]:
+        - generic [ref=e183]:
+          - generic [ref=e184]:
+            - paragraph [ref=e185]: Platform Store
+            - heading "Curated Job Sources" [level=1] [ref=e186]
+            - paragraph [ref=e187]: Each square card opens a dedicated page where you can manage the platform link and referral notes.
+          - link "+ Add Platform" [ref=e188] [cursor=pointer]:
+            - /url: /dashboard/job-hunt/platforms/new
+        - generic [ref=e189]:
+          - generic [ref=e190]:
+            - paragraph [ref=e191]: Platforms
+            - paragraph [ref=e192]: "0"
+          - generic [ref=e193]:
+            - paragraph [ref=e194]: Curated Jobs
+            - paragraph [ref=e195]: "0"
+          - generic [ref=e196]:
+            - paragraph [ref=e197]: Need Referral
+            - paragraph [ref=e198]: "0"
+        - generic [ref=e199]: Loading platform store...
+  - alert [ref=e200]

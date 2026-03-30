@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e37]:
+    - generic [ref=e38]:
+      - generic [ref=e40]: A
+      - heading "Welcome Back" [level=1] [ref=e41]
+      - paragraph [ref=e42]: Enter your password to access the dashboard
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]: Password
+        - textbox "Password" [ref=e46]:
+          - /placeholder: Enter your password
+      - button "Login" [ref=e47] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e53] [cursor=pointer]:
+    - img [ref=e54]
+  - alert [ref=e57]

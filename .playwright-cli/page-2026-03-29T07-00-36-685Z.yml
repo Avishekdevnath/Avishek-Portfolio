@@ -1,0 +1,558 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e8]: AD
+        - generic [ref=e9]:
+          - paragraph [ref=e10]: Avishek Devnath
+          - paragraph [ref=e11]: Software Engineer
+      - link "View Portfolio" [ref=e13] [cursor=pointer]:
+        - /url: /
+        - img [ref=e14]
+        - generic [ref=e18]: View Portfolio
+      - navigation [ref=e20]:
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: Main
+          - generic [ref=e23]:
+            - link "Overview" [ref=e26] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e27]
+              - generic [ref=e32]: Overview
+            - link "Outreach" [ref=e35] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e36]
+              - generic [ref=e39]: Outreach
+              - img [ref=e40]
+            - generic [ref=e42]:
+              - link "Job Hunt" [ref=e44] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=e45]
+                - generic [ref=e49]: Job Hunt
+                - img [ref=e50]
+              - generic [ref=e201]:
+                - link "Overview" [ref=e202] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt
+                  - text: Overview
+                - link "Platform Store" [ref=e204] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/platforms
+                  - text: Platform Store
+                - link "Company Store" [ref=e206] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/companies
+                  - text: Company Store
+                - link "HR Store" [ref=e208] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/hr
+                  - text: HR Store
+                - link "Applications" [ref=e210] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/applications
+                  - text: Applications
+                - link "Job Leads" [ref=e212] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/leads
+                  - text: Job Leads
+                - link "Bookmarks" [ref=e214] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/bookmarks
+                  - text: Bookmarks
+                - link "Activity Log" [ref=e216] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/activities
+                  - text: Activity Log
+                - link "Interviews" [ref=e218] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/interviews
+                  - text: Interviews
+                - link "Contacts" [ref=e220] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/contacts
+                  - text: Contacts
+                - link "Analytics" [ref=e222] [cursor=pointer]:
+                  - /url: /dashboard/job-hunt/analytics
+                  - text: Analytics
+            - link "Tools" [ref=e54] [cursor=pointer]:
+              - /url: /dashboard/tools
+              - img [ref=e55]
+              - generic [ref=e57]: Tools
+        - generic [ref=e58]:
+          - paragraph [ref=e59]: Content
+          - generic [ref=e60]:
+            - link "Projects" [ref=e63] [cursor=pointer]:
+              - /url: /dashboard/projects
+              - img [ref=e64]
+              - generic [ref=e67]: Projects
+            - link "Skills" [ref=e70] [cursor=pointer]:
+              - /url: /dashboard/skills
+              - img [ref=e71]
+              - generic [ref=e75]: Skills
+            - link "Experience" [ref=e78] [cursor=pointer]:
+              - /url: /dashboard/experience
+              - img [ref=e79]
+              - generic [ref=e83]: Experience
+            - link "Education" [ref=e86] [cursor=pointer]:
+              - /url: /dashboard/education
+              - img [ref=e87]
+              - generic [ref=e90]: Education
+            - link "Achievements" [ref=e93] [cursor=pointer]:
+              - /url: /dashboard/achievements
+              - img [ref=e94]
+              - generic [ref=e97]: Achievements
+            - link "Statistics" [ref=e100] [cursor=pointer]:
+              - /url: /dashboard/stats
+              - img [ref=e101]
+              - generic [ref=e103]: Statistics
+            - link "Blog Posts" [ref=e106] [cursor=pointer]:
+              - /url: /dashboard/posts
+              - img [ref=e107]
+              - generic [ref=e109]: Blog Posts
+            - link "Resumes" [ref=e112] [cursor=pointer]:
+              - /url: /dashboard/resumes
+              - img [ref=e113]
+              - generic [ref=e116]: Resumes
+        - generic [ref=e117]:
+          - paragraph [ref=e118]: Engagement
+          - generic [ref=e119]:
+            - link "Messages" [ref=e122] [cursor=pointer]:
+              - /url: /dashboard/messages
+              - img [ref=e123]
+              - generic [ref=e126]: Messages
+            - link "Hiring Inquiries" [ref=e129] [cursor=pointer]:
+              - /url: /dashboard/hiring-inquiries
+              - img [ref=e130]
+              - generic [ref=e134]: Hiring Inquiries
+            - link "Notifications" [ref=e137] [cursor=pointer]:
+              - /url: /dashboard/notifications
+              - img [ref=e138]
+              - generic [ref=e141]: Notifications
+        - generic [ref=e142]:
+          - paragraph [ref=e143]: System
+          - link "Settings" [ref=e147] [cursor=pointer]:
+            - /url: /dashboard/settings
+            - img [ref=e148]
+            - generic [ref=e151]: Settings
+      - generic [ref=e153]:
+        - generic [ref=e155]: AD
+        - generic [ref=e156]:
+          - paragraph [ref=e157]: Avishek Devnath
+          - paragraph [ref=e158]: Admin
+    - banner [ref=e159]:
+      - heading "Platform Store" [level=1] [ref=e161]
+      - generic [ref=e162]:
+        - button "Settings" [ref=e163] [cursor=pointer]:
+          - img [ref=e164]
+        - generic [ref=e168]:
+          - generic [ref=e170]: AD
+          - generic [ref=e171]: Avishek Devnath
+        - button "Logout" [ref=e173] [cursor=pointer]:
+          - img [ref=e174]
+          - generic [ref=e177]: Logout
+    - main [ref=e178]:
+      - generic [ref=e182]:
+        - generic [ref=e183]:
+          - generic [ref=e184]:
+            - paragraph [ref=e185]: Platform Store
+            - heading "Curated Job Sources" [level=1] [ref=e186]
+            - paragraph [ref=e187]: Each square card opens a dedicated page where you can manage the platform link and referral notes.
+          - link "+ Add Platform" [ref=e188] [cursor=pointer]:
+            - /url: /dashboard/job-hunt/platforms/new
+        - generic [ref=e189]:
+          - generic [ref=e190]:
+            - paragraph [ref=e191]: Platforms
+            - paragraph [ref=e192]: "21"
+          - generic [ref=e193]:
+            - paragraph [ref=e194]: Curated Jobs
+            - paragraph [ref=e195]: "1"
+          - generic [ref=e196]:
+            - paragraph [ref=e197]: Need Referral
+            - paragraph [ref=e198]: "0"
+        - generic [ref=e199]:
+          - button "Platform Angellist Startup jobs and funding Curated jobs 1 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e224] [cursor=pointer]:
+            - generic [ref=e225]:
+              - generic [ref=e226]:
+                - paragraph [ref=e227]: Platform
+                - heading "Angellist" [level=2] [ref=e228]
+                - paragraph [ref=e229]: Startup jobs and funding
+              - generic [ref=e230]:
+                - generic [ref=e231]:
+                  - generic [ref=e232]: Curated jobs
+                  - generic [ref=e233]: "1"
+                - generic [ref=e234]:
+                  - generic [ref=e235]: Self-apply
+                  - generic [ref=e236]: Details →
+                - generic [ref=e237]:
+                  - link "View Platform-wise Jobs" [ref=e238]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=angellist
+                  - link "Open Platform Website" [ref=e239]:
+                    - /url: https://angel.co/jobs
+                  - button "Delete Platform" [active] [ref=e240]
+          - button "Platform Buildin Career growth and job matching Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e241] [cursor=pointer]:
+            - generic [ref=e242]:
+              - generic [ref=e243]:
+                - paragraph [ref=e244]: Platform
+                - heading "Buildin" [level=2] [ref=e245]
+                - paragraph [ref=e246]: Career growth and job matching
+              - generic [ref=e247]:
+                - generic [ref=e248]:
+                  - generic [ref=e249]: Curated jobs
+                  - generic [ref=e250]: "0"
+                - generic [ref=e251]:
+                  - generic [ref=e252]: Self-apply
+                  - generic [ref=e253]: Details →
+                - generic [ref=e254]:
+                  - link "View Platform-wise Jobs" [ref=e255]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=buildin
+                  - link "Open Platform Website" [ref=e256]:
+                    - /url: https://buildin.com
+                  - button "Delete Platform" [ref=e257]
+          - button "Platform Flexjobs Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e258] [cursor=pointer]:
+            - generic [ref=e259]:
+              - generic [ref=e260]:
+                - paragraph [ref=e261]: Platform
+                - heading "Flexjobs" [level=2] [ref=e262]
+              - generic [ref=e263]:
+                - generic [ref=e264]:
+                  - generic [ref=e265]: Curated jobs
+                  - generic [ref=e266]: "0"
+                - generic [ref=e267]:
+                  - generic [ref=e268]: Self-apply
+                  - generic [ref=e269]: Details →
+                - generic [ref=e270]:
+                  - link "View Platform-wise Jobs" [ref=e271]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=flexjobs
+                  - link "Open Platform Website" [ref=e272]:
+                    - /url: https://flexjobs.com
+                  - button "Delete Platform" [ref=e273]
+          - button "Platform Flexjobs Curated jobs 0 Self-apply Details → View Platform-wise Jobs No platform URL added yet Delete Platform" [ref=e274] [cursor=pointer]:
+            - generic [ref=e275]:
+              - generic [ref=e276]:
+                - paragraph [ref=e277]: Platform
+                - heading "Flexjobs" [level=2] [ref=e278]
+              - generic [ref=e279]:
+                - generic [ref=e280]:
+                  - generic [ref=e281]: Curated jobs
+                  - generic [ref=e282]: "0"
+                - generic [ref=e283]:
+                  - generic [ref=e284]: Self-apply
+                  - generic [ref=e285]: Details →
+                - generic [ref=e286]:
+                  - link "View Platform-wise Jobs" [ref=e287]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=flexjobs
+                  - generic [ref=e288]: No platform URL added yet
+                  - button "Delete Platform" [ref=e289]
+          - button "Platform Github Jobs Tech and developer jobs Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e290] [cursor=pointer]:
+            - generic [ref=e291]:
+              - generic [ref=e292]:
+                - paragraph [ref=e293]: Platform
+                - heading "Github Jobs" [level=2] [ref=e294]
+                - paragraph [ref=e295]: Tech and developer jobs
+              - generic [ref=e296]:
+                - generic [ref=e297]:
+                  - generic [ref=e298]: Curated jobs
+                  - generic [ref=e299]: "0"
+                - generic [ref=e300]:
+                  - generic [ref=e301]: Self-apply
+                  - generic [ref=e302]: Details →
+                - generic [ref=e303]:
+                  - link "View Platform-wise Jobs" [ref=e304]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=github%20jobs
+                  - link "Open Platform Website" [ref=e305]:
+                    - /url: https://github.com/jobs
+                  - button "Delete Platform" [ref=e306]
+          - button "Platform Glassdoor Company reviews and job listings Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e307] [cursor=pointer]:
+            - generic [ref=e308]:
+              - generic [ref=e309]:
+                - paragraph [ref=e310]: Platform
+                - heading "Glassdoor" [level=2] [ref=e311]
+                - paragraph [ref=e312]: Company reviews and job listings
+              - generic [ref=e313]:
+                - generic [ref=e314]:
+                  - generic [ref=e315]: Curated jobs
+                  - generic [ref=e316]: "0"
+                - generic [ref=e317]:
+                  - generic [ref=e318]: Self-apply
+                  - generic [ref=e319]: Details →
+                - generic [ref=e320]:
+                  - link "View Platform-wise Jobs" [ref=e321]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=glassdoor
+                  - link "Open Platform Website" [ref=e322]:
+                    - /url: https://glassdoor.com
+                  - button "Delete Platform" [ref=e323]
+          - button "Platform Himalayas Strong public reputation for clean UX, salary/time-zone filters, and detailed company pages. Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e324] [cursor=pointer]:
+            - generic [ref=e325]:
+              - generic [ref=e326]:
+                - paragraph [ref=e327]: Platform
+                - heading "Himalayas" [level=2] [ref=e328]
+                - paragraph [ref=e329]: Strong public reputation for clean UX, salary/time-zone filters, and detailed company pages.
+              - generic [ref=e330]:
+                - generic [ref=e331]:
+                  - generic [ref=e332]: Curated jobs
+                  - generic [ref=e333]: "0"
+                - generic [ref=e334]:
+                  - generic [ref=e335]: Self-apply
+                  - generic [ref=e336]: Details →
+                - generic [ref=e337]:
+                  - link "View Platform-wise Jobs" [ref=e338]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=himalayas
+                  - link "Open Platform Website" [ref=e339]:
+                    - /url: https://himalayas.app
+                  - button "Delete Platform" [ref=e340]
+          - button "Platform Himalayas Curated jobs 0 Self-apply Details → View Platform-wise Jobs No platform URL added yet Delete Platform" [ref=e341] [cursor=pointer]:
+            - generic [ref=e342]:
+              - generic [ref=e343]:
+                - paragraph [ref=e344]: Platform
+                - heading "Himalayas" [level=2] [ref=e345]
+              - generic [ref=e346]:
+                - generic [ref=e347]:
+                  - generic [ref=e348]: Curated jobs
+                  - generic [ref=e349]: "0"
+                - generic [ref=e350]:
+                  - generic [ref=e351]: Self-apply
+                  - generic [ref=e352]: Details →
+                - generic [ref=e353]:
+                  - link "View Platform-wise Jobs" [ref=e354]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=himalayas
+                  - generic [ref=e355]: No platform URL added yet
+                  - button "Delete Platform" [ref=e356]
+          - button "Platform Indeed Job search engine Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e357] [cursor=pointer]:
+            - generic [ref=e358]:
+              - generic [ref=e359]:
+                - paragraph [ref=e360]: Platform
+                - heading "Indeed" [level=2] [ref=e361]
+                - paragraph [ref=e362]: Job search engine
+              - generic [ref=e363]:
+                - generic [ref=e364]:
+                  - generic [ref=e365]: Curated jobs
+                  - generic [ref=e366]: "0"
+                - generic [ref=e367]:
+                  - generic [ref=e368]: Self-apply
+                  - generic [ref=e369]: Details →
+                - generic [ref=e370]:
+                  - link "View Platform-wise Jobs" [ref=e371]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=indeed
+                  - link "Open Platform Website" [ref=e372]:
+                    - /url: https://indeed.com
+                  - button "Delete Platform" [ref=e373]
+          - button "Platform Jobspresso Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e374] [cursor=pointer]:
+            - generic [ref=e375]:
+              - generic [ref=e376]:
+                - paragraph [ref=e377]: Platform
+                - heading "Jobspresso" [level=2] [ref=e378]
+              - generic [ref=e379]:
+                - generic [ref=e380]:
+                  - generic [ref=e381]: Curated jobs
+                  - generic [ref=e382]: "0"
+                - generic [ref=e383]:
+                  - generic [ref=e384]: Self-apply
+                  - generic [ref=e385]: Details →
+                - generic [ref=e386]:
+                  - link "View Platform-wise Jobs" [ref=e387]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=jobspresso
+                  - link "Open Platform Website" [ref=e388]:
+                    - /url: https://jobspresso.co/
+                  - button "Delete Platform" [ref=e389]
+          - button "Platform Just Remote Every listing checked by experts. No scams, just real remote jobs curated for you. Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e390] [cursor=pointer]:
+            - generic [ref=e391]:
+              - generic [ref=e392]:
+                - paragraph [ref=e393]: Platform
+                - heading "Just Remote" [level=2] [ref=e394]
+                - paragraph [ref=e395]: Every listing checked by experts. No scams, just real remote jobs curated for you.
+              - generic [ref=e396]:
+                - generic [ref=e397]:
+                  - generic [ref=e398]: Curated jobs
+                  - generic [ref=e399]: "0"
+                - generic [ref=e400]:
+                  - generic [ref=e401]: Self-apply
+                  - generic [ref=e402]: Details →
+                - generic [ref=e403]:
+                  - link "View Platform-wise Jobs" [ref=e404]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=just%20remote
+                  - link "Open Platform Website" [ref=e405]:
+                    - /url: https://www.remotejobs.io
+                  - button "Delete Platform" [ref=e406]
+          - button "Platform Justremote Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e407] [cursor=pointer]:
+            - generic [ref=e408]:
+              - generic [ref=e409]:
+                - paragraph [ref=e410]: Platform
+                - heading "Justremote" [level=2] [ref=e411]
+              - generic [ref=e412]:
+                - generic [ref=e413]:
+                  - generic [ref=e414]: Curated jobs
+                  - generic [ref=e415]: "0"
+                - generic [ref=e416]:
+                  - generic [ref=e417]: Self-apply
+                  - generic [ref=e418]: Details →
+                - generic [ref=e419]:
+                  - link "View Platform-wise Jobs" [ref=e420]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=justremote
+                  - link "Open Platform Website" [ref=e421]:
+                    - /url: https://justremote.co/
+                  - button "Delete Platform" [ref=e422]
+          - button "Platform Linkedin Professional networking platform Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e423] [cursor=pointer]:
+            - generic [ref=e424]:
+              - generic [ref=e425]:
+                - paragraph [ref=e426]: Platform
+                - heading "Linkedin" [level=2] [ref=e427]
+                - paragraph [ref=e428]: Professional networking platform
+              - generic [ref=e429]:
+                - generic [ref=e430]:
+                  - generic [ref=e431]: Curated jobs
+                  - generic [ref=e432]: "0"
+                - generic [ref=e433]:
+                  - generic [ref=e434]: Self-apply
+                  - generic [ref=e435]: Details →
+                - generic [ref=e436]:
+                  - link "View Platform-wise Jobs" [ref=e437]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=linkedin
+                  - link "Open Platform Website" [ref=e438]:
+                    - /url: https://linkedin.com/jobs
+                  - button "Delete Platform" [ref=e439]
+          - button "Platform Others Other job sources Curated jobs 0 Self-apply Details → View Platform-wise Jobs No platform URL added yet Delete Platform" [ref=e440] [cursor=pointer]:
+            - generic [ref=e441]:
+              - generic [ref=e442]:
+                - paragraph [ref=e443]: Platform
+                - heading "Others" [level=2] [ref=e444]
+                - paragraph [ref=e445]: Other job sources
+              - generic [ref=e446]:
+                - generic [ref=e447]:
+                  - generic [ref=e448]: Curated jobs
+                  - generic [ref=e449]: "0"
+                - generic [ref=e450]:
+                  - generic [ref=e451]: Self-apply
+                  - generic [ref=e452]: Details →
+                - generic [ref=e453]:
+                  - link "View Platform-wise Jobs" [ref=e454]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=others
+                  - generic [ref=e455]: No platform URL added yet
+                  - button "Delete Platform" [ref=e456]
+          - button "Platform Remoteok Remote job listings Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e457] [cursor=pointer]:
+            - generic [ref=e458]:
+              - generic [ref=e459]:
+                - paragraph [ref=e460]: Platform
+                - heading "Remoteok" [level=2] [ref=e461]
+                - paragraph [ref=e462]: Remote job listings
+              - generic [ref=e463]:
+                - generic [ref=e464]:
+                  - generic [ref=e465]: Curated jobs
+                  - generic [ref=e466]: "0"
+                - generic [ref=e467]:
+                  - generic [ref=e468]: Self-apply
+                  - generic [ref=e469]: Details →
+                - generic [ref=e470]:
+                  - link "View Platform-wise Jobs" [ref=e471]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=remoteok
+                  - link "Open Platform Website" [ref=e472]:
+                    - /url: https://remoteok.com
+                  - button "Delete Platform" [ref=e473]
+          - button "Platform Stack Overflow Jobs Developer and tech jobs Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e474] [cursor=pointer]:
+            - generic [ref=e475]:
+              - generic [ref=e476]:
+                - paragraph [ref=e477]: Platform
+                - heading "Stack Overflow Jobs" [level=2] [ref=e478]
+                - paragraph [ref=e479]: Developer and tech jobs
+              - generic [ref=e480]:
+                - generic [ref=e481]:
+                  - generic [ref=e482]: Curated jobs
+                  - generic [ref=e483]: "0"
+                - generic [ref=e484]:
+                  - generic [ref=e485]: Self-apply
+                  - generic [ref=e486]: Details →
+                - generic [ref=e487]:
+                  - link "View Platform-wise Jobs" [ref=e488]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=stack%20overflow%20jobs
+                  - link "Open Platform Website" [ref=e489]:
+                    - /url: https://stackoverflow.com/jobs
+                  - button "Delete Platform" [ref=e490]
+          - button "Platform Still Hiring Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e491] [cursor=pointer]:
+            - generic [ref=e492]:
+              - generic [ref=e493]:
+                - paragraph [ref=e494]: Platform
+                - heading "Still Hiring" [level=2] [ref=e495]
+              - generic [ref=e496]:
+                - generic [ref=e497]:
+                  - generic [ref=e498]: Curated jobs
+                  - generic [ref=e499]: "0"
+                - generic [ref=e500]:
+                  - generic [ref=e501]: Self-apply
+                  - generic [ref=e502]: Details →
+                - generic [ref=e503]:
+                  - link "View Platform-wise Jobs" [ref=e504]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=still%20hiring
+                  - link "Open Platform Website" [ref=e505]:
+                    - /url: https://stillhiring.today/
+                  - button "Delete Platform" [ref=e506]
+          - button "Platform Web3 Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e507] [cursor=pointer]:
+            - generic [ref=e508]:
+              - generic [ref=e509]:
+                - paragraph [ref=e510]: Platform
+                - heading "Web3" [level=2] [ref=e511]
+              - generic [ref=e512]:
+                - generic [ref=e513]:
+                  - generic [ref=e514]: Curated jobs
+                  - generic [ref=e515]: "0"
+                - generic [ref=e516]:
+                  - generic [ref=e517]: Self-apply
+                  - generic [ref=e518]: Details →
+                - generic [ref=e519]:
+                  - link "View Platform-wise Jobs" [ref=e520]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=web3
+                  - link "Open Platform Website" [ref=e521]:
+                    - /url: https://web3.career/
+                  - button "Delete Platform" [ref=e522]
+          - button "Platform Wellfound Startup jobs (formerly AngelList Talent) Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e523] [cursor=pointer]:
+            - generic [ref=e524]:
+              - generic [ref=e525]:
+                - paragraph [ref=e526]: Platform
+                - heading "Wellfound" [level=2] [ref=e527]
+                - paragraph [ref=e528]: Startup jobs (formerly AngelList Talent)
+              - generic [ref=e529]:
+                - generic [ref=e530]:
+                  - generic [ref=e531]: Curated jobs
+                  - generic [ref=e532]: "0"
+                - generic [ref=e533]:
+                  - generic [ref=e534]: Self-apply
+                  - generic [ref=e535]: Details →
+                - generic [ref=e536]:
+                  - link "View Platform-wise Jobs" [ref=e537]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=wellfound
+                  - link "Open Platform Website" [ref=e538]:
+                    - /url: https://wellfound.com/jobs
+                  - button "Delete Platform" [ref=e539]
+          - button "Platform Weworkremotely Remote and flexible jobs Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e540] [cursor=pointer]:
+            - generic [ref=e541]:
+              - generic [ref=e542]:
+                - paragraph [ref=e543]: Platform
+                - heading "Weworkremotely" [level=2] [ref=e544]
+                - paragraph [ref=e545]: Remote and flexible jobs
+              - generic [ref=e546]:
+                - generic [ref=e547]:
+                  - generic [ref=e548]: Curated jobs
+                  - generic [ref=e549]: "0"
+                - generic [ref=e550]:
+                  - generic [ref=e551]: Self-apply
+                  - generic [ref=e552]: Details →
+                - generic [ref=e553]:
+                  - link "View Platform-wise Jobs" [ref=e554]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=weworkremotely
+                  - link "Open Platform Website" [ref=e555]:
+                    - /url: https://weworkremotely.com
+                  - button "Delete Platform" [ref=e556]
+          - button "Platform Working Nomads Curated jobs 0 Self-apply Details → View Platform-wise Jobs Open Platform Website Delete Platform" [ref=e557] [cursor=pointer]:
+            - generic [ref=e558]:
+              - generic [ref=e559]:
+                - paragraph [ref=e560]: Platform
+                - heading "Working Nomads" [level=2] [ref=e561]
+              - generic [ref=e562]:
+                - generic [ref=e563]:
+                  - generic [ref=e564]: Curated jobs
+                  - generic [ref=e565]: "0"
+                - generic [ref=e566]:
+                  - generic [ref=e567]: Self-apply
+                  - generic [ref=e568]: Details →
+                - generic [ref=e569]:
+                  - link "View Platform-wise Jobs" [ref=e570]:
+                    - /url: /dashboard/job-hunt/bookmarks?platform=working%20nomads
+                  - link "Open Platform Website" [ref=e571]:
+                    - /url: https://www.workingnomads.com/jobs
+                  - button "Delete Platform" [ref=e572]
+        - generic [ref=e583]:
+          - heading "Delete platform?" [level=3] [ref=e584]
+          - paragraph [ref=e585]: Delete "Angellist"? This action cannot be undone.
+          - generic [ref=e586]:
+            - button "Cancel" [ref=e587] [cursor=pointer]
+            - button "Delete" [ref=e588] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e578] [cursor=pointer]:
+    - img [ref=e579]
+  - alert [ref=e200]

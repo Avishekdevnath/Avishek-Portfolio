@@ -2,31 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { BookmarkedJob } from '@/models/BookmarkedJob';
 import JobApplication from '@/models/JobApplication';
+import ApplicationContactModel from '@/models/ApplicationContact';
 import { ensureDashboardAuth } from '../../../_auth';
 import { formatBookmarkResponse, generateConvertToApplicationPayload } from '@/lib/bookmark-helpers';
 import { Types } from 'mongoose';
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
     await connectDB();
+    const { id } = await params;
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid bookmark ID' }, { status: 400 });
     }
 
     const body = await request.json();
     const { status: appStatus } = body;
 
-    // Fetch bookmark
-    const bookmark = await BookmarkedJob.findById(params.id);
+    const bookmark = await BookmarkedJob.findById(id);
     if (!bookmark) {
       return NextResponse.json({ success: false, error: 'Bookmark not found' }, { status: 404 });
     }
 
-    // Create application from bookmark
+    // Create application from bookmark — includes jobDescription + resumeLink
     const applicationPayload = generateConvertToApplicationPayload(bookmark);
     const application = new JobApplication({
       ...applicationPayload,
@@ -35,6 +36,18 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     await application.validate();
     await application.save();
+
+    // Sync contacts — bulk update from bookmark to application
+    await ApplicationContactModel.updateMany(
+      { bookmarkId: bookmark._id, sourceType: 'bookmark' },
+      {
+        $set: {
+          applicationId: application._id,
+          sourceType: 'application',
+        },
+        $unset: { bookmarkId: '' },
+      }
+    );
 
     // Update bookmark with conversion info
     bookmark.status = 'applied';
@@ -46,7 +59,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       {
         success: true,
         data: {
-          newApplication: application.toObject(),
+          newApplication: { ...application.toObject(), _id: application._id.toString() },
           updatedBookmark: formatBookmarkResponse(bookmark),
         },
       },

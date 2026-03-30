@@ -4,11 +4,12 @@ import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 import Blog from '@/models/Blog';
 import BlogStats from '@/models/BlogStats';
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     await connectDB();
 
-    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
+    const { slug } = await params;
+    const blog = await Blog.findOne({ $or: [{ slug }, { slugHistory: slug }] });
     if (!blog) {
       return sendError('Blog not found', 404);
     }

@@ -5,18 +5,19 @@ import { ensureDashboardAuth } from '../../_auth';
 import { formatBookmarkResponse } from '@/lib/bookmark-helpers';
 import { Types } from 'mongoose';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
     await connectDB();
+    const { id } = await params;
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid bookmark ID' }, { status: 400 });
     }
 
-    const bookmark = await BookmarkedJob.findById(params.id).lean();
+    const bookmark = await BookmarkedJob.findById(id).lean();
 
     if (!bookmark) {
       return NextResponse.json({ success: false, error: 'Bookmark not found' }, { status: 404 });
@@ -37,14 +38,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
     await connectDB();
+    const { id } = await params;
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid bookmark ID' }, { status: 400 });
     }
 
@@ -56,7 +58,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       updateData.statusChangedDate = new Date();
     }
 
-    const bookmark = await BookmarkedJob.findByIdAndUpdate(params.id, updateData, {
+    const bookmark = await BookmarkedJob.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     }).lean();
@@ -80,18 +82,19 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
     await connectDB();
+    const { id } = await params;
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid bookmark ID' }, { status: 400 });
     }
 
-    const result = await BookmarkedJob.findByIdAndDelete(params.id);
+    const result = await BookmarkedJob.findByIdAndDelete(id);
 
     if (!result) {
       return NextResponse.json({ success: false, error: 'Bookmark not found' }, { status: 404 });

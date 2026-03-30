@@ -7,19 +7,20 @@ import { Types } from 'mongoose';
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
+  const { id } = await params;
 
   try {
     await connectDB();
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid company ID' }, { status: 400 });
     }
 
-    const company = (await JobHuntCompany.findById(params.id).lean()) as any;
+    const company = (await JobHuntCompany.findById(id).lean()) as any;
 
     if (!company) {
       return NextResponse.json(
@@ -65,22 +66,23 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
+  const { id } = await params;
 
   try {
     await connectDB();
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid company ID' }, { status: 400 });
     }
 
     const body = await request.json();
     const { name, website, careerPageUrl, linkedinUrl, industry, size, locationHQ, tier, notes, isActive } = body;
 
-    const company = await JobHuntCompany.findById(params.id);
+    const company = await JobHuntCompany.findById(id);
 
     if (!company) {
       return NextResponse.json(
@@ -93,7 +95,7 @@ export async function PATCH(
     if (name && name.toLowerCase().trim() !== company.name) {
       const existing = await JobHuntCompany.findOne({
         name: name.toLowerCase().trim(),
-        _id: { $ne: params.id },
+        _id: { $ne: id },
       });
       if (existing) {
         return NextResponse.json(
@@ -160,21 +162,22 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
+  const { id } = await params;
 
   try {
     await connectDB();
 
-    if (!Types.ObjectId.isValid(params.id)) {
+    if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid company ID' }, { status: 400 });
     }
 
     // Check if company has linked HR contacts
     const hrContactCount = await JobHuntHRContact.countDocuments({
-      companyId: params.id,
+      companyId: id,
     });
 
     if (hrContactCount > 0) {
@@ -187,7 +190,7 @@ export async function DELETE(
       );
     }
 
-    const company = await JobHuntCompany.findByIdAndDelete(params.id);
+    const company = await JobHuntCompany.findByIdAndDelete(id);
 
     if (!company) {
       return NextResponse.json(

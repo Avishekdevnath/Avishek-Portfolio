@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { Education } from '@/models/Experience';
 import { BaseQuery, SortConfig, PaginationOptions } from '@/types/api';
 import { Experience as ExperienceType } from '@/types/experience';
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 // GET /api/experience/education - Get all education entries
 export async function GET(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 // POST /api/experience/education - Create a new education entry
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
 
     const body = await request.json();
     body.type = 'education'; // Ensure type is set to education

@@ -25,10 +25,11 @@ async function suggestIcon(name: string, description?: string): Promise<string> 
   }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await dbConnect();
   try {
-    const tool = await Tool.findById(params.id);
+    const tool = await Tool.findById(id);
     if (!tool) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: tool });
   } catch (error) {
@@ -36,7 +37,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await dbConnect();
   try {
     const body = await req.json();
@@ -44,7 +46,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!icon && body.name) {
       icon = await suggestIcon(body.name, body.description);
     }
-    const tool = await Tool.findByIdAndUpdate(params.id, { ...body, icon }, { new: true });
+    const tool = await Tool.findByIdAndUpdate(id, { ...body, icon }, { new: true });
     if (!tool) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: tool });
   } catch (error) {
@@ -52,13 +54,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await dbConnect();
   try {
-    const tool = await Tool.findByIdAndDelete(params.id);
+    const tool = await Tool.findByIdAndDelete(id);
     if (!tool) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to delete tool' }, { status: 400 });
   }
-} 
+}

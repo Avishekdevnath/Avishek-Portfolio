@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { Education } from '@/models/Experience';
 import { sendSuccess, sendError } from '@/lib/api-utils';
 
@@ -93,7 +93,7 @@ const sampleEducationData = [
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     // Check existing education count
     const existingCount = await Education.countDocuments();
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     const count = await Education.countDocuments();
     const entries = await Education.find().select('title institution degree').lean();

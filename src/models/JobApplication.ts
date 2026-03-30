@@ -1,6 +1,12 @@
 import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 import { APPLICATION_STATUSES, JOB_TYPES, ApplicationStatus, JobType } from '@/lib/job-hunt-utils';
 
+export interface StatusHistoryEntry {
+  status: ApplicationStatus;
+  changedAt: Date;
+  note?: string;
+}
+
 export interface JobApplication extends Document {
   company: string;
   jobTitle: string;
@@ -14,6 +20,11 @@ export interface JobApplication extends Document {
   contactEmail?: string;
   notes?: string;
   sourceLeadId?: Types.ObjectId;
+  statusHistory: StatusHistoryEntry[];
+  followUpReminderAt?: Date;
+  reminderFired: boolean;
+  resumeLink?: string;
+  jobDescription?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -111,6 +122,34 @@ const jobApplicationSchema = new Schema<JobApplication>(
       index: true,
       sparse: true,
       unique: true,
+    },
+    statusHistory: {
+      type: [
+        {
+          status: { type: String, required: true },
+          changedAt: { type: Date, required: true },
+          note: { type: String },
+        },
+      ],
+      default: [],
+    },
+    followUpReminderAt: {
+      type: Date,
+      default: null,
+    },
+    reminderFired: {
+      type: Boolean,
+      default: false,
+    },
+    resumeLink: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Resume link cannot exceed 500 characters'],
+    },
+    jobDescription: {
+      type: String,
+      trim: true,
+      maxlength: [20000, 'Job description cannot exceed 20000 characters'],
     },
   },
   {

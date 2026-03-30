@@ -3,7 +3,7 @@ import { ensureDashboardAuth } from '../../_auth';
 import { generateAIContent, buildImprovePrompt, parseAIResponse } from '@/lib/outreach-ai';
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

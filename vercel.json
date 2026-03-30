@@ -1,6 +1,12 @@
 {
   "version": 2,
   "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/job-hunt/cron/reminders",
+      "schedule": "0 * * * *"
+    }
+  ],
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30

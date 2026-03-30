@@ -5,7 +5,7 @@ import JobLead from '@/models/JobLead';
 import { ensureDashboardAuth } from '../_auth';
 
 export async function GET() {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

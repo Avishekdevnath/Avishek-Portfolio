@@ -5,7 +5,7 @@ import { JobHuntHRContact } from '@/models/JobHuntHRContact';
 import { ensureDashboardAuth } from '../_auth';
 
 export async function GET(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     let filter: any = includeInactive ? {} : { isActive: true };
 
     if (search) {
-      filter.$text = { $search: search };
+      filter.name = { $regex: search, $options: 'i' };
     }
 
     if (tier) {
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

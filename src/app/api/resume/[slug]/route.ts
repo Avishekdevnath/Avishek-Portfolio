@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { ResumeVariant } from '@/models/ResumeVariant';
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   try {
     await connectDB();
 
     // Find the public resume variant by slug
     const variant: any =
-      (await ResumeVariant.findOne({ slug: params.slug, publicViewEnabled: true, status: 'ready' })) ||
-      (await ResumeVariant.findOne({ slugHistory: params.slug, publicViewEnabled: true, status: 'ready' }));
+      (await ResumeVariant.findOne({ slug, publicViewEnabled: true, status: 'ready' })) ||
+      (await ResumeVariant.findOne({ slugHistory: slug, publicViewEnabled: true, status: 'ready' }));
 
     if (!variant || !variant.fileUrl) {
       console.error('❌ Resume not found:', {
-        slug: params.slug,
+        slug,
         variantExists: !!variant,
         fileUrlExists: variant?.fileUrl ? true : false,
         status: variant?.status,
@@ -23,10 +24,10 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
 
     // Fetch the PDF from Vercel Blob
     const pdfResponse = await fetch(variant.fileUrl);
-    
+
     if (!pdfResponse.ok) {
       console.error('❌ Failed to fetch PDF from Blob:', {
-        slug: params.slug,
+        slug,
         status: pdfResponse.status,
         statusText: pdfResponse.statusText,
         blobUrl: variant.fileUrl?.substring(0, 50) + '...',
@@ -35,16 +36,16 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     }
 
     const pdfBuffer = await pdfResponse.arrayBuffer();
-    
+
     console.log('✅ PDF fetched successfully:', {
-      slug: params.slug,
+      slug,
       fileName: variant.fileName,
       size: pdfBuffer.byteLength,
     });
-    
+
     // Check if download parameter is set
     const isDownload = request.nextUrl.searchParams.get('download') === '1';
-    
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/pdf',
       'Cache-Control': 'public, max-age=3600', // Cache for 1 hour

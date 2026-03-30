@@ -44,6 +44,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'path required' }, { status: 400 });
   }
 
+  // Skip tracking for owner's IP
+  const excludedIps = (process.env.EXCLUDED_IPS ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  if (ip && excludedIps.includes(ip)) {
+    return NextResponse.json({ success: true, skipped: true });
+  }
+
   try {
     await connectDB();
     const normalizedRef = normalizeReferer(referer);

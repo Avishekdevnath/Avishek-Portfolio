@@ -1,6 +1,8 @@
 import type {
   ActivityType,
+  ApplicationContactTitle,
   ApplicationStatus,
+  ReferralStatus,
   ContactStatus,
   FollowUpDoneOption,
   InterviewResult,
@@ -14,6 +16,12 @@ import type {
   ReferralOption,
   RelationshipType,
 } from '@/lib/job-hunt-utils';
+
+export interface StatusHistoryEntry {
+  status: ApplicationStatus;
+  changedAt: string;
+  note?: string;
+}
 
 export interface JobApplicationItem {
   _id: string;
@@ -29,8 +37,83 @@ export interface JobApplicationItem {
   contactEmail?: string;
   notes?: string;
   sourceLeadId?: string;
+  statusHistory?: StatusHistoryEntry[];
+  followUpReminderAt?: string;
+  reminderFired?: boolean;
+  resumeLink?: string;
+  jobDescription?: string;
   daysSinceApplied: number;
   followUpAlert: 'None' | 'Follow up Soon' | 'Overdue';
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ApplicationContactItem {
+  _id: string;
+  applicationId?: string;
+  bookmarkId?: string;
+  sourceType: 'application' | 'bookmark';
+  name: string;
+  title: ApplicationContactTitle;
+  company?: string;
+  roleAtCompany?: string;
+  linkedinUrl?: string;
+  email?: string;
+  phone?: string;
+  bio?: string;
+  referralStatus?: ReferralStatus;
+  referralNote?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ApplicationOutreachDraftItem {
+  _id: string;
+  applicationId: string;
+  contactId: string;
+  emailSubject?: string;
+  emailBody?: string;
+  linkedinDm?: string;
+  generatedAt: string;
+  modelUsed?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ApplicationNoteItem {
+  _id: string;
+  applicationId?: string;
+  bookmarkId?: string;
+  sourceType: 'application' | 'bookmark';
+  body: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BookmarkAIAnalysis {
+  relevanceScore: number;
+  relevanceSummary: string;
+  interviewPrep: string[];
+  resumeTips: string[];
+  skillGaps: string[];
+  generatedAt: string;
+}
+
+export interface BookmarkDetailItem {
+  _id: string;
+  jobTitle: string;
+  company: string;
+  platform: string;
+  jobUrl: string;
+  notes?: string;
+  jobDescription?: string;
+  resumeLink?: string;
+  followUpDate?: string;
+  followUpDone: boolean;
+  aiAnalysis?: BookmarkAIAnalysis;
+  status: 'saved' | 'applied' | 'discarded';
+  linkedApplicationId?: string;
+  bookmarkedDate: string;
   createdAt?: string;
   updatedAt?: string;
 }

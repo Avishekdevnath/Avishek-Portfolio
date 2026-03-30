@@ -1,36 +1,112 @@
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4';
+const GOOGLE_MODEL = 'gemini-pro';
+
+function extractOpenAIText(data: any): string {
+  if (typeof data?.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text.trim();
+  }
+
+  const output = Array.isArray(data?.output) ? data.output : [];
+  const texts = output.flatMap((item: any) => {
+    const content = Array.isArray(item?.content) ? item.content : [];
+    return content
+      .filter((part: any) => part?.type === 'output_text' && typeof part?.text === 'string')
+      .map((part: any) => part.text.trim())
+      .filter(Boolean);
+  });
+
+  return texts.join('\n').trim();
+}
+
+function extractGoogleText(data: any): string {
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
+}
+
+function extractProviderError(data: any, fallback: string): string {
+  if (typeof data?.error === 'string' && data.error.trim()) {
+    return data.error.trim();
+  }
+
+  if (typeof data?.error?.message === 'string' && data.error.message.trim()) {
+    return data.error.message.trim();
+  }
+
+  return fallback;
+}
+
+async function generateWithOpenAI(prompt: string, apiKey: string): Promise<string> {
+  const model = process.env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL;
+  const res = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      input: prompt,
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(extractProviderError(data, `OpenAI request failed with status ${res.status}`));
+  }
+
+  const text = extractOpenAIText(data);
+  if (!text) {
+    throw new Error('OpenAI returned no text content');
+  }
+
+  return text;
+}
+
+async function generateWithGoogle(prompt: string, apiKey: string): Promise<string> {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_MODEL}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1024,
+        },
+      }),
+    }
+  );
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(extractProviderError(data, `Google AI request failed with status ${res.status}`));
+  }
+
+  const text = extractGoogleText(data);
+  if (!text) {
+    throw new Error('Google AI returned no text content');
+  }
+
+  return text;
+}
+
 export async function generateAIContent(prompt: string): Promise<string> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) {
-    throw new Error('Google AI API key not configured');
+  const openAiApiKey = process.env.OPENAI_API_KEY;
+  const googleApiKey = process.env.GOOGLE_AI_API_KEY;
+
+  if (!openAiApiKey && !googleApiKey) {
+    throw new Error('Neither OPENAI_API_KEY nor GOOGLE_AI_API_KEY is configured');
   }
 
   try {
-    const res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-          },
-        }),
-      }
-    );
-
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-    if (!text) {
-      throw new Error('No content generated');
+    if (openAiApiKey) {
+      return await generateWithOpenAI(prompt, openAiApiKey);
     }
 
-    return text;
+    return await generateWithGoogle(prompt, googleApiKey as string);
   } catch (error) {
     console.error('AI generation error:', error);
-    throw new Error('Failed to generate AI content');
+    throw new Error(error instanceof Error ? error.message : 'Failed to generate AI content');
   }
 }
 

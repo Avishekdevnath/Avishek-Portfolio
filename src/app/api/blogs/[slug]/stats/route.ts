@@ -56,12 +56,13 @@ interface StatsResponseData {
 // GET /api/blogs/[slug]/stats - Get blog stats
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB();
 
-    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
+    const { slug } = await params;
+    const blog = await Blog.findOne({ $or: [{ slug }, { slugHistory: slug }] });
     if (!blog) {
       return NextResponse.json({
         success: false,
@@ -104,12 +105,13 @@ export async function GET(
 // POST /api/blogs/[slug]/stats - Update blog stats
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB();
 
-    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
+    const { slug } = await params;
+    const blog = await Blog.findOne({ $or: [{ slug }, { slugHistory: slug }] });
     if (!blog) {
       return NextResponse.json({
         success: false,

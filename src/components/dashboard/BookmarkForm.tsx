@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import PlatformSelector from './PlatformSelector';
+import CompanyCombobox from './CompanyCombobox';
 
 interface BookmarkFormProps {
   initialBookmark?: {
@@ -84,14 +85,10 @@ export default function BookmarkForm({ initialBookmark, onSubmit, onCancel }: Bo
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Company *</label>
-        <input
-          type="text"
+        <CompanyCombobox
           value={form.company}
-          onChange={(e) => setForm({ ...form, company: e.target.value })}
-          placeholder="e.g., TechCorp Inc"
-          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 ${
-            errors.company ? 'border-red-500' : 'border-gray-300'
-          }`}
+          onChange={(value) => setForm({ ...form, company: value })}
+          error={errors.company}
         />
         {errors.company && <p className="text-xs text-red-600 mt-1">{errors.company}</p>}
       </div>

@@ -14,7 +14,7 @@ interface RouteParams {
 }
 
 export async function POST(_request: NextRequest, { params }: RouteParams) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

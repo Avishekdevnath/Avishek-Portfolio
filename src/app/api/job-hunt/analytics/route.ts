@@ -15,7 +15,7 @@ function monthLabel(date: Date): string {
 }
 
 export async function GET() {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   try {

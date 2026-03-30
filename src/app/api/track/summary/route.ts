@@ -10,7 +10,7 @@ function getRangeMs(range: string): number {
 }
 
 export async function GET(request: NextRequest) {
-  const authError = ensureDashboardAuth();
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
   const range = request.nextUrl.searchParams.get('range') ?? '7d';

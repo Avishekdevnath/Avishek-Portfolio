@@ -10,11 +10,11 @@ interface Like {
   timestamp: Date;
 }
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     await connectDB();
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // Derive client IP (works behind proxies/CDN)
     const forwarded = request.headers.get('x-forwarded-for');
@@ -76,15 +76,16 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
 }
 
 // Get like status for a user
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     await connectDB();
 
-    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
-                     request.headers.get('x-real-ip') || 
+    const { slug } = await params;
+    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+                     request.headers.get('x-real-ip') ||
                      'unknown';
 
-    const blog = await Blog.findOne({ $or: [{ slug: params.slug }, { slugHistory: params.slug }] });
+    const blog = await Blog.findOne({ $or: [{ slug }, { slugHistory: slug }] });
     if (!blog) {
       return sendError('Blog not found', 404);
     }

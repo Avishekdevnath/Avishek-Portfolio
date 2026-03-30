@@ -116,6 +116,21 @@ export const COMPANY_TIERS = ['Dream', 'Target', 'Safe'] as const;
 export const HR_ROLE_TITLES = ['HR', 'Recruiter', 'Hiring Manager'] as const;
 export const HR_CONTACT_STATUSES = ['New', 'Contacted', 'Replied', 'Closed'] as const;
 
+// Application-scoped contact titles
+export const APPLICATION_CONTACT_TITLES = [
+  'HR',
+  'Recruiter',
+  'Hiring Manager',
+  'Engineer',
+  'Employee',
+  'Referral',
+  'Other',
+] as const;
+export type ApplicationContactTitle = (typeof APPLICATION_CONTACT_TITLES)[number];
+
+export const REFERRAL_STATUSES = ['Potential', 'Asked', 'Confirmed'] as const;
+export type ReferralStatus = (typeof REFERRAL_STATUSES)[number];
+
 export type CompanyTier = (typeof COMPANY_TIERS)[number];
 export type HRRoleTitle = (typeof HR_ROLE_TITLES)[number];
 export type HRContactStatus = (typeof HR_CONTACT_STATUSES)[number];

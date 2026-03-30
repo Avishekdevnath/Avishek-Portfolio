@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidObjectId } from 'mongoose';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import Skill from '@/models/Skill';
 import { handleApiError, sendSuccess, sendError } from '@/lib/api-utils';
 
@@ -14,13 +14,14 @@ const validateId = (id: string) => {
 // GET /api/skills/[id] - Get a single skill
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectDB();
 
-    const skill = await Skill.findById(params.id);
-    
+    const skill = await Skill.findById(id);
+
     if (!skill) {
       return NextResponse.json(
         { success: false, error: 'Skill not found' },
@@ -43,17 +44,18 @@ export async function GET(
 // PUT /api/skills/[id] - Update a skill
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectDB();
-    
+
     const body = await request.json();
-    
+
     // Validate required fields
     const requiredFields = ['name', 'proficiency', 'category'];
     const missingFields = requiredFields.filter(field => !body[field]);
-    
+
     if (missingFields.length > 0) {
       return sendError(`Missing required fields: ${missingFields.join(', ')}`, 400);
     }
@@ -81,11 +83,11 @@ export async function PUT(
 
     // Update skill
     const skill = await Skill.findByIdAndUpdate(
-      params.id,
+      id,
       { ...body, updatedAt: new Date() },
       { new: true, runValidators: true }
     );
-    
+
     if (!skill) {
       return sendError('Skill not found', 404);
     }
@@ -99,14 +101,15 @@ export async function PUT(
 // PATCH /api/skills/[id] - Partially update a skill
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectDB();
 
     const body = await request.json();
 
-    const skill = await Skill.findByIdAndUpdate(params.id, body, {
+    const skill = await Skill.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -133,13 +136,14 @@ export async function PATCH(
 // DELETE /api/skills/[id] - Delete a skill
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectDB();
 
-    const skill = await Skill.findByIdAndDelete(params.id);
-    
+    const skill = await Skill.findByIdAndDelete(id);
+
     if (!skill) {
       return NextResponse.json(
         { success: false, error: 'Skill not found' },
@@ -149,7 +153,7 @@ export async function DELETE(
 
     // Reorder remaining skills in the same category
     await Skill.updateMany(
-      { 
+      {
         category: skill.category,
         order: { $gt: skill.order }
       },
@@ -166,4 +170,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

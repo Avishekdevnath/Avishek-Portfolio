@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { Education } from '@/models/Experience';
 import { sendSuccess, sendError } from '@/lib/api-utils';
 
 export async function GET(request: NextRequest) {
   try {
-    await connectToDatabase();
+    await connectDB();
     
     // Check if education data exists
     const educationCount = await Education.countDocuments();

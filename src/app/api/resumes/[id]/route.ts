@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isValidObjectId } from 'mongoose';
-import connectDB from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 import { ResumeVariant } from '@/models/ResumeVariant';
 import { buildNextSlugHistory, normalizeSlug } from '@/lib/slug';
 import { ensureDashboardAuth } from '../../job-hunt/_auth';
@@ -9,16 +9,17 @@ function invalidId() {
   return NextResponse.json({ success: false, error: 'Invalid resume id' }, { status: 400 });
 }
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
-  if (!isValidObjectId(params.id)) return invalidId();
+  if (!isValidObjectId(id)) return invalidId();
 
   try {
     await connectDB();
 
-    const item = await ResumeVariant.findById(params.id).read('primary').lean();
+    const item = await ResumeVariant.findById(id).read('primary').lean();
     if (!item) {
       return NextResponse.json({ success: false, error: 'Resume variant not found' }, { status: 404 });
     }
@@ -32,17 +33,18 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
-  if (!isValidObjectId(params.id)) return invalidId();
+  if (!isValidObjectId(id)) return invalidId();
 
   try {
     await connectDB();
 
     const body = await request.json();
-    const variant = await ResumeVariant.findById(params.id);
+    const variant = await ResumeVariant.findById(id);
 
     if (!variant) {
       return NextResponse.json({ success: false, error: 'Resume variant not found' }, { status: 404 });
@@ -120,16 +122,17 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  const authError = ensureDashboardAuth();
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const authError = await ensureDashboardAuth();
   if (authError) return authError;
 
-  if (!isValidObjectId(params.id)) return invalidId();
+  if (!isValidObjectId(id)) return invalidId();
 
   try {
     await connectDB();
 
-    const removed = await ResumeVariant.findByIdAndDelete(params.id);
+    const removed = await ResumeVariant.findByIdAndDelete(id);
     if (!removed) {
       return NextResponse.json({ success: false, error: 'Resume variant not found' }, { status: 404 });
     }
